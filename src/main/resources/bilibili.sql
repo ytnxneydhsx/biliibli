@@ -144,8 +144,8 @@ CREATE TABLE IF NOT EXISTS `t_following` (
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_user_following` (`user_id`, `following_user_id`),
-    KEY `idx_following_user_id` (`following_user_id`),
-    KEY `idx_user_status` (`user_id`, `status`)
+    KEY `idx_user_status_following` (`user_id`, `status`, `following_user_id`),
+    KEY `idx_following_status_user` (`following_user_id`, `status`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 标签字典表
