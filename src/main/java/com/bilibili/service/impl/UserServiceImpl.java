@@ -9,11 +9,15 @@ import com.bilibili.model.dto.UserProfileUpdateDTO;
 import com.bilibili.model.dto.UserRegisterDTO;
 import com.bilibili.model.entity.UserDO;
 import com.bilibili.model.entity.UserInfoDO;
+import com.bilibili.model.vo.UserLoginVO;
 import com.bilibili.model.vo.UserProfileVO;
 import com.bilibili.service.UserService;
+import com.bilibili.storage.StorageService;
+import com.bilibili.storage.StoredFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -24,11 +28,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final UserInfoMapper userInfoMapper;
+    private final StorageService storageService;
 
     @Autowired
-    public UserServiceImpl(UserMapper userMapper, UserInfoMapper userInfoMapper) {
+    public UserServiceImpl(UserMapper userMapper,
+                           UserInfoMapper userInfoMapper,
+                           StorageService storageService) {
         this.userMapper = userMapper;
         this.userInfoMapper = userInfoMapper;
+        this.storageService = storageService;
     }
 
     @Override
@@ -78,7 +86,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDO login(UserLoginDTO dto) {
+    public UserLoginVO login(UserLoginDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("login request is null");
         }
@@ -96,8 +104,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("username or password is incorrect");
         }
 
-        user.setPassword(null);
-        return user;
+        UserLoginVO loginVO = new UserLoginVO();
+        loginVO.setUid(user.getId());
+        loginVO.setUsername(user.getUsername());
+        return loginVO;
     }
 
     @Override
@@ -146,6 +156,30 @@ public class UserServiceImpl implements UserService {
         if (rows != 1) {
             throw new IllegalArgumentException("user not found or no changes");
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String uploadAvatar(Long uid, MultipartFile file) {
+        if (uid == null || uid <= 0) {
+            throw new IllegalArgumentException("uid is invalid");
+        }
+        UserInfoDO userInfo = getUserInfoByUid(uid);
+        StoredFile storedFile = storageService.saveAvatar(file);
+        String avatarUrl = storedFile.getPublicUrl();
+
+        LambdaUpdateWrapper<UserInfoDO> uw = new LambdaUpdateWrapper<>();
+        uw.eq(UserInfoDO::getUserId, uid)
+                .set(UserInfoDO::getAvatarUrl, avatarUrl);
+        int rows = userInfoMapper.update(null, uw);
+        if (rows != 1) {
+            storageService.deleteByPublicUrl(avatarUrl);
+            throw new IllegalArgumentException("user not found");
+        }
+
+        storageService.deleteByPublicUrl(userInfo.getAvatarUrl());
+
+        return avatarUrl;
     }
 
 

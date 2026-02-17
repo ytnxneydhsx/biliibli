@@ -2,23 +2,34 @@ package com.bilibili.config;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletRegistration;
+
 public class WebInit extends AbstractAnnotationConfigDispatcherServletInitializer {
 
-    // 指定 Spring 的根配置类
     @Override
     protected Class<?>[] getRootConfigClasses() {
         return new Class[]{AppConfig.class};
     }
 
-    // 指定 Spring MVC 的配置类 (也就是你刚才写的 AppMvcConfig)
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class[]{AppMvcConfig.class};
     }
 
-    // 哪些请求交给 Spring 处理？"/" 代表拦截所有请求
     @Override
     protected String[] getServletMappings() {
         return new String[]{"/"};
+    }
+
+    @Override
+    protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+        String location = System.getProperty("java.io.tmpdir");
+        long maxFileSize = 2L * 1024 * 1024 * 1024; // 2 GB
+        long maxRequestSize = 2L * 1024 * 1024 * 1024; // 2 GB
+        int fileSizeThreshold = 0;
+        registration.setMultipartConfig(
+                new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold)
+        );
     }
 }
