@@ -2,37 +2,44 @@ package com.bilibili.controller;
 
 import com.bilibili.common.result.Result;
 import com.bilibili.model.dto.UserLoginDTO;
-import com.bilibili.model.dto.UserProfileUpdateDTO;
 import com.bilibili.model.dto.UserRegisterDTO;
 import com.bilibili.model.vo.UserLoginVO;
 import com.bilibili.model.vo.UserProfileVO;
+import com.bilibili.security.JwtTokenService;
 import com.bilibili.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenService jwtTokenService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtTokenService jwtTokenService) {
         this.userService = userService;
+        this.jwtTokenService = jwtTokenService;
     }
 
     @PostMapping("/login")
     public Result<UserLoginVO> login(@RequestBody UserLoginDTO dto) {
-        return Result.success(userService.login(dto));
+        UserLoginVO loginVO = userService.login(dto);
+        String token = jwtTokenService.generateToken(loginVO.getUid());
+        loginVO.setToken(token);
+        return Result.success(loginVO);
+    }
+
+    @PostMapping("/logout")
+    public Result<Void> logout() {
+        // JWT stateless mode: client deletes local token.
+        return Result.success(null);
     }
 
     @PostMapping("/register")
@@ -43,19 +50,6 @@ public class UserController {
     @GetMapping("/{uid}")
     public Result<UserProfileVO> getPublicProfile(@PathVariable("uid") Long uid) {
         return Result.success(userService.getPublicProfile(uid));
-    }
-
-    @PutMapping("/{uid}/profile")
-    public Result<Void> updatePublicProfile(@PathVariable("uid") Long uid,
-                                            @RequestBody UserProfileUpdateDTO dto) {
-        userService.updatePublicProfile(uid, dto);
-        return Result.success(null);
-    }
-
-    @PostMapping(value = "/{uid}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Result<String> uploadAvatar(@PathVariable("uid") Long uid,
-                                       @RequestParam("file") MultipartFile file) {
-        return Result.success(userService.uploadAvatar(uid, file));
     }
 
 }

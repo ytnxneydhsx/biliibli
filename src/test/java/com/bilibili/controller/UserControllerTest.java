@@ -2,10 +2,10 @@ package com.bilibili.controller;
 
 import com.bilibili.common.exception.GlobalExceptionHandler;
 import com.bilibili.model.dto.UserLoginDTO;
-import com.bilibili.model.dto.UserProfileUpdateDTO;
 import com.bilibili.model.dto.UserRegisterDTO;
 import com.bilibili.model.vo.UserLoginVO;
 import com.bilibili.model.vo.UserProfileVO;
+import com.bilibili.security.JwtTokenService;
 import com.bilibili.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,6 +35,9 @@ public class UserControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private JwtTokenService jwtTokenService;
 
     @InjectMocks
     private UserController userController;
@@ -58,6 +60,7 @@ public class UserControllerTest {
         user.setUid(1001L);
         user.setUsername("tom");
         when(userService.login(any(UserLoginDTO.class))).thenReturn(user);
+        when(jwtTokenService.generateToken(1001L)).thenReturn("token-abc");
 
         UserLoginDTO dto = new UserLoginDTO();
         dto.setUsername("tom");
@@ -74,6 +77,7 @@ public class UserControllerTest {
         assertEquals("OK", root.get("message").asText());
         assertEquals(1001L, root.get("data").get("uid").asLong());
         assertEquals("tom", root.get("data").get("username").asText());
+        assertEquals("token-abc", root.get("data").get("token").asText());
     }
 
     @Test
@@ -116,23 +120,6 @@ public class UserControllerTest {
         assertEquals(1001L, root.get("data").get("uid").asLong());
         assertEquals("Tom", root.get("data").get("nickname").asText());
         assertEquals("hello", root.get("data").get("sign").asText());
-    }
-
-    @Test
-    public void updatePublicProfileSuccess_shouldReturnOk() throws Exception {
-        UserProfileUpdateDTO dto = new UserProfileUpdateDTO();
-        dto.setNickname("Tom2");
-        dto.setSign("new sign");
-
-        MvcResult mvcResult = mockMvc.perform(put("/users/1001/profile")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JsonNode root = readBody(mvcResult);
-        assertEquals(0, root.get("code").asInt());
-        assertEquals("OK", root.get("message").asText());
     }
 
     @Test
