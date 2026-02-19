@@ -81,7 +81,6 @@ public class UserServiceImpl implements UserService {
         if (userInfoRows != 1) {
             throw new RuntimeException("insert t_user_info failed");
         }
-
         return user.getId();
     }
 
@@ -178,7 +177,6 @@ public class UserServiceImpl implements UserService {
         }
 
         storageService.deleteByPublicUrl(userInfo.getAvatarUrl());
-
         return avatarUrl;
     }
 
