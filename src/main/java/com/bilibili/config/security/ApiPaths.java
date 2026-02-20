@@ -8,10 +8,17 @@ public final class ApiPaths {
     };
 
     public static final String[] PUBLIC_GET = {
+            "/videos",
+            "/videos/*",
             "/users/*",
+            "/users/*/videos",
             "/users/*/followers",
             "/users/*/followings",
             "/users/*/friends"
+    };
+
+    public static final String[] PUBLIC_POST = {
+            "/videos/*/views"
     };
 
     public static final String[] USER_ONLY = {
@@ -23,4 +30,3 @@ public final class ApiPaths {
     private ApiPaths() {
     }
 }
-

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_HOME" value="${catalina.base:-.}/logs/bilibili"/>
+    <property name="LOG_HOME" value="F:/bilibili-data/log"/>
     <property name="LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId:-} uid=%X{uid:-} - %msg%n"/>
 

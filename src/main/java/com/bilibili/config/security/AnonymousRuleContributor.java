@@ -17,4 +17,3 @@ public class AnonymousRuleContributor implements SecurityRuleContributor {
         registry.antMatchers(HttpMethod.GET, ApiPaths.PUBLIC_GET).permitAll();
     }
 }
-

@@ -13,7 +13,7 @@ public class UserRuleContributor implements SecurityRuleContributor {
     @Override
     public void contribute(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry) {
         registry.antMatchers(ApiPaths.USER_ONLY).authenticated();
+        registry.antMatchers(HttpMethod.POST, ApiPaths.PUBLIC_POST).authenticated();
         registry.antMatchers(HttpMethod.POST, ApiPaths.USER_LOGOUT).authenticated();
     }
 }
-
