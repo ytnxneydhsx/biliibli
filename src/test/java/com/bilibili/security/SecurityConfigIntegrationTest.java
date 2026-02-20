@@ -34,8 +34,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -148,6 +150,33 @@ public class SecurityConfigIntegrationTest {
     @Test
     public void unknownPath_shouldBeRejectedByDefaultRule() throws Exception {
         mockMvc.perform(get("/not/exist/path"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void corsPreflightForLogin_shouldReturn200() throws Exception {
+        mockMvc.perform(options("/users/login")
+                        .header("Origin", "http://localhost:63342")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "Content-Type,Authorization"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:63342"));
+    }
+
+    @Test
+    public void videoViewWithoutToken_shouldReturn401() throws Exception {
+        mockMvc.perform(post("/videos/1/views"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void videoViewWithToken_shouldNotReturn401() throws Exception {
+        String token = jwtTokenService.generateToken(1001L);
+
+        MvcResult mvcResult = mockMvc.perform(post("/videos/1/views")
+                        .header("Authorization", "Bearer " + token))
+                .andReturn();
+
+        Assert.assertNotEquals(401, mvcResult.getResponse().getStatus());
     }
 }
