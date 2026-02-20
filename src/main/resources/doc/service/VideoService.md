@@ -32,7 +32,7 @@
 | `viewCount`    | `t_video`   | `selectById` |
 | `likeCount`    | `t_video`   | `selectById` |
 | `danmakuCount` | `t_danmaku` | `count(*) where video_id=? and status=0` |
-| `replyCount`   | `t_comment` | `count(*) where video_id=?` |
+| `commentCount` | `t_comment` | `count(*) where video_id=?` |
 
 ---
 

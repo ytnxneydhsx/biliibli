@@ -2,36 +2,56 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bilibili.mapper.VideoMapper">
 
-    <!-- 视频列表展示的映射字典 -->
-    <!-- 我们将数据库的下划线字段映射到 VideoVO 的驼峰属性上 -->
     <resultMap id="VideoVOMap" type="com.bilibili.model.vo.VideoVO">
-        <id column="id" property="id" />
-        <result column="title" property="title" />
-        <result column="cover_url" property="coverUrl" />
-        <result column="view_count" property="viewCount" />
-        <result column="duration" property="duration" />
-        <result column="create_time" property="createTime" />
-        <result column="nickname" property="nickname" />
+        <id column="id" property="id"/>
+        <result column="author_uid" property="authorUid"/>
+        <result column="title" property="title"/>
+        <result column="cover_url" property="coverUrl"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="duration" property="duration"/>
+        <result column="create_time" property="createTime"/>
+        <result column="nickname" property="nickname"/>
     </resultMap>
 
-    <!-- 核心联表查询：联结视频表和用户详情表 -->
-    <select id="selectVideoList" resultMap="VideoVOMap">
-        SELECT 
-            v.id, 
-            v.title, 
-            v.cover_url, 
-            v.view_count, 
-            v.duration, 
+    <select id="selectPublishedVideos" resultMap="VideoVOMap">
+        SELECT
+            v.id,
+            v.user_id AS author_uid,
+            v.title,
+            v.cover_url,
+            v.view_count,
+            v.duration,
             v.create_time,
             u.nickname
         FROM t_video v
         LEFT JOIN t_user_info u ON v.user_id = u.user_id
-        LEFT JOIN t_user s ON v.user_id = s.id
-        WHERE v.status = 0 
+        WHERE v.status = 0
         <if test="title != null and title != ''">
             AND v.title LIKE CONCAT('%', #{title}, '%')
         </if>
         ORDER BY v.create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="selectMyPublishedVideos" resultMap="VideoVOMap">
+        SELECT
+            v.id,
+            v.user_id AS author_uid,
+            v.title,
+            v.cover_url,
+            v.view_count,
+            v.duration,
+            v.create_time,
+            u.nickname
+        FROM t_video v
+        LEFT JOIN t_user_info u ON v.user_id = u.user_id
+        WHERE v.user_id = #{uid}
+          AND v.status = 0
+        <if test="title != null and title != ''">
+            AND v.title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        ORDER BY v.create_time DESC
+        LIMIT #{offset}, #{pageSize}
     </select>
 
 </mapper>
