@@ -13,9 +13,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
-/**
- * 数据库连接配置 (读 db.properties -> 创建 DataSource)
- */
 @Configuration
 @PropertySource("classpath:db.properties")
 public class JdbcConfig {
@@ -32,9 +29,10 @@ public class JdbcConfig {
     @Value("${jdbc.password}")
     private String password;
 
-    /**
-     * 创建数据源 (Spring 会自动将其存入容器内)
-     */
+    @Value("${jdbc.initScript:bilibili.sql}")
+    private String initScript;
+
+    
     @Bean
     public DataSource dataSource() {
         DruidDataSource dataSource = new DruidDataSource();
@@ -45,15 +43,14 @@ public class JdbcConfig {
         return dataSource;
     }
 
-    /**
-     * 自动化初始化数据库：启动时自动执行 SQL 脚本
-     */
+    
     @Bean
     public DataSourceInitializer dataSourceInitializer(DataSource dataSource) {
         DataSourceInitializer initializer = new DataSourceInitializer();
         initializer.setDataSource(dataSource);
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        populator.addScript(new ClassPathResource("bilibili.sql"));
+        populator.setSqlScriptEncoding("UTF-8");
+        populator.addScript(new ClassPathResource(initScript));
         initializer.setDatabasePopulator(populator);
         return initializer;
     }

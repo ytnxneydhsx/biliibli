@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 评论实体 (映射 t_comment)
- */
 @Data
 @TableName("t_comment")
 public class CommentDO implements Serializable {
@@ -22,10 +19,7 @@ public class CommentDO implements Serializable {
 
     private String content;
 
-    /**
-     * 父评论 ID
-     * 如果为 0 则是一级评论，如果不为 0 则是回复（楼中楼）
-     */
+    
     private Long parentId;
 
     private Long likeCount;

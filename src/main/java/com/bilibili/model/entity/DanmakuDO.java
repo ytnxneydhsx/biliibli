@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 弹幕实体 (映射 t_danmaku)
- */
 @Data
 @TableName("t_danmaku")
 public class DanmakuDO implements Serializable {
@@ -22,10 +19,7 @@ public class DanmakuDO implements Serializable {
 
     private String content;
 
-    /**
-     * 在视频中出现的时刻 (单位：毫秒)
-     * 保证弹幕在大流量下依然能丝滑错位展示
-     */
+    
     private Long showTime;
 
     private Long likeCount;

@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS `bilibili` DEFAULT CHARACTER SET utf8mb4;
-USE `bilibili`;
-
 CREATE TABLE IF NOT EXISTS `t_user` (
     `id` BIGINT NOT NULL COMMENT 'snowflake id',
     `username` VARCHAR(32) NOT NULL COMMENT 'login username',

@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 视频标签关系实体
- */
 @Data
 @TableName("t_video_tag")
 public class VideoTagDO implements Serializable {

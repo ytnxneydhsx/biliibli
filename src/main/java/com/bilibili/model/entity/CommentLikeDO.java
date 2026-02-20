@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 评论点赞映射 t_comment_like
- */
 @Data
 @TableName("t_comment_like")
 public class CommentLikeDO implements Serializable {

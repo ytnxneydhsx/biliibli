@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 标签字典实体
- */
 @Data
 @TableName("t_tag")
 public class TagDO implements Serializable {

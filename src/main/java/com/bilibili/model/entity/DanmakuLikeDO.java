@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 弹幕点赞映射 t_danmaku_like
- */
 @Data
 @TableName("t_danmaku_like")
 public class DanmakuLikeDO implements Serializable {
