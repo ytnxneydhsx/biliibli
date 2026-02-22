@@ -10,6 +10,7 @@ public final class ApiPaths {
     public static final String[] PUBLIC_GET = {
             "/videos",
             "/videos/*",
+            "/videos/*/comments",
             "/users/*",
             "/users/*/videos",
             "/users/*/followers",

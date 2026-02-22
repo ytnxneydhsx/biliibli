@@ -3,10 +3,13 @@ package com.bilibili.security;
 import com.bilibili.config.SecurityConfig;
 import com.bilibili.config.security.AnonymousRuleContributor;
 import com.bilibili.config.security.UserRuleContributor;
+import com.bilibili.controller.CommentController;
 import com.bilibili.controller.FollowingController;
+import com.bilibili.controller.MeCommentController;
 import com.bilibili.controller.MeFollowingController;
 import com.bilibili.controller.MeUserController;
 import com.bilibili.controller.UserController;
+import com.bilibili.service.CommentService;
 import com.bilibili.model.vo.UserProfileVO;
 import com.bilibili.service.FollowingService;
 import com.bilibili.service.UserService;
@@ -69,6 +72,11 @@ public class SecurityConfigIntegrationTest {
         }
 
         @Bean
+        public CommentService commentService() {
+            return Mockito.mock(CommentService.class);
+        }
+
+        @Bean
         public UserController userController(UserService userService, JwtTokenService jwtTokenService) {
             return new UserController(userService, jwtTokenService);
         }
@@ -86,6 +94,16 @@ public class SecurityConfigIntegrationTest {
         @Bean
         public MeFollowingController meFollowingController(FollowingService followingService) {
             return new MeFollowingController(followingService);
+        }
+
+        @Bean
+        public CommentController commentController(CommentService commentService) {
+            return new CommentController(commentService);
+        }
+
+        @Bean
+        public MeCommentController meCommentController(CommentService commentService) {
+            return new MeCommentController(commentService);
         }
     }
 
@@ -148,9 +166,9 @@ public class SecurityConfigIntegrationTest {
     }
 
     @Test
-    public void unknownPath_shouldBeRejectedByDefaultRule() throws Exception {
+    public void unknownPath_shouldReturn401ByDefaultRule() throws Exception {
         mockMvc.perform(get("/not/exist/path"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -178,5 +196,25 @@ public class SecurityConfigIntegrationTest {
                 .andReturn();
 
         Assert.assertNotEquals(401, mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    public void listCommentsWithoutToken_shouldBeAccessible() throws Exception {
+        mockMvc.perform(get("/videos/1/comments"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void createCommentWithoutToken_shouldReturn401() throws Exception {
+        mockMvc.perform(post("/me/videos/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"hello\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void likeCommentWithoutToken_shouldReturn401() throws Exception {
+        mockMvc.perform(post("/me/comments/1/likes"))
+                .andExpect(status().isUnauthorized());
     }
 }

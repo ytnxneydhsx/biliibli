@@ -244,6 +244,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
             video.setDuration(duration);
             video.setViewCount(0L);
             video.setLikeCount(0L);
+            video.setCommentCount(0L);
             video.setStatus(0);
             int insertVideoRows = videoMapper.insert(video);
             if (insertVideoRows != 1 || video.getId() == null) {

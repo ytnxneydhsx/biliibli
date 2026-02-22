@@ -127,7 +127,8 @@ public class VideoServiceImpl implements VideoService {
         vo.setAuthor(buildAuthor(video.getUserId()));
         vo.setTags(queryTagNames(video.getId()));
         vo.setDanmakuCount(countDanmaku(video.getId()));
-        vo.setCommentCount(countComment(video.getId()));
+        Long commentCount = video.getCommentCount();
+        vo.setCommentCount(commentCount == null ? countComment(video.getId()) : commentCount);
 
         boolean hasLogin = currentUid != null && currentUid > 0;
         vo.setIsLiked(hasLogin && isVideoLikedByCurrentUser(video.getId(), currentUid));
@@ -276,7 +277,8 @@ public class VideoServiceImpl implements VideoService {
 
     private Long countComment(Long videoId) {
         LambdaQueryWrapper<CommentDO> query = new LambdaQueryWrapper<>();
-        query.eq(CommentDO::getVideoId, videoId);
+        query.eq(CommentDO::getVideoId, videoId)
+                .eq(CommentDO::getStatus, STATUS_NORMAL);
         Long count = commentMapper.selectCount(query);
         return count == null ? 0L : count;
     }

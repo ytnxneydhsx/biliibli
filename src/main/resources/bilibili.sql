@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `t_video` (
     `duration` BIGINT NOT NULL DEFAULT 0 COMMENT 'seconds',
     `view_count` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
+    `comment_count` BIGINT NOT NULL DEFAULT 0,
     `status` TINYINT(1) DEFAULT 0,
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `t_video` (
     KEY `idx_update_time` (`update_time`),
     KEY `idx_view_count` (`view_count`),
     KEY `idx_like_count` (`like_count`),
+    KEY `idx_comment_count` (`comment_count`),
     KEY `idx_status_create` (`status`, `create_time`),
     KEY `idx_user_status_create` (`user_id`, `status`, `create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -104,12 +106,16 @@ CREATE TABLE IF NOT EXISTS `t_comment` (
     `user_id` BIGINT NOT NULL,
     `content` TEXT NOT NULL,
     `parent_id` BIGINT DEFAULT 0,
+    `root_id` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
+    `reply_count` INT NOT NULL DEFAULT 0,
+    `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0 normal, 1 deleted',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_like_count` (`like_count`),
-    KEY `idx_video_parent_create` (`video_id`, `parent_id`, `create_time`)
+    KEY `idx_video_status_parent_create` (`video_id`, `status`, `parent_id`, `create_time`),
+    KEY `idx_root_create` (`root_id`, `create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `t_comment_like` (

@@ -22,7 +22,13 @@ public class CommentDO implements Serializable {
     
     private Long parentId;
 
+    private Long rootId;
+
     private Long likeCount;
+
+    private Integer replyCount;
+
+    private Integer status;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

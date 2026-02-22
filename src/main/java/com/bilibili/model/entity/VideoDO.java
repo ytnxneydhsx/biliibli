@@ -39,6 +39,8 @@ public class VideoDO implements Serializable {
     
     private Long likeCount;
 
+    private Long commentCount;
+
     
     private Integer status;
 
