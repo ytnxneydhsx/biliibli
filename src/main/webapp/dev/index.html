@@ -115,11 +115,13 @@
                 <h3>Search</h3>
                 <label>keyword</label>
                 <input id="searchKeyword" type="text" />
+                <label>categoryId(optional)</label>
+                <input id="searchCategoryId" type="text" inputmode="numeric" />
                 <label>pageNo</label>
                 <input id="searchPageNo" type="number" value="1" />
                 <label>pageSize</label>
                 <input id="searchPageSize" type="number" value="10" />
-                <button id="searchVideosBtn">GET /videos/search</button>
+                <button id="searchVideosBtn">GET /search/videos</button>
             </div>
         </div>
         <div class="grid2">
@@ -184,6 +186,40 @@
                 <input id="completeCoverUrl" type="text" />
                 <label>duration(ms)</label>
                 <input id="completeDuration" type="number" value="0" />
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Comment</h2>
+        <div class="grid2">
+            <div>
+                <h3>List / Create</h3>
+                <label>videoId</label>
+                <input id="commentVideoId" type="text" inputmode="numeric" />
+                <label>pageNo</label>
+                <input id="commentPageNo" type="number" value="1" />
+                <label>pageSize</label>
+                <input id="commentPageSize" type="number" value="10" />
+                <button id="listCommentsBtn">GET /videos/{videoId}/comments</button>
+
+                <label>content</label>
+                <input id="commentContent" type="text" />
+                <label>parentId(optional)</label>
+                <input id="commentParentId" type="text" inputmode="numeric" />
+                <button id="createCommentBtn">POST /me/videos/{videoId}/comments</button>
+            </div>
+            <div>
+                <h3>Delete / Like</h3>
+                <label>commentId</label>
+                <input id="commentId" type="text" inputmode="numeric" />
+                <div class="row">
+                    <button id="deleteCommentBtn">DELETE /me/comments/{commentId}</button>
+                    <button id="likeCommentBtn">POST /me/comments/{commentId}/likes</button>
+                </div>
+                <div class="row">
+                    <button id="unlikeCommentBtn">DELETE /me/comments/{commentId}/likes</button>
+                </div>
             </div>
         </div>
     </section>

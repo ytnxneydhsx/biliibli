@@ -95,10 +95,27 @@
             await apiJson("GET", `/videos?pageNo=${pageNo}&pageSize=${pageSize}`, null, false);
         });
         on("searchVideosBtn", async () => {
-            const keyword = encodeURIComponent(val("searchKeyword"));
+            const keywordRaw = val("searchKeyword");
+            const categoryRaw = val("searchCategoryId");
             const pageNo = num("searchPageNo");
             const pageSize = num("searchPageSize");
-            await apiJson("GET", `/videos/search?keyword=${keyword}&pageNo=${pageNo}&pageSize=${pageSize}`, null, false);
+            const queryParts = [
+                `pageNo=${pageNo}`,
+                `pageSize=${pageSize}`
+            ];
+            if (!keywordRaw && !categoryRaw) {
+                throw new Error("keyword or searchCategoryId is required.");
+            }
+            if (keywordRaw) {
+                queryParts.push(`keyword=${encodeURIComponent(keywordRaw)}`);
+            }
+            if (categoryRaw) {
+                if (!/^\d+$/.test(categoryRaw)) {
+                    throw new Error("searchCategoryId must be a positive integer string.");
+                }
+                queryParts.push(`categoryId=${categoryRaw}`);
+            }
+            await apiJson("GET", `/search/videos?${queryParts.join("&")}`, null, false);
         });
         on("userVideosBtn", async () => {
             const uid = longId("userVideoUid");
@@ -123,6 +140,38 @@
         on("unlikeBtn", async () => {
             const videoId = longId("videoId");
             await apiJson("DELETE", `/me/videos/${videoId}/likes`, null, true);
+        });
+
+        on("listCommentsBtn", async () => {
+            const videoId = longId("commentVideoId");
+            const pageNo = num("commentPageNo");
+            const pageSize = num("commentPageSize");
+            await apiJson("GET", `/videos/${videoId}/comments?pageNo=${pageNo}&pageSize=${pageSize}`, null, false, true);
+        });
+        on("createCommentBtn", async () => {
+            const videoId = longId("commentVideoId");
+            const content = val("commentContent");
+            const parentIdRaw = val("commentParentId");
+            const payload = { content: content };
+            if (parentIdRaw) {
+                if (!/^\d+$/.test(parentIdRaw)) {
+                    throw new Error("commentParentId must be a positive integer string.");
+                }
+                payload.parentId = parentIdRaw;
+            }
+            await apiJson("POST", `/me/videos/${videoId}/comments`, payload, true);
+        });
+        on("deleteCommentBtn", async () => {
+            const commentId = longId("commentId");
+            await apiJson("DELETE", `/me/comments/${commentId}`, null, true);
+        });
+        on("likeCommentBtn", async () => {
+            const commentId = longId("commentId");
+            await apiJson("POST", `/me/comments/${commentId}/likes`, null, true);
+        });
+        on("unlikeCommentBtn", async () => {
+            const commentId = longId("commentId");
+            await apiJson("DELETE", `/me/comments/${commentId}/likes`, null, true);
         });
 
         on("initUploadBtn", async () => {
@@ -235,7 +284,7 @@
         const text = await response.text();
         let body;
         try {
-            body = text ? JSON.parse(text) : null;
+            body = text ? parseJsonPreserveLong(text) : null;
         } catch (e) {
             body = text;
         }
@@ -348,5 +397,31 @@
 
     function info(message) {
         responseBox.textContent = JSON.stringify({ info: message }, null, 2);
+    }
+
+    function parseJsonPreserveLong(text) {
+        const rewritten = rewriteUnsafeIntegers(text);
+        return JSON.parse(rewritten);
+    }
+
+    function rewriteUnsafeIntegers(jsonText) {
+        const pattern = /("(?:[^"\\]|\\.)*"\s*:\s*)(-?\d+)(\s*[,}\]])/g;
+        return jsonText.replace(pattern, (match, prefix, digits, suffix) => {
+            if (!isUnsafeIntegerLiteral(digits)) {
+                return match;
+            }
+            return `${prefix}"${digits}"${suffix}`;
+        });
+    }
+
+    function isUnsafeIntegerLiteral(literal) {
+        try {
+            const value = BigInt(literal);
+            const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
+            const minSafe = -maxSafe;
+            return value > maxSafe || value < minSafe;
+        } catch (e) {
+            return false;
+        }
     }
 })();
