@@ -11,6 +11,7 @@ public final class ApiPaths {
             "/videos",
             "/videos/*",
             "/videos/*/comments",
+            "/search/**",
             "/users/*",
             "/users/*/videos",
             "/users/*/followers",
