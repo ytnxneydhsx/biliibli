@@ -3,8 +3,9 @@ package com.bilibili.controller;
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.model.vo.VideoDetailVO;
+import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
-import com.bilibili.service.VideoService;
+import com.bilibili.service.VideoAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,36 +21,35 @@ import java.util.List;
 @RequestMapping("/videos")
 public class VideoController {
 
-    private final VideoService videoService;
+    private final VideoAppService videoAppService;
 
     @Autowired
-    public VideoController(VideoService videoService) {
-        this.videoService = videoService;
+    public VideoController(VideoAppService videoAppService) {
+        this.videoAppService = videoAppService;
     }
 
     @GetMapping
     public Result<List<VideoVO>> listVideos(@RequestParam(value = "pageNo", required = false) Integer pageNo,
                                             @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        return Result.success(videoService.listHomepageVideos(null, pageNo, pageSize));
+        return Result.success(videoAppService.listVideos(pageNo, pageSize));
     }
 
-    @GetMapping("/search")
-    public Result<List<VideoVO>> searchVideos(@RequestParam("keyword") String keyword,
-                                              @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                              @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        return Result.success(videoService.searchVideos(keyword, pageNo, pageSize));
+    @GetMapping("/rank")
+    public Result<List<VideoRankVO>> listVideoRank(@RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                    @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        return Result.success(videoAppService.listVideoRank(pageNo, pageSize));
     }
 
     @GetMapping("/{videoId}")
     public Result<VideoDetailVO> getVideoDetail(@PathVariable("videoId") Long videoId,
                                                 @AuthenticationPrincipal AuthenticatedUser currentUser) {
         Long currentUid = currentUser == null ? null : currentUser.getUid();
-        return Result.success(videoService.getVideoDetail(videoId, currentUid));
+        return Result.success(videoAppService.getVideoDetail(videoId, currentUid));
     }
 
     @PostMapping("/{videoId}/views")
     public Result<Void> increaseViewCount(@PathVariable("videoId") Long videoId) {
-        videoService.increaseViewCount(videoId);
+        videoAppService.increaseViewCount(videoId);
         return Result.success(null);
     }
 }

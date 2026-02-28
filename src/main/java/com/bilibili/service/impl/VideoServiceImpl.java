@@ -78,17 +78,6 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<VideoVO> searchVideos(String keyword, Integer pageNo, Integer pageSize) {
-        String normalizedKeyword = normalizeRequired(keyword, "keyword");
-
-        int normalizedPageNo = normalizePageNo(pageNo);
-        int normalizedPageSize = normalizePageSize(pageSize);
-        int offset = (normalizedPageNo - 1) * normalizedPageSize;
-
-        return videoMapper.selectPublishedVideos(normalizedKeyword, offset, normalizedPageSize);
-    }
-
-    @Override
     public List<VideoVO> listPublishedVideos(Long uid, String title, Integer pageNo, Integer pageSize) {
         if (uid == null || uid <= 0) {
             throw new IllegalArgumentException("uid is invalid");
@@ -137,19 +126,11 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public void increaseViewCount(Long videoId) {
+    public void validateViewableVideo(Long videoId) {
         if (videoId == null || videoId <= 0) {
             throw new IllegalArgumentException("videoId is invalid");
         }
-
-        LambdaUpdateWrapper<VideoDO> update = new LambdaUpdateWrapper<>();
-        update.eq(VideoDO::getId, videoId)
-                .eq(VideoDO::getStatus, STATUS_NORMAL)
-                .setSql("view_count = view_count + 1");
-        int rows = videoMapper.update(null, update);
-        if (rows != 1) {
-            throw new IllegalArgumentException("video not found");
-        }
+        ensureVideoExists(videoId);
     }
 
     @Override
@@ -353,14 +334,6 @@ public class VideoServiceImpl implements VideoService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private static String normalizeRequired(String value, String fieldName) {
-        String normalized = normalizeOptional(value);
-        if (normalized == null) {
-            throw new IllegalArgumentException(fieldName + " is required");
-        }
-        return normalized;
     }
 
 }
