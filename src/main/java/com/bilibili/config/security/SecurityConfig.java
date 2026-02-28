@@ -1,6 +1,5 @@
-package com.bilibili.config;
+package com.bilibili.config.security;
 
-import com.bilibili.config.security.SecurityRuleContributor;
 import com.bilibili.security.JwtAuthenticationFilter;
 import com.bilibili.security.RequestLoggingFilter;
 import com.bilibili.security.RestAccessDeniedHandler;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,7 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +33,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
     private final RequestLoggingFilter requestLoggingFilter;
-    private final List<SecurityRuleContributor> securityRuleContributors;
     private final String corsAllowedOrigins;
 
     @Autowired
@@ -44,13 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                           RestAuthenticationEntryPoint restAuthenticationEntryPoint,
                           RestAccessDeniedHandler restAccessDeniedHandler,
                           RequestLoggingFilter requestLoggingFilter,
-                          List<SecurityRuleContributor> securityRuleContributors,
                           @Value("${cors.allowedOrigins:http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080}") String corsAllowedOrigins) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.restAccessDeniedHandler = restAccessDeniedHandler;
         this.requestLoggingFilter = requestLoggingFilter;
-        this.securityRuleContributors = securityRuleContributors;
         this.corsAllowedOrigins = corsAllowedOrigins;
     }
 
@@ -76,13 +70,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private void applyAccessRules(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry) {
-        List<SecurityRuleContributor> orderedContributors = new ArrayList<>(securityRuleContributors);
-        AnnotationAwareOrderComparator.sort(orderedContributors);
-        for (SecurityRuleContributor contributor : orderedContributors) {
-            contributor.contribute(registry);
+        for (SecurityRule rule : SecurityRuleMatrix.getRules()) {
+            applyRule(registry, rule);
         }
-        // Secure-by-default: any path not explicitly listed above is rejected.
-        registry.anyRequest().denyAll();
+        // Secure-by-default: any path not explicitly listed above requires authentication.
+        registry.anyRequest().authenticated();
+    }
+
+    private void applyRule(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry,
+                           SecurityRule rule) {
+        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl;
+        if (rule.getMethod() == null) {
+            authorizedUrl = registry.antMatchers(rule.getPattern());
+        } else {
+            authorizedUrl = registry.antMatchers(rule.getMethod(), rule.getPattern());
+        }
+
+        if (rule.getAccessLevel() == AccessLevel.PUBLIC) {
+            authorizedUrl.permitAll();
+            return;
+        }
+        if (rule.getAccessLevel() == AccessLevel.AUTH) {
+            authorizedUrl.authenticated();
+            return;
+        }
+        authorizedUrl.hasRole("ADMIN");
     }
 
     @Bean

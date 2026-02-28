@@ -26,7 +26,6 @@ public class MeCommentController {
     }
 
     @PostMapping("/videos/{videoId}/comments")
-    @PreAuthorize("isAuthenticated()")
     public Result<Long> createComment(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                       @PathVariable("videoId") Long videoId,
                                       @RequestBody CommentCreateDTO dto) {
@@ -34,7 +33,7 @@ public class MeCommentController {
     }
 
     @DeleteMapping("/comments/{commentId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@authz.canDeleteComment(authentication, #commentId)")
     public Result<Void> deleteComment(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                       @PathVariable("commentId") Long commentId) {
         commentService.deleteComment(currentUser.getUid(), commentId);
@@ -42,7 +41,6 @@ public class MeCommentController {
     }
 
     @PostMapping("/comments/{commentId}/likes")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> likeComment(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                     @PathVariable("commentId") Long commentId) {
         commentService.likeComment(currentUser.getUid(), commentId);
@@ -50,7 +48,6 @@ public class MeCommentController {
     }
 
     @DeleteMapping("/comments/{commentId}/likes")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> unlikeComment(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                       @PathVariable("commentId") Long commentId) {
         commentService.unlikeComment(currentUser.getUid(), commentId);

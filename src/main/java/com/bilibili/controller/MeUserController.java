@@ -6,7 +6,6 @@ import com.bilibili.model.dto.UserProfileUpdateDTO;
 import com.bilibili.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,7 +27,6 @@ public class MeUserController {
     }
 
     @PutMapping("/profile")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> updateMyProfile(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                         @RequestBody UserProfileUpdateDTO dto) {
         userService.updatePublicProfile(currentUser.getUid(), dto);
@@ -36,10 +34,8 @@ public class MeUserController {
     }
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public Result<String> uploadMyAvatar(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                          @RequestParam("file") MultipartFile file) {
         return Result.success(userService.uploadAvatar(currentUser.getUid(), file));
     }
 }
-

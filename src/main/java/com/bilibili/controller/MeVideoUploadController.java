@@ -34,14 +34,13 @@ public class MeVideoUploadController {
     }
 
     @PostMapping("/init-session")
-    @PreAuthorize("isAuthenticated()")
     public Result<VideoUploadInitVO> initUpload(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                                 @RequestBody VideoUploadInitDTO dto) {
         return Result.success(videoUploadService.initUpload(currentUser.getUid(), dto));
     }
 
     @PutMapping(value = "/{uploadId}/chunks/{index}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@authz.canAccessUploadTask(authentication, #uploadId)")
     public Result<Void> uploadChunk(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                     @PathVariable("uploadId") String uploadId,
                                     @PathVariable("index") Integer index,
@@ -51,14 +50,14 @@ public class MeVideoUploadController {
     }
 
     @GetMapping("/{uploadId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@authz.canAccessUploadTask(authentication, #uploadId)")
     public Result<VideoUploadStatusVO> getUploadStatus(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                                        @PathVariable("uploadId") String uploadId) {
         return Result.success(videoUploadService.getUploadStatus(currentUser.getUid(), uploadId));
     }
 
     @PostMapping("/{uploadId}/complete")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@authz.canAccessUploadTask(authentication, #uploadId)")
     public Result<VideoUploadCompleteVO> completeUpload(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                                         @PathVariable("uploadId") String uploadId,
                                                         @RequestBody VideoUploadCompleteDTO dto) {

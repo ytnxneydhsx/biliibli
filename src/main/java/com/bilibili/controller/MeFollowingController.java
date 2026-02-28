@@ -4,7 +4,6 @@ import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.service.FollowingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +23,6 @@ public class MeFollowingController {
     }
 
     @PostMapping("/followings/{targetUid}")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> follow(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                @PathVariable("targetUid") Long targetUid) {
         followingService.follow(currentUser.getUid(), targetUid);
@@ -32,11 +30,9 @@ public class MeFollowingController {
     }
 
     @DeleteMapping("/followings/{targetUid}")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> unfollow(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                  @PathVariable("targetUid") Long targetUid) {
         followingService.unfollow(currentUser.getUid(), targetUid);
         return Result.success(null);
     }
 }
-

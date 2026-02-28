@@ -4,7 +4,6 @@ import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +23,6 @@ public class MeVideoLikeController {
     }
 
     @PostMapping("/{videoId}/likes")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> likeVideo(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                   @PathVariable("videoId") Long videoId) {
         videoService.likeVideo(currentUser.getUid(), videoId);
@@ -32,7 +30,6 @@ public class MeVideoLikeController {
     }
 
     @DeleteMapping("/{videoId}/likes")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> unlikeVideo(@AuthenticationPrincipal AuthenticatedUser currentUser,
                                     @PathVariable("videoId") Long videoId) {
         videoService.unlikeVideo(currentUser.getUid(), videoId);
