@@ -36,6 +36,10 @@ build/
 ### VS Code ###
 .vscode/
 logs/
+tools/simulator/output/*
+!tools/simulator/output/.gitkeep
+tools/simulator/__pycache__/
+*.pyc
 
 ### Mac OS ###
 .DS_Store

@@ -7,6 +7,49 @@
 
 ---
 
+## 0. 最新安全策略更新（2026-02）
+
+本次做了 3 个关键调整，目的就是解决你提到的“控制层看不出权限”的问题。
+
+### 0.1 登录校验统一到过滤器链
+
+- 公开接口：在 `SecurityRuleMatrix` 里标 `PUBLIC`。
+- 其余接口：默认 `authenticated()`。
+- 代码位置：
+  - `src/main/java/com/bilibili/config/security/SecurityConfig.java`
+  - `src/main/java/com/bilibili/config/security/SecurityRuleMatrix.java`
+  - `src/main/java/com/bilibili/config/security/SecurityRule.java`
+
+你可以理解为：  
+**URL 级别“要不要登录”，只看安全配置，不再散落在控制器里。**
+
+### 0.2 控制层新增“资源归属”可见校验
+
+为了让“用户 A 不能操作用户 B 的资源”在控制层一眼可见，新增了声明式注解：
+
+- 删除评论（必须是评论作者）：
+  - `MeCommentController.deleteComment`
+  - `@PreAuthorize("@authz.canDeleteComment(authentication, #commentId)")`
+- 访问上传任务（必须是任务拥有者）：
+  - `MeVideoUploadController.uploadChunk/getUploadStatus/completeUpload`
+  - `@PreAuthorize("@authz.canAccessUploadTask(authentication, #uploadId)")`
+
+### 0.3 权限逻辑集中到 `AuthzService`
+
+新增统一权限服务：
+- `src/main/java/com/bilibili/authorization/AuthzService.java`
+
+作用：
+- `canDeleteComment(...)`：检查评论归属
+- `canAccessUploadTask(...)`：检查上传任务归属
+
+这样做的意义是：
+1. 控制层可读（看注解就知道权限）
+2. 权限代码集中（便于维护）
+3. Service 层保留兜底校验（双保险）
+
+---
+
 ## 1. 你先记住的总体结构
 
 本项目安全链路分 4 层：
@@ -30,7 +73,7 @@
 | `JwtAuthenticationFilter` | 请求头 `Authorization: Bearer <token>` | `SecurityContext` 里写入当前用户认证信息（或保持匿名） | 把 token 变成“当前登录用户” |
 | `RestAuthenticationEntryPoint` | “需要登录但当前未认证”的异常场景 | 401 JSON | 统一处理未登录 |
 | `RestAccessDeniedHandler` | “已登录但权限不足”的异常场景 | 403 JSON | 统一处理无权限 |
-| `@PreAuthorize(\"isAuthenticated()\")` | 当前请求的认证状态 | 通过 / 401 | 方法级鉴权，减少控制层侵入 |
+| `@PreAuthorize(\"@authz...\")` | 当前认证信息 + 资源 ID（如 `commentId/uploadId`） | 通过 / 403 | 方法级“资源归属”鉴权，控制层可见 |
 | `JwtTokenService` | 登录成功后的 `uid/username` 或请求 token | 生成 token / 解析出用户信息 | token 签发与解析 |
 
 ---
@@ -104,27 +147,28 @@
 
 ---
 
-## 2.4 `@PreAuthorize + @AuthenticationPrincipal`（非侵入式鉴权）
+## 2.4 `@PreAuthorize + @AuthenticationPrincipal`（资源归属可见鉴权）
 
 文件：  
 - `src/main/java/com/bilibili/controller/MeUserController.java`  
 - `src/main/java/com/bilibili/controller/MeFollowingController.java`
 
 ### 它在干什么
-- `@PreAuthorize(\"isAuthenticated()\")`：交给 Spring Security 判断是否登录。  
 - `@AuthenticationPrincipal AuthenticatedUser currentUser`：由框架注入当前登录用户。  
-- 业务代码不再手写 `uid` 比对逻辑。
+- `@PreAuthorize(\"@authz...\")`：在控制层直接声明“是否有权操作该资源”。  
+- 资源归属规则集中在 `AuthzService`，避免散落在多个 Service 方法里。
 
 ### 输入
 - SecurityContext 中的认证主体（由 `JwtAuthenticationFilter` 写入）。  
 
 ### 输出
-- 已认证：进入业务方法。  
-- 未认证：被安全层拦截并返回 401。  
+- 已认证且资源归属合法：进入业务方法。  
+- 已认证但资源归属不合法：返回 403。  
+- 未认证：先被 URL 规则拦截并返回 401。  
 
 ### 价值
-- Controller 更干净，安全逻辑由框架统一处理。  
-- 结合 `/me/**` 接口，天然避免 path `uid` 伪造问题。  
+- 控制层可直接读到权限规则（看注解即可）。  
+- 结合 `/me/**` + `AuthzService`，同时解决“是否登录”和“是否归属本人”两个问题。  
 
 ---
 
@@ -276,7 +320,7 @@ sequenceDiagram
 
 ## 3. `configure(HttpSecurity http)` 到底在组装什么
 
-文件：`src/main/java/com/bilibili/config/SecurityConfig.java`
+文件：`src/main/java/com/bilibili/config/security/SecurityConfig.java`
 
 `configure` 本质是在“拼一条安全处理管线”。
 
@@ -378,7 +422,7 @@ sequenceDiagram
 
 ## 7. 本项目关键代码对照表
 
-- 安全规则入口：`src/main/java/com/bilibili/config/SecurityConfig.java`
+- 安全规则入口：`src/main/java/com/bilibili/config/security/SecurityConfig.java`
 - token 解析过滤器：`src/main/java/com/bilibili/security/JwtAuthenticationFilter.java`
 - token 签发/解析：`src/main/java/com/bilibili/security/JwtTokenService.java`
 - 未登录返回：`src/main/java/com/bilibili/security/RestAuthenticationEntryPoint.java`
@@ -417,3 +461,4 @@ sequenceDiagram
 - 在 Controller 里使用 `@AuthenticationPrincipal` 读取当前用户
 
 做完这两步，你就真正掌握这套安全流了。
+
