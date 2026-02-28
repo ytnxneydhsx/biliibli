@@ -1,4 +1,4 @@
-package com.bilibili.config;
+package com.bilibili.config.properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

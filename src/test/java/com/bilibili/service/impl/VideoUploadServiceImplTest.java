@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
-import com.bilibili.config.StorageProperties;
+import com.bilibili.config.properties.StorageProperties;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.mapper.VideoUploadTaskMapper;
 import com.bilibili.model.dto.VideoUploadCompleteDTO;
@@ -192,4 +192,3 @@ public class VideoUploadServiceImplTest {
         return task;
     }
 }
-

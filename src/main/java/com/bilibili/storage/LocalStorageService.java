@@ -1,6 +1,6 @@
 package com.bilibili.storage;
 
-import com.bilibili.config.StorageProperties;
+import com.bilibili.config.properties.StorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

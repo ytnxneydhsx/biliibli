@@ -1,4 +1,7 @@
-package com.bilibili.config;
+package com.bilibili.config.bootstrap;
+
+import com.bilibili.config.core.AppConfig;
+import com.bilibili.config.web.AppMvcConfig;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;

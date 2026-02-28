@@ -3,7 +3,7 @@ package com.bilibili.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.bilibili.common.exception.ForbiddenException;
-import com.bilibili.config.StorageProperties;
+import com.bilibili.config.properties.StorageProperties;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.mapper.VideoUploadTaskMapper;
 import com.bilibili.model.dto.VideoUploadCompleteDTO;

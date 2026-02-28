@@ -1,8 +1,8 @@
 package com.bilibili.integration;
 
-import com.bilibili.config.JdbcConfig;
-import com.bilibili.config.MybatisPlusConfig;
-import com.bilibili.config.StorageProperties;
+import com.bilibili.config.data.JdbcConfig;
+import com.bilibili.config.data.MybatisPlusConfig;
+import com.bilibili.config.properties.StorageProperties;
 import com.bilibili.model.dto.UserLoginDTO;
 import com.bilibili.model.dto.UserProfileUpdateDTO;
 import com.bilibili.model.dto.UserRegisterDTO;
@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,7 +32,14 @@ public class UserServiceIntegrationTest {
     @Configuration
     @EnableTransactionManagement
     @Import({JdbcConfig.class, MybatisPlusConfig.class, StorageProperties.class})
-    @ComponentScan(basePackageClasses = {UserServiceImpl.class, LocalStorageService.class})
+    @ComponentScan(
+            basePackageClasses = {UserServiceImpl.class, LocalStorageService.class},
+            useDefaultFilters = false,
+            includeFilters = @ComponentScan.Filter(
+                    type = FilterType.ASSIGNABLE_TYPE,
+                    classes = {UserServiceImpl.class, LocalStorageService.class}
+            )
+    )
     static class TestConfig {
     }
 
