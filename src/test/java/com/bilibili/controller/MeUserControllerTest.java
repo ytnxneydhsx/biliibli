@@ -1,21 +1,31 @@
 package com.bilibili.controller;
 
-import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.common.exception.GlobalExceptionHandler;
+import com.bilibili.controller.support.TestAuthenticatedUserArgumentResolver;
 import com.bilibili.model.dto.UserProfileUpdateDTO;
 import com.bilibili.service.UserService;
-import org.junit.Assert;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MeUserControllerTest {
@@ -26,21 +36,37 @@ public class MeUserControllerTest {
     @InjectMocks
     private MeUserController meUserController;
 
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+
+    @Before
+    public void setUp() {
+        objectMapper = new ObjectMapper();
+        mockMvc = MockMvcBuilders.standaloneSetup(meUserController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new TestAuthenticatedUserArgumentResolver())
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                .build();
+    }
+
     @Test
-    public void updateMyProfile_shouldUseCurrentUserUid() {
-        AuthenticatedUser currentUser = new AuthenticatedUser(1001L);
+    public void updateMyProfile_shouldUseCurrentUserUid() throws Exception {
         UserProfileUpdateDTO dto = new UserProfileUpdateDTO();
         dto.setNickname("Tom2");
         dto.setSign("hello");
 
-        meUserController.updateMyProfile(currentUser, dto);
+        mockMvc.perform(put("/me/profile")
+                        .header(TestAuthenticatedUserArgumentResolver.UID_HEADER, "1001")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0));
 
-        verify(userService, times(1)).updatePublicProfile(eq(1001L), eq(dto));
+        verify(userService, times(1)).updatePublicProfile(eq(1001L), any(UserProfileUpdateDTO.class));
     }
 
     @Test
-    public void uploadMyAvatar_shouldUseCurrentUserUidAndReturnUrl() {
-        AuthenticatedUser currentUser = new AuthenticatedUser(1001L);
+    public void uploadMyAvatar_shouldUseCurrentUserUidAndReturnUrl() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "avatar.png",
@@ -49,10 +75,13 @@ public class MeUserControllerTest {
         );
         when(userService.uploadAvatar(eq(1001L), any())).thenReturn("http://localhost:9000/media/avatar/a.png");
 
-        String url = meUserController.uploadMyAvatar(currentUser, file).getData();
+        mockMvc.perform(multipart("/me/avatar")
+                        .file(file)
+                        .header(TestAuthenticatedUserArgumentResolver.UID_HEADER, "1001"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value("http://localhost:9000/media/avatar/a.png"));
 
-        Assert.assertEquals("http://localhost:9000/media/avatar/a.png", url);
         verify(userService, times(1)).uploadAvatar(eq(1001L), any());
     }
 }
-

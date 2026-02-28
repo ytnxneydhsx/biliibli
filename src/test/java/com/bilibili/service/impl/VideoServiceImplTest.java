@@ -85,28 +85,6 @@ public class VideoServiceImplTest {
     }
 
     @Test
-    public void searchVideos_shouldRequireKeyword() {
-        IllegalArgumentException ex = Assert.assertThrows(
-                IllegalArgumentException.class,
-                () -> videoService.searchVideos("   ", 1, 10)
-        );
-
-        Assert.assertTrue(ex.getMessage().contains("keyword is required"));
-    }
-
-    @Test
-    public void searchVideos_shouldDelegateToPublishedQuery() {
-        when(videoMapper.selectPublishedVideos(eq("spring"), eq(0), eq(10)))
-                .thenReturn(Collections.emptyList());
-
-        List<VideoVO> result = videoService.searchVideos("spring", 1, 10);
-
-        Assert.assertTrue(result.isEmpty());
-        verify(videoMapper, times(1))
-                .selectPublishedVideos(eq("spring"), eq(0), eq(10));
-    }
-
-    @Test
     public void listPublishedVideos_shouldUseDefaultPageWhenParamsInvalid() {
         VideoVO item = new VideoVO();
         item.setId(11L);
@@ -209,12 +187,12 @@ public class VideoServiceImplTest {
     }
 
     @Test
-    public void increaseViewCount_shouldUpdateOnce() {
-        when(videoMapper.update(isNull(), any())).thenReturn(1);
+    public void validateViewableVideo_shouldCheckExists() {
+        when(videoMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(1L);
 
-        videoService.increaseViewCount(300L);
+        videoService.validateViewableVideo(300L);
 
-        verify(videoMapper, times(1)).update(isNull(), any());
+        verify(videoMapper, times(1)).selectCount(any(LambdaQueryWrapper.class));
     }
 
     @Test

@@ -1,18 +1,23 @@
 package com.bilibili.security;
 
-import com.bilibili.config.SecurityConfig;
-import com.bilibili.config.security.AnonymousRuleContributor;
-import com.bilibili.config.security.UserRuleContributor;
+import com.bilibili.authorization.AuthzService;
+import com.bilibili.config.security.SecurityConfig;
 import com.bilibili.controller.CommentController;
 import com.bilibili.controller.FollowingController;
 import com.bilibili.controller.MeCommentController;
 import com.bilibili.controller.MeFollowingController;
+import com.bilibili.controller.MeVideoLikeController;
 import com.bilibili.controller.MeUserController;
+import com.bilibili.controller.SearchController;
 import com.bilibili.controller.UserController;
+import com.bilibili.controller.VideoController;
 import com.bilibili.service.CommentService;
 import com.bilibili.model.vo.UserProfileVO;
 import com.bilibili.service.FollowingService;
+import com.bilibili.service.SearchService;
 import com.bilibili.service.UserService;
+import com.bilibili.service.VideoAppService;
+import com.bilibili.service.VideoService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -55,9 +61,7 @@ public class SecurityConfigIntegrationTest {
             JwtAuthenticationFilter.class,
             JwtTokenService.class,
             RestAuthenticationEntryPoint.class,
-            RestAccessDeniedHandler.class,
-            AnonymousRuleContributor.class,
-            UserRuleContributor.class
+            RestAccessDeniedHandler.class
     })
     static class TestConfig {
 
@@ -74,6 +78,29 @@ public class SecurityConfigIntegrationTest {
         @Bean
         public CommentService commentService() {
             return Mockito.mock(CommentService.class);
+        }
+
+        @Bean
+        public VideoService videoService() {
+            return Mockito.mock(VideoService.class);
+        }
+
+        @Bean
+        public VideoAppService videoAppService() {
+            return Mockito.mock(VideoAppService.class);
+        }
+
+        @Bean
+        public SearchService searchService() {
+            return Mockito.mock(SearchService.class);
+        }
+
+        @Bean(name = "authz")
+        public AuthzService authzService() {
+            AuthzService authz = Mockito.mock(AuthzService.class);
+            when(authz.canDeleteComment(any(), any())).thenReturn(true);
+            when(authz.canAccessUploadTask(any(), any())).thenReturn(true);
+            return authz;
         }
 
         @Bean
@@ -104,6 +131,21 @@ public class SecurityConfigIntegrationTest {
         @Bean
         public MeCommentController meCommentController(CommentService commentService) {
             return new MeCommentController(commentService);
+        }
+
+        @Bean
+        public MeVideoLikeController meVideoLikeController(VideoService videoService) {
+            return new MeVideoLikeController(videoService);
+        }
+
+        @Bean
+        public VideoController videoController(VideoAppService videoAppService) {
+            return new VideoController(videoAppService);
+        }
+
+        @Bean
+        public SearchController searchController(SearchService searchService) {
+            return new SearchController(searchService);
         }
     }
 
@@ -172,6 +214,14 @@ public class SecurityConfigIntegrationTest {
     }
 
     @Test
+    public void unknownPath_withToken_shouldReturn404() throws Exception {
+        String token = jwtTokenService.generateToken(1001L);
+        mockMvc.perform(get("/not/exist/path")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void corsPreflightForLogin_shouldReturn200() throws Exception {
         mockMvc.perform(options("/users/login")
                         .header("Origin", "http://localhost:63342")
@@ -182,9 +232,22 @@ public class SecurityConfigIntegrationTest {
     }
 
     @Test
-    public void videoViewWithoutToken_shouldReturn401() throws Exception {
+    public void videoViewWithoutToken_shouldBeAccessible() throws Exception {
         mockMvc.perform(post("/videos/1/views"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void searchWithoutToken_shouldBeAccessible() throws Exception {
+        mockMvc.perform(get("/search/videos")
+                        .param("keyword", "java"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void searchHistoryWithoutToken_shouldBeAccessible() throws Exception {
+        mockMvc.perform(get("/search/videos/history"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -210,6 +273,40 @@ public class SecurityConfigIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"content\":\"hello\"}"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void meVideoLikeWithoutToken_shouldReturn401() throws Exception {
+        mockMvc.perform(post("/me/videos/1/likes"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void meVideoLikeWithToken_shouldNotReturn401() throws Exception {
+        String token = jwtTokenService.generateToken(1001L);
+
+        MvcResult mvcResult = mockMvc.perform(post("/me/videos/1/likes")
+                        .header("Authorization", "Bearer " + token))
+                .andReturn();
+
+        Assert.assertNotEquals(401, mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    public void userLogoutWithoutToken_shouldReturn401() throws Exception {
+        mockMvc.perform(post("/users/logout"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void userLogoutWithToken_shouldNotReturn401() throws Exception {
+        String token = jwtTokenService.generateToken(1001L);
+
+        MvcResult mvcResult = mockMvc.perform(post("/users/logout")
+                        .header("Authorization", "Bearer " + token))
+                .andReturn();
+
+        Assert.assertNotEquals(401, mvcResult.getResponse().getStatus());
     }
 
     @Test
