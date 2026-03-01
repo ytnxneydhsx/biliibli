@@ -26,7 +26,9 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs",
             "/v3/api-docs/**",
-            "/v3/api-docs.yaml"
+            "/v3/api-docs.yaml",
+            "/doc.html",
+            "/webjars/**"
     };
 
     private static final String[] PUBLIC_PATHS = {
