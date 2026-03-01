@@ -1,0 +1,206 @@
+package com.bilibili.service.impl;
+
+import com.bilibili.config.redis.RedisViewCacheKeys;
+import com.bilibili.config.redis.RedisViewCacheTuning;
+import com.bilibili.mapper.VideoMapper;
+import com.bilibili.model.vo.VideoRankVO;
+import com.bilibili.model.vo.VideoVO;
+import com.bilibili.service.VideoRankService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+@Service
+public class VideoRankServiceImpl implements VideoRankService {
+
+    private static final int DEFAULT_PAGE_NO = 1;
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 50;
+
+    private final StringRedisTemplate stringRedisTemplate;
+    private final VideoMapper videoMapper;
+
+    @Autowired
+    public VideoRankServiceImpl(StringRedisTemplate stringRedisTemplate,
+                                VideoMapper videoMapper) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.videoMapper = videoMapper;
+    }
+
+    @Override
+    public void increaseVideoViewScore(Long videoId, long delta) {
+        if (videoId == null || videoId <= 0 || delta <= 0) {
+            return;
+        }
+        try {
+            String deltaKey = buildDeltaKey(videoId);
+            ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
+            valueOps.increment(deltaKey, delta);
+            stringRedisTemplate.expire(deltaKey, RedisViewCacheTuning.VIDEO_VIEW_DELTA_EXPIRE_SECONDS, TimeUnit.SECONDS);
+            stringRedisTemplate.opsForSet().add(RedisViewCacheKeys.VIDEO_VIEW_DIRTY_KEY, String.valueOf(videoId));
+
+            stringRedisTemplate.opsForZSet()
+                    .incrementScore(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY, String.valueOf(videoId), delta);
+        } catch (Exception ex) {
+            // Redis failure should not break the main request path.
+        }
+    }
+
+    @Override
+    public List<VideoRankVO> listVideoViewRank(Integer pageNo, Integer pageSize) {
+        int normalizedPageNo = normalizePageNo(pageNo);
+        int normalizedPageSize = normalizePageSize(pageSize);
+        long start = (long) (normalizedPageNo - 1) * normalizedPageSize;
+        long end = start + normalizedPageSize - 1;
+
+        try {
+            Set<ZSetOperations.TypedTuple<String>> tuples = fetchByScoreDesc(start, end);
+            if (tuples == null || tuples.isEmpty()) {
+                warmupIfEmpty();
+                tuples = fetchByScoreDesc(start, end);
+            }
+
+            if (tuples == null || tuples.isEmpty()) {
+                return buildFallbackByMySql(normalizedPageNo, normalizedPageSize);
+            }
+            return buildRankResultFromRedis(tuples, start);
+        } catch (Exception ex) {
+            return buildFallbackByMySql(normalizedPageNo, normalizedPageSize);
+        }
+    }
+
+    private Set<ZSetOperations.TypedTuple<String>> fetchByScoreDesc(long start, long end) {
+        return stringRedisTemplate.opsForZSet()
+                .reverseRangeWithScores(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY, start, end);
+    }
+
+    private void warmupIfEmpty() {
+        Long size = stringRedisTemplate.opsForZSet().zCard(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY);
+        if (size != null && size > 0) {
+            return;
+        }
+        List<VideoVO> topVideos = videoMapper.selectPublishedVideosByViewCount(0, RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT);
+        if (topVideos == null || topVideos.isEmpty()) {
+            return;
+        }
+        ZSetOperations<String, String> zSetOps = stringRedisTemplate.opsForZSet();
+        for (VideoVO video : topVideos) {
+            if (video.getId() == null) {
+                continue;
+            }
+            double score = video.getViewCount() == null ? 0D : video.getViewCount().doubleValue();
+            zSetOps.add(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY, String.valueOf(video.getId()), score);
+        }
+    }
+
+    private List<VideoRankVO> buildRankResultFromRedis(Set<ZSetOperations.TypedTuple<String>> tuples, long start) {
+        List<Long> orderedVideoIds = new ArrayList<>();
+        Map<Long, Double> scoreMap = new LinkedHashMap<>();
+        for (ZSetOperations.TypedTuple<String> tuple : tuples) {
+            if (tuple == null || tuple.getValue() == null) {
+                continue;
+            }
+            Long videoId = parseLong(tuple.getValue());
+            if (videoId == null) {
+                continue;
+            }
+            orderedVideoIds.add(videoId);
+            Double score = tuple.getScore();
+            scoreMap.put(videoId, score == null ? 0D : score);
+        }
+        if (orderedVideoIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<VideoVO> videos = videoMapper.selectPublishedVideosByIds(orderedVideoIds);
+        if (videos == null || videos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, VideoVO> videoMap = new LinkedHashMap<>();
+        for (VideoVO video : videos) {
+            if (video.getId() != null) {
+                videoMap.put(video.getId(), video);
+            }
+        }
+
+        List<VideoRankVO> result = new ArrayList<>();
+        int rank = (int) start + 1;
+        for (Long videoId : orderedVideoIds) {
+            VideoVO video = videoMap.get(videoId);
+            if (video == null) {
+                stringRedisTemplate.opsForZSet().remove(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY, String.valueOf(videoId));
+                continue;
+            }
+            result.add(toRankVO(video, scoreMap.get(videoId), rank));
+            rank++;
+        }
+        return result;
+    }
+
+    private List<VideoRankVO> buildFallbackByMySql(int pageNo, int pageSize) {
+        int offset = (pageNo - 1) * pageSize;
+        List<VideoVO> videos = videoMapper.selectPublishedVideosByViewCount(offset, pageSize);
+        if (videos == null || videos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<VideoRankVO> result = new ArrayList<>(videos.size());
+        int rank = offset + 1;
+        for (VideoVO video : videos) {
+            double score = video.getViewCount() == null ? 0D : video.getViewCount().doubleValue();
+            result.add(toRankVO(video, score, rank));
+            rank++;
+        }
+        return result;
+    }
+
+    private VideoRankVO toRankVO(VideoVO video, Double score, Integer rank) {
+        VideoRankVO vo = new VideoRankVO();
+        vo.setRank(rank);
+        vo.setScore(score == null ? 0D : score);
+        vo.setId(video.getId());
+        vo.setAuthorUid(video.getAuthorUid());
+        vo.setTitle(video.getTitle());
+        vo.setCoverUrl(video.getCoverUrl());
+        vo.setViewCount(video.getViewCount());
+        vo.setDuration(video.getDuration());
+        vo.setCreateTime(video.getCreateTime());
+        vo.setNickname(video.getNickname());
+        return vo;
+    }
+
+    private static Long parseLong(String rawValue) {
+        try {
+            return Long.valueOf(rawValue);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private static int normalizePageNo(Integer pageNo) {
+        if (pageNo == null || pageNo <= 0) {
+            return DEFAULT_PAGE_NO;
+        }
+        return pageNo;
+    }
+
+    private static int normalizePageSize(Integer pageSize) {
+        if (pageSize == null || pageSize <= 0) {
+            return DEFAULT_PAGE_SIZE;
+        }
+        return Math.min(pageSize, MAX_PAGE_SIZE);
+    }
+
+    private static String buildDeltaKey(Long videoId) {
+        return RedisViewCacheKeys.buildVideoViewDeltaKey(videoId);
+    }
+}
