@@ -1,0 +1,62 @@
+package com.bilibili.controller;
+
+import com.bilibili.common.result.Result;
+import com.bilibili.model.dto.UserLoginDTO;
+import com.bilibili.model.dto.UserRegisterDTO;
+import com.bilibili.model.vo.UserLoginVO;
+import com.bilibili.model.vo.UserProfileVO;
+import com.bilibili.security.JwtTokenService;
+import com.bilibili.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/users")
+@Tag(name = "User", description = "User authentication and profile APIs")
+public class UserController {
+
+    private final UserService userService;
+    private final JwtTokenService jwtTokenService;
+
+    @Autowired
+    public UserController(UserService userService, JwtTokenService jwtTokenService) {
+        this.userService = userService;
+        this.jwtTokenService = jwtTokenService;
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "User login")
+    public Result<UserLoginVO> login(@RequestBody UserLoginDTO dto) {
+        UserLoginVO loginVO = userService.login(dto);
+        String token = jwtTokenService.generateToken(loginVO.getUid());
+        loginVO.setToken(token);
+        return Result.success(loginVO);
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "User logout")
+    public Result<Void> logout() {
+        return Result.success(null);
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "User register")
+    public Result<Long> register(@RequestBody UserRegisterDTO dto) {
+        return Result.success(userService.register(dto));
+    }
+
+    @GetMapping("/{uid}")
+    @Operation(summary = "Get user public profile")
+    public Result<UserProfileVO> getPublicProfile(@PathVariable("uid") Long uid) {
+        return Result.success(userService.getPublicProfile(uid));
+    }
+}
