@@ -1,0 +1,14 @@
+spring:
+  sql:
+    init:
+      mode: always
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+app:
+  docs:
+    public: true

@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: bilibili_SpringBoot
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://mysql:3306/bilibili?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
+  sql:
+    init:
+      mode: never
+      schema-locations: classpath:bilibili.sql
+      encoding: UTF-8
+
+server:
+  forward-headers-strategy: framework
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+
+jwt:
+  secret: ${JWT_SECRET:change-this-secret-at-least-32-bytes-long}
+  expireSeconds: 604800
+
+cors:
+  allowedOrigins: http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080
+
+storage:
+  rootDir: ${STORAGE_ROOT_DIR:F:/bilibili-data}
+  publicBaseUrl: ${STORAGE_PUBLIC_BASE_URL:http://localhost:9000/media}
+  avatarSubDir: avatar
+  coverSubDir: cover
+  videoSubDir: video
+  avatar:
+    maxSize: 2097152
+  cover:
+    maxSize: 5242880
+  video:
+    maxSize: 2147483648
+  allowedImageTypes: image/jpeg,image/png,image/webp
+  allowedVideoTypes: video/mp4
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  docs:
+    public: false
