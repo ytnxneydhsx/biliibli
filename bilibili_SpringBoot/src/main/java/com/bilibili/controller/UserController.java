@@ -41,12 +41,7 @@ public class UserController {
         return Result.success(loginVO);
     }
 
-    @PostMapping("/logout")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "User logout")
-    public Result<Void> logout() {
-        return Result.success(null);
-    }
+
 
     @PostMapping("/register")
     @Operation(summary = "User register")
