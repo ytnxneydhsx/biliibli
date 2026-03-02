@@ -3,6 +3,8 @@ package com.bilibili.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.DanmakuMapper;
 import com.bilibili.mapper.FollowingMapper;
@@ -68,27 +70,27 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<VideoVO> listHomepageVideos(String title, Integer pageNo, Integer pageSize) {
+    public IPage<VideoVO> listHomepageVideos(String title, Integer pageNo, Integer pageSize) {
         int normalizedPageNo = normalizePageNo(pageNo);
         int normalizedPageSize = normalizePageSize(pageSize);
-        int offset = (normalizedPageNo - 1) * normalizedPageSize;
         String normalizedTitle = normalizeOptional(title);
 
-        return videoMapper.selectPublishedVideos(normalizedTitle, offset, normalizedPageSize);
+        Page<VideoVO> page = new Page<>(normalizedPageNo, normalizedPageSize);
+        return videoMapper.selectPublishedVideos(page, normalizedTitle);
     }
 
     @Override
-    public List<VideoVO> listPublishedVideos(Long uid, String title, Integer pageNo, Integer pageSize) {
+    public IPage<VideoVO> listPublishedVideos(Long uid, String title, Integer pageNo, Integer pageSize) {
         if (uid == null || uid <= 0) {
             throw new IllegalArgumentException("uid is invalid");
         }
 
         int normalizedPageNo = normalizePageNo(pageNo);
         int normalizedPageSize = normalizePageSize(pageSize);
-        int offset = (normalizedPageNo - 1) * normalizedPageSize;
         String normalizedTitle = normalizeOptional(title);
 
-        return videoMapper.selectMyPublishedVideos(uid, normalizedTitle, offset, normalizedPageSize);
+        Page<VideoVO> page = new Page<>(normalizedPageNo, normalizedPageSize);
+        return videoMapper.selectMyPublishedVideos(page, uid, normalizedTitle);
     }
 
     @Override

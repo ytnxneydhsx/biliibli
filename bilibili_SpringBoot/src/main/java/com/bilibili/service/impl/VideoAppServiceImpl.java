@@ -1,5 +1,6 @@
 package com.bilibili.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.bilibili.model.vo.VideoDetailVO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
@@ -8,8 +9,6 @@ import com.bilibili.service.VideoRankService;
 import com.bilibili.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class VideoAppServiceImpl implements VideoAppService {
@@ -25,7 +24,7 @@ public class VideoAppServiceImpl implements VideoAppService {
     }
 
     @Override
-    public List<VideoVO> listVideos(Integer pageNo, Integer pageSize) {
+    public IPage<VideoVO> listVideos(Integer pageNo, Integer pageSize) {
         return videoService.listHomepageVideos(null, pageNo, pageSize);
     }
 
@@ -35,7 +34,7 @@ public class VideoAppServiceImpl implements VideoAppService {
     }
 
     @Override
-    public List<VideoRankVO> listVideoRank(Integer pageNo, Integer pageSize) {
+    public IPage<VideoRankVO> listVideoRank(Integer pageNo, Integer pageSize) {
         return videoRankService.listVideoViewRank(pageNo, pageSize);
     }
 

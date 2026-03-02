@@ -1,8 +1,12 @@
 package com.bilibili.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.config.redis.RedisViewCacheKeys;
 import com.bilibili.config.redis.RedisViewCacheTuning;
 import com.bilibili.mapper.VideoMapper;
+import com.bilibili.model.entity.VideoDO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.VideoRankService;
@@ -57,11 +61,12 @@ public class VideoRankServiceImpl implements VideoRankService {
     }
 
     @Override
-    public List<VideoRankVO> listVideoViewRank(Integer pageNo, Integer pageSize) {
+    public IPage<VideoRankVO> listVideoViewRank(Integer pageNo, Integer pageSize) {
         int normalizedPageNo = normalizePageNo(pageNo);
         int normalizedPageSize = normalizePageSize(pageSize);
         long start = (long) (normalizedPageNo - 1) * normalizedPageSize;
         long end = start + normalizedPageSize - 1;
+        long total = queryRankTotal();
 
         try {
             Set<ZSetOperations.TypedTuple<String>> tuples = fetchByScoreDesc(start, end);
@@ -73,7 +78,8 @@ public class VideoRankServiceImpl implements VideoRankService {
             if (tuples == null || tuples.isEmpty()) {
                 return buildFallbackByMySql(normalizedPageNo, normalizedPageSize);
             }
-            return buildRankResultFromRedis(tuples, start);
+            List<VideoRankVO> records = buildRankResultFromRedis(tuples, start);
+            return toPage(records, normalizedPageNo, normalizedPageSize, total);
         } catch (Exception ex) {
             return buildFallbackByMySql(normalizedPageNo, normalizedPageSize);
         }
@@ -89,7 +95,9 @@ public class VideoRankServiceImpl implements VideoRankService {
         if (size != null && size > 0) {
             return;
         }
-        List<VideoVO> topVideos = videoMapper.selectPublishedVideosByViewCount(0, RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT);
+        Page<VideoVO> warmupPage = new Page<>(1, RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT);
+        IPage<VideoVO> topVideoPage = videoMapper.selectPublishedVideosByViewCount(warmupPage);
+        List<VideoVO> topVideos = topVideoPage == null ? Collections.emptyList() : topVideoPage.getRecords();
         if (topVideos == null || topVideos.isEmpty()) {
             return;
         }
@@ -147,11 +155,13 @@ public class VideoRankServiceImpl implements VideoRankService {
         return result;
     }
 
-    private List<VideoRankVO> buildFallbackByMySql(int pageNo, int pageSize) {
+    private IPage<VideoRankVO> buildFallbackByMySql(int pageNo, int pageSize) {
         int offset = (pageNo - 1) * pageSize;
-        List<VideoVO> videos = videoMapper.selectPublishedVideosByViewCount(offset, pageSize);
+        Page<VideoVO> page = new Page<>(pageNo, pageSize);
+        IPage<VideoVO> videoPage = videoMapper.selectPublishedVideosByViewCount(page);
+        List<VideoVO> videos = videoPage == null ? Collections.emptyList() : videoPage.getRecords();
         if (videos == null || videos.isEmpty()) {
-            return Collections.emptyList();
+            return toPage(Collections.emptyList(), pageNo, pageSize, videoPage == null ? 0L : videoPage.getTotal());
         }
         List<VideoRankVO> result = new ArrayList<>(videos.size());
         int rank = offset + 1;
@@ -160,7 +170,7 @@ public class VideoRankServiceImpl implements VideoRankService {
             result.add(toRankVO(video, score, rank));
             rank++;
         }
-        return result;
+        return toPage(result, pageNo, pageSize, videoPage == null ? 0L : videoPage.getTotal());
     }
 
     private VideoRankVO toRankVO(VideoVO video, Double score, Integer rank) {
@@ -202,5 +212,22 @@ public class VideoRankServiceImpl implements VideoRankService {
 
     private static String buildDeltaKey(Long videoId) {
         return RedisViewCacheKeys.buildVideoViewDeltaKey(videoId);
+    }
+
+    private long queryRankTotal() {
+        Long redisTotal = stringRedisTemplate.opsForZSet().zCard(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY);
+        if (redisTotal != null && redisTotal > 0) {
+            return redisTotal;
+        }
+        LambdaQueryWrapper<VideoDO> query = new LambdaQueryWrapper<>();
+        query.eq(VideoDO::getStatus, 0);
+        Long mysqlTotal = videoMapper.selectCount(query);
+        return mysqlTotal == null ? 0L : mysqlTotal;
+    }
+
+    private IPage<VideoRankVO> toPage(List<VideoRankVO> records, int pageNo, int pageSize, long total) {
+        Page<VideoRankVO> page = new Page<>(pageNo, pageSize, total);
+        page.setRecords(records == null ? Collections.emptyList() : records);
+        return page;
     }
 }
