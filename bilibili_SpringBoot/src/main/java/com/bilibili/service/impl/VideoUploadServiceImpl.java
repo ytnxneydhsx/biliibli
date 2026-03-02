@@ -3,6 +3,8 @@ package com.bilibili.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.bilibili.common.exception.ForbiddenException;
+import com.bilibili.common.enums.RecordStatus;
+import com.bilibili.common.enums.UploadTaskStatus;
 import com.bilibili.config.properties.StorageProperties;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.mapper.VideoUploadTaskMapper;
@@ -41,12 +43,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class VideoUploadServiceImpl implements VideoUploadService {
-
-    private static final int STATUS_UPLOADING = 0;
-    private static final int STATUS_MERGING = 1;
-    private static final int STATUS_DONE = 2;
-    private static final int STATUS_EXPIRED = 3;
-    private static final int STATUS_FAILED = 4;
 
     private final VideoUploadTaskMapper videoUploadTaskMapper;
     private final VideoMapper videoMapper;
@@ -100,7 +96,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         task.setFileSize(totalSize);
         task.setChunkSize(chunkSize);
         task.setTotalChunks(totalChunks);
-        task.setStatus(STATUS_UPLOADING);
+        task.setStatus(UploadTaskStatus.UPLOADING.code());
         task.setTempDir(tempRelativeDir);
         task.setExpireTime(expireTime);
 
@@ -183,7 +179,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         vo.setTotalChunks(task.getTotalChunks());
         vo.setUploadedChunks(uploadedChunks);
         vo.setUploadedChunkCount(uploadedChunks.size());
-        vo.setCompleted(task.getStatus() != null && task.getStatus() == STATUS_DONE);
+        vo.setCompleted(UploadTaskStatus.DONE.matches(task.getStatus()));
         vo.setExpireTime(task.getExpireTime() == null ? null : task.getExpireTime().toString());
         return vo;
     }
@@ -199,7 +195,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         }
 
         VideoUploadTaskDO task = getOwnedTask(uid, uploadId);
-        if (task.getStatus() != null && task.getStatus() == STATUS_DONE) {
+        if (UploadTaskStatus.DONE.matches(task.getStatus())) {
             return buildCompleteVO(task);
         }
         ensureTaskUploadable(task);
@@ -217,12 +213,12 @@ public class VideoUploadServiceImpl implements VideoUploadService {
 
         LambdaUpdateWrapper<VideoUploadTaskDO> markMerging = new LambdaUpdateWrapper<>();
         markMerging.eq(VideoUploadTaskDO::getUploadId, task.getUploadId())
-                .eq(VideoUploadTaskDO::getStatus, STATUS_UPLOADING)
-                .set(VideoUploadTaskDO::getStatus, STATUS_MERGING);
+                .eq(VideoUploadTaskDO::getStatus, UploadTaskStatus.UPLOADING.code())
+                .set(VideoUploadTaskDO::getStatus, UploadTaskStatus.MERGING.code());
         int updateRows = videoUploadTaskMapper.update(null, markMerging);
         if (updateRows != 1) {
             VideoUploadTaskDO latest = getOwnedTask(uid, uploadId);
-            if (latest.getStatus() != null && latest.getStatus() == STATUS_DONE) {
+            if (UploadTaskStatus.DONE.matches(latest.getStatus())) {
                 return buildCompleteVO(latest);
             }
             throw new IllegalArgumentException("upload task is not in uploading status");
@@ -246,7 +242,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
             video.setViewCount(0L);
             video.setLikeCount(0L);
             video.setCommentCount(0L);
-            video.setStatus(0);
+            video.setStatus(RecordStatus.NORMAL.code());
             int insertVideoRows = videoMapper.insert(video);
             if (insertVideoRows != 1 || video.getId() == null) {
                 throw new RuntimeException("insert video failed");
@@ -254,8 +250,8 @@ public class VideoUploadServiceImpl implements VideoUploadService {
 
             LambdaUpdateWrapper<VideoUploadTaskDO> markDone = new LambdaUpdateWrapper<>();
             markDone.eq(VideoUploadTaskDO::getUploadId, task.getUploadId())
-                    .eq(VideoUploadTaskDO::getStatus, STATUS_MERGING)
-                    .set(VideoUploadTaskDO::getStatus, STATUS_DONE)
+                    .eq(VideoUploadTaskDO::getStatus, UploadTaskStatus.MERGING.code())
+                    .set(VideoUploadTaskDO::getStatus, UploadTaskStatus.DONE.code())
                     .set(VideoUploadTaskDO::getFinalVideoId, video.getId())
                     .set(VideoUploadTaskDO::getFinalVideoUrl, videoUrl)
                     .set(VideoUploadTaskDO::getErrorMsg, null);
@@ -298,11 +294,11 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         }
         if (task.getExpireTime() != null
                 && LocalDateTime.now().isAfter(task.getExpireTime())
-                && (task.getStatus() == null || task.getStatus() == STATUS_UPLOADING)) {
+                && (task.getStatus() == null || UploadTaskStatus.UPLOADING.matches(task.getStatus()))) {
             LambdaUpdateWrapper<VideoUploadTaskDO> markExpired = new LambdaUpdateWrapper<>();
             markExpired.eq(VideoUploadTaskDO::getUploadId, normalizedUploadId)
-                    .eq(VideoUploadTaskDO::getStatus, STATUS_UPLOADING)
-                    .set(VideoUploadTaskDO::getStatus, STATUS_EXPIRED);
+                    .eq(VideoUploadTaskDO::getStatus, UploadTaskStatus.UPLOADING.code())
+                    .set(VideoUploadTaskDO::getStatus, UploadTaskStatus.EXPIRED.code());
             videoUploadTaskMapper.update(null, markExpired);
             throw new IllegalArgumentException("upload task is expired");
         }
@@ -311,7 +307,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
 
     private void ensureTaskUploadable(VideoUploadTaskDO task) {
         Integer status = task.getStatus();
-        if (status == null || status != STATUS_UPLOADING) {
+        if (status == null || !UploadTaskStatus.UPLOADING.matches(status)) {
             throw new IllegalArgumentException("upload task is not uploadable");
         }
     }
@@ -409,8 +405,8 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         }
         LambdaUpdateWrapper<VideoUploadTaskDO> markFailed = new LambdaUpdateWrapper<>();
         markFailed.eq(VideoUploadTaskDO::getUploadId, uploadId)
-                .eq(VideoUploadTaskDO::getStatus, STATUS_MERGING)
-                .set(VideoUploadTaskDO::getStatus, STATUS_FAILED)
+                .eq(VideoUploadTaskDO::getStatus, UploadTaskStatus.MERGING.code())
+                .set(VideoUploadTaskDO::getStatus, UploadTaskStatus.FAILED.code())
                 .set(VideoUploadTaskDO::getErrorMsg, errorMessage);
         videoUploadTaskMapper.update(null, markFailed);
     }

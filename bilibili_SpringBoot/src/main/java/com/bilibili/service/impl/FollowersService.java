@@ -2,6 +2,8 @@ package com.bilibili.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.bilibili.common.enums.RecordStatus;
+import com.bilibili.common.enums.UserStatus;
 import com.bilibili.mapper.FollowingMapper;
 import com.bilibili.mapper.UserInfoMapper;
 import com.bilibili.mapper.UserMapper;
@@ -47,7 +49,7 @@ public class FollowersService implements FollowingService {
 
         LambdaQueryWrapper<FollowingDO> followingQuery = new LambdaQueryWrapper<>();
         followingQuery.eq(FollowingDO::getFollowingUserId, uid)
-                .eq(FollowingDO::getStatus, 0)
+                .eq(FollowingDO::getStatus, RecordStatus.NORMAL.code())
                 .orderByDesc(FollowingDO::getUpdateTime);
 
         List<FollowingDO> followerRelations = followingMapper.selectList(followingQuery);
@@ -66,7 +68,7 @@ public class FollowersService implements FollowingService {
 
         LambdaQueryWrapper<FollowingDO> followingQuery = new LambdaQueryWrapper<>();
         followingQuery.eq(FollowingDO::getUserId, uid)
-                .eq(FollowingDO::getStatus, 0)
+                .eq(FollowingDO::getStatus, RecordStatus.NORMAL.code())
                 .orderByDesc(FollowingDO::getUpdateTime);
 
         List<FollowingDO> followingRelations = followingMapper.selectList(followingQuery);
@@ -85,7 +87,7 @@ public class FollowersService implements FollowingService {
 
         LambdaQueryWrapper<FollowingDO> myFollowingQuery = new LambdaQueryWrapper<>();
         myFollowingQuery.eq(FollowingDO::getUserId, uid)
-                .eq(FollowingDO::getStatus, 0)
+                .eq(FollowingDO::getStatus, RecordStatus.NORMAL.code())
                 .orderByDesc(FollowingDO::getUpdateTime);
         List<FollowingDO> myFollowingRelations = followingMapper.selectList(myFollowingQuery);
         if (myFollowingRelations == null || myFollowingRelations.isEmpty()) {
@@ -100,7 +102,7 @@ public class FollowersService implements FollowingService {
         LambdaQueryWrapper<FollowingDO> reverseQuery = new LambdaQueryWrapper<>();
         reverseQuery.in(FollowingDO::getUserId, myFollowingUserIds)
                 .eq(FollowingDO::getFollowingUserId, uid)
-                .eq(FollowingDO::getStatus, 0);
+                .eq(FollowingDO::getStatus, RecordStatus.NORMAL.code());
         List<FollowingDO> reverseRelations = followingMapper.selectList(reverseQuery);
         if (reverseRelations == null || reverseRelations.isEmpty()) {
             return Collections.emptyList();
@@ -142,7 +144,7 @@ public class FollowersService implements FollowingService {
             FollowingDO newRelation = new FollowingDO();
             newRelation.setUserId(uid);
             newRelation.setFollowingUserId(targetUid);
-            newRelation.setStatus(0);
+            newRelation.setStatus(RecordStatus.NORMAL.code());
             int insertRows = followingMapper.insert(newRelation);
             if (insertRows != 1) {
                 throw new RuntimeException("insert follow relation failed");
@@ -151,11 +153,11 @@ public class FollowersService implements FollowingService {
             return;
         }
 
-        if (relation.getStatus() != null && relation.getStatus() == 0) {
+        if (RecordStatus.NORMAL.matches(relation.getStatus())) {
             return;
         }
 
-        relation.setStatus(0);
+        relation.setStatus(RecordStatus.NORMAL.code());
         int updateRows = followingMapper.updateById(relation);
         if (updateRows != 1) {
             throw new RuntimeException("update follow relation failed");
@@ -179,8 +181,8 @@ public class FollowersService implements FollowingService {
         LambdaUpdateWrapper<FollowingDO> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(FollowingDO::getUserId, uid)
                 .eq(FollowingDO::getFollowingUserId, targetUid)
-                .eq(FollowingDO::getStatus, 0)
-                .set(FollowingDO::getStatus, 1);
+                .eq(FollowingDO::getStatus, RecordStatus.NORMAL.code())
+                .set(FollowingDO::getStatus, RecordStatus.DELETED.code());
         int updateRows = followingMapper.update(null, updateWrapper);
 
         // idempotent: already unfollowed / relation not found
@@ -197,7 +199,7 @@ public class FollowersService implements FollowingService {
     private void ensureUserExists(Long uid) {
         LambdaQueryWrapper<UserDO> query = new LambdaQueryWrapper<>();
         query.eq(UserDO::getId, uid)
-                .eq(UserDO::getStatus, 0);
+                .eq(UserDO::getStatus, UserStatus.NORMAL.code());
         Long count = userMapper.selectCount(query);
         if (count == null || count <= 0) {
             throw new IllegalArgumentException("user not found");

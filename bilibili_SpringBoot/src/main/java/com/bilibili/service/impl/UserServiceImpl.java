@@ -2,6 +2,7 @@ package com.bilibili.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.bilibili.common.enums.UserStatus;
 import com.bilibili.mapper.UserInfoMapper;
 import com.bilibili.mapper.UserMapper;
 import com.bilibili.model.dto.UserLoginDTO;
@@ -67,7 +68,7 @@ public class UserServiceImpl implements UserService {
         UserDO user = new UserDO();
         user.setUsername(username);
         user.setPassword(encryptPassword(dto.getPassword()));
-        user.setStatus(0);
+        user.setStatus(UserStatus.NORMAL.code());
         int userRows = userMapper.insert(user);
         if (userRows != 1 || user.getId() == null) {
             throw new RuntimeException("insert t_user failed");

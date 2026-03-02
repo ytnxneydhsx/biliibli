@@ -3,6 +3,7 @@ package com.bilibili.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.config.redis.RedisViewCacheKeys;
 import com.bilibili.config.redis.RedisViewCacheTuning;
 import com.bilibili.mapper.VideoMapper;
@@ -204,7 +205,7 @@ public class VideoRankServiceImpl implements VideoRankService {
             return redisTotal;
         }
         LambdaQueryWrapper<VideoDO> query = new LambdaQueryWrapper<>();
-        query.eq(VideoDO::getStatus, 0);
+        query.eq(VideoDO::getStatus, RecordStatus.NORMAL.code());
         Long mysqlTotal = videoMapper.selectCount(query);
         return mysqlTotal == null ? 0L : mysqlTotal;
     }

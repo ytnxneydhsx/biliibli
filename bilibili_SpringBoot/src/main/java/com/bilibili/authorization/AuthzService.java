@@ -2,6 +2,7 @@ package com.bilibili.authorization;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.VideoUploadTaskMapper;
 import com.bilibili.model.entity.CommentDO;
@@ -13,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 @Service("authz")
 public class AuthzService {
-
-    private static final int STATUS_NORMAL = 0;
 
     private final CommentMapper commentMapper;
     private final VideoUploadTaskMapper videoUploadTaskMapper;
@@ -33,7 +32,7 @@ public class AuthzService {
         CommentDO comment = commentMapper.selectById(commentId);
         return comment != null
                 && comment.getStatus() != null
-                && comment.getStatus() == STATUS_NORMAL
+                && RecordStatus.NORMAL.matches(comment.getStatus())
                 && currentUid.equals(comment.getUserId());
     }
 

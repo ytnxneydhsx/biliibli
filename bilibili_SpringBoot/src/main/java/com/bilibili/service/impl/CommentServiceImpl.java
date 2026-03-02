@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.bilibili.common.exception.ForbiddenException;
+import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.mapper.CommentLikeMapper;
 import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.UserInfoMapper;
@@ -36,8 +37,6 @@ import java.util.stream.Collectors;
 @Service
 public class CommentServiceImpl implements CommentService {
 
-    private static final int STATUS_NORMAL = 0;
-    private static final int STATUS_DELETED = 1;
     private static final int MAX_CONTENT_LENGTH = 1000;
 
     private final CommentMapper commentMapper;
@@ -83,7 +82,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (parentId > 0) {
             CommentDO parent = commentMapper.selectById(parentId);
-            if (parent == null || !Objects.equals(parent.getStatus(), STATUS_NORMAL)) {
+            if (parent == null || !RecordStatus.NORMAL.matches(parent.getStatus())) {
                 throw new IllegalArgumentException("parent comment not found");
             }
             if (!Objects.equals(parent.getVideoId(), videoId)) {
@@ -103,7 +102,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setRootId(rootId);
         comment.setLikeCount(0L);
         comment.setReplyCount(0);
-        comment.setStatus(STATUS_NORMAL);
+        comment.setStatus(RecordStatus.NORMAL.code());
         int insertRows = commentMapper.insert(comment);
         if (insertRows != 1 || comment.getId() == null) {
             throw new RuntimeException("create comment failed");
@@ -130,7 +129,7 @@ public class CommentServiceImpl implements CommentService {
 
         LambdaQueryWrapper<CommentDO> rootQuery = new LambdaQueryWrapper<>();
         rootQuery.eq(CommentDO::getVideoId, videoId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL)
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
                 .eq(CommentDO::getParentId, 0L)
                 .orderByDesc(CommentDO::getCreateTime)
                 .orderByDesc(CommentDO::getId)
@@ -144,7 +143,7 @@ public class CommentServiceImpl implements CommentService {
 
         LambdaQueryWrapper<CommentDO> replyQuery = new LambdaQueryWrapper<>();
         replyQuery.eq(CommentDO::getVideoId, videoId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL)
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
                 .in(CommentDO::getRootId, rootIds)
                 .ne(CommentDO::getParentId, 0L)
                 .orderByAsc(CommentDO::getCreateTime)
@@ -190,7 +189,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         CommentDO comment = commentMapper.selectById(commentId);
-        if (comment == null || !Objects.equals(comment.getStatus(), STATUS_NORMAL)) {
+        if (comment == null || !RecordStatus.NORMAL.matches(comment.getStatus())) {
             throw new IllegalArgumentException("comment not found");
         }
         if (!Objects.equals(comment.getUserId(), uid)) {
@@ -199,8 +198,8 @@ public class CommentServiceImpl implements CommentService {
 
         LambdaUpdateWrapper<CommentDO> markDeleted = new LambdaUpdateWrapper<>();
         markDeleted.eq(CommentDO::getId, commentId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL)
-                .set(CommentDO::getStatus, STATUS_DELETED);
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
+                .set(CommentDO::getStatus, RecordStatus.DELETED.code());
         int deletedRows = commentMapper.update(null, markDeleted);
         if (deletedRows != 1) {
             return;
@@ -212,8 +211,8 @@ public class CommentServiceImpl implements CommentService {
         } else {
             LambdaUpdateWrapper<CommentDO> markRepliesDeleted = new LambdaUpdateWrapper<>();
             markRepliesDeleted.eq(CommentDO::getRootId, commentId)
-                    .eq(CommentDO::getStatus, STATUS_NORMAL)
-                    .set(CommentDO::getStatus, STATUS_DELETED);
+                    .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
+                    .set(CommentDO::getStatus, RecordStatus.DELETED.code());
             int replyDeletedRows = commentMapper.update(null, markRepliesDeleted);
             if (replyDeletedRows > 0) {
                 totalDeletedCount += replyDeletedRows;
@@ -244,7 +243,7 @@ public class CommentServiceImpl implements CommentService {
             CommentLikeDO newRelation = new CommentLikeDO();
             newRelation.setCommentId(commentId);
             newRelation.setUserId(uid);
-            newRelation.setStatus(STATUS_NORMAL);
+            newRelation.setStatus(RecordStatus.NORMAL.code());
             int insertRows = commentLikeMapper.insert(newRelation);
             if (insertRows != 1) {
                 throw new RuntimeException("insert comment like relation failed");
@@ -253,14 +252,14 @@ public class CommentServiceImpl implements CommentService {
             return;
         }
 
-        if (Objects.equals(relation.getStatus(), STATUS_NORMAL)) {
+        if (RecordStatus.NORMAL.matches(relation.getStatus())) {
             return;
         }
 
         UpdateWrapper<CommentLikeDO> reactivate = new UpdateWrapper<>();
         reactivate.eq("id", relation.getId())
-                .eq("status", STATUS_DELETED)
-                .set("status", STATUS_NORMAL);
+                .eq("status", RecordStatus.DELETED.code())
+                .set("status", RecordStatus.NORMAL.code());
         int reactivateRows = commentLikeMapper.update(null, reactivate);
         if (reactivateRows != 1) {
             return;
@@ -283,8 +282,8 @@ public class CommentServiceImpl implements CommentService {
         UpdateWrapper<CommentLikeDO> cancel = new UpdateWrapper<>();
         cancel.eq("comment_id", commentId)
                 .eq("user_id", uid)
-                .eq("status", STATUS_NORMAL)
-                .set("status", STATUS_DELETED);
+                .eq("status", RecordStatus.NORMAL.code())
+                .set("status", RecordStatus.DELETED.code());
         int updateRows = commentLikeMapper.update(null, cancel);
         if (updateRows == 0) {
             return;
@@ -299,7 +298,7 @@ public class CommentServiceImpl implements CommentService {
     private void ensureVideoExists(Long videoId) {
         LambdaQueryWrapper<VideoDO> query = new LambdaQueryWrapper<>();
         query.eq(VideoDO::getId, videoId)
-                .eq(VideoDO::getStatus, STATUS_NORMAL);
+                .eq(VideoDO::getStatus, RecordStatus.NORMAL.code());
         Long count = videoMapper.selectCount(query);
         if (count == null || count <= 0) {
             throw new IllegalArgumentException("video not found");
@@ -309,7 +308,7 @@ public class CommentServiceImpl implements CommentService {
     private void ensureCommentExists(Long commentId) {
         LambdaQueryWrapper<CommentDO> query = new LambdaQueryWrapper<>();
         query.eq(CommentDO::getId, commentId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL);
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code());
         Long count = commentMapper.selectCount(query);
         if (count == null || count <= 0) {
             throw new IllegalArgumentException("comment not found");
@@ -322,7 +321,7 @@ public class CommentServiceImpl implements CommentService {
         }
         LambdaUpdateWrapper<VideoDO> update = new LambdaUpdateWrapper<>();
         update.eq(VideoDO::getId, videoId)
-                .eq(VideoDO::getStatus, STATUS_NORMAL);
+                .eq(VideoDO::getStatus, RecordStatus.NORMAL.code());
         if (delta > 0) {
             update.setSql("comment_count = comment_count + " + delta);
         } else {
@@ -340,7 +339,7 @@ public class CommentServiceImpl implements CommentService {
         }
         LambdaUpdateWrapper<CommentDO> update = new LambdaUpdateWrapper<>();
         update.eq(CommentDO::getId, parentId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL);
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code());
         if (delta > 0) {
             update.setSql("reply_count = reply_count + " + delta);
         } else {
@@ -352,7 +351,7 @@ public class CommentServiceImpl implements CommentService {
     private void increaseCommentLikeCount(Long commentId) {
         LambdaUpdateWrapper<CommentDO> update = new LambdaUpdateWrapper<>();
         update.eq(CommentDO::getId, commentId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL)
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
                 .setSql("like_count = like_count + 1");
         int rows = commentMapper.update(null, update);
         if (rows != 1) {
@@ -363,7 +362,7 @@ public class CommentServiceImpl implements CommentService {
     private void decreaseCommentLikeCount(Long commentId) {
         LambdaUpdateWrapper<CommentDO> update = new LambdaUpdateWrapper<>();
         update.eq(CommentDO::getId, commentId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL)
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
                 .setSql("like_count = GREATEST(like_count - 1, 0)");
         int rows = commentMapper.update(null, update);
         if (rows != 1) {
@@ -412,7 +411,7 @@ public class CommentServiceImpl implements CommentService {
 
         LambdaQueryWrapper<CommentLikeDO> query = new LambdaQueryWrapper<>();
         query.eq(CommentLikeDO::getUserId, currentUid)
-                .eq(CommentLikeDO::getStatus, STATUS_NORMAL)
+                .eq(CommentLikeDO::getStatus, RecordStatus.NORMAL.code())
                 .in(CommentLikeDO::getCommentId, commentIds);
         List<CommentLikeDO> likes = commentLikeMapper.selectList(query);
         if (likes == null || likes.isEmpty()) {

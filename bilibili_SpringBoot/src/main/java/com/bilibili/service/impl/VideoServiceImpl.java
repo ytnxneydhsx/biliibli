@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.DanmakuMapper;
 import com.bilibili.mapper.FollowingMapper;
@@ -36,8 +37,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class VideoServiceImpl implements VideoService {
-
-    private static final int STATUS_NORMAL = 0;
 
     private final VideoMapper videoMapper;
     private final UserInfoMapper userInfoMapper;
@@ -100,7 +99,7 @@ public class VideoServiceImpl implements VideoService {
         }
 
         VideoDO video = videoMapper.selectById(videoId);
-        if (video == null || !Objects.equals(video.getStatus(), STATUS_NORMAL)) {
+        if (video == null || !RecordStatus.NORMAL.matches(video.getStatus())) {
             throw new IllegalArgumentException("video not found");
         }
 
@@ -156,7 +155,7 @@ public class VideoServiceImpl implements VideoService {
             VideoLikeDO newRelation = new VideoLikeDO();
             newRelation.setVideoId(videoId);
             newRelation.setUserId(uid);
-            newRelation.setStatus(STATUS_NORMAL);
+            newRelation.setStatus(RecordStatus.NORMAL.code());
             int insertRows = videoLikeMapper.insert(newRelation);
             if (insertRows != 1) {
                 throw new RuntimeException("insert like relation failed");
@@ -165,14 +164,14 @@ public class VideoServiceImpl implements VideoService {
             return;
         }
 
-        if (Objects.equals(relation.getStatus(), STATUS_NORMAL)) {
+        if (RecordStatus.NORMAL.matches(relation.getStatus())) {
             return;
         }
 
         UpdateWrapper<VideoLikeDO> reactivate = new UpdateWrapper<>();
         reactivate.eq("id", relation.getId())
-                .eq("status", 1)
-                .set("status", STATUS_NORMAL);
+                .eq("status", RecordStatus.DELETED.code())
+                .set("status", RecordStatus.NORMAL.code());
         int reactivateRows = videoLikeMapper.update(null, reactivate);
         if (reactivateRows != 1) {
             return;
@@ -193,8 +192,8 @@ public class VideoServiceImpl implements VideoService {
         UpdateWrapper<VideoLikeDO> cancel = new UpdateWrapper<>();
         cancel.eq("video_id", videoId)
                 .eq("user_id", uid)
-                .eq("status", STATUS_NORMAL)
-                .set("status", 1);
+                .eq("status", RecordStatus.NORMAL.code())
+                .set("status", RecordStatus.DELETED.code());
         int rows = videoLikeMapper.update(null, cancel);
 
         if (rows == 0) {
@@ -227,7 +226,7 @@ public class VideoServiceImpl implements VideoService {
     private List<String> queryTagNames(Long videoId) {
         LambdaQueryWrapper<VideoTagDO> videoTagQuery = new LambdaQueryWrapper<>();
         videoTagQuery.eq(VideoTagDO::getVideoId, videoId)
-                .eq(VideoTagDO::getStatus, STATUS_NORMAL);
+                .eq(VideoTagDO::getStatus, RecordStatus.NORMAL.code());
         List<VideoTagDO> videoTags = videoTagMapper.selectList(videoTagQuery);
         if (videoTags == null || videoTags.isEmpty()) {
             return Collections.emptyList();
@@ -244,7 +243,7 @@ public class VideoServiceImpl implements VideoService {
         }
 
         return tags.stream()
-                .filter(tag -> Objects.equals(tag.getStatus(), STATUS_NORMAL))
+                .filter(tag -> RecordStatus.NORMAL.matches(tag.getStatus()))
                 .map(TagDO::getName)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -253,7 +252,7 @@ public class VideoServiceImpl implements VideoService {
     private Long countDanmaku(Long videoId) {
         LambdaQueryWrapper<DanmakuDO> query = new LambdaQueryWrapper<>();
         query.eq(DanmakuDO::getVideoId, videoId)
-                .eq(DanmakuDO::getStatus, STATUS_NORMAL);
+                .eq(DanmakuDO::getStatus, RecordStatus.NORMAL.code());
         Long count = danmakuMapper.selectCount(query);
         return count == null ? 0L : count;
     }
@@ -261,7 +260,7 @@ public class VideoServiceImpl implements VideoService {
     private Long countComment(Long videoId) {
         LambdaQueryWrapper<CommentDO> query = new LambdaQueryWrapper<>();
         query.eq(CommentDO::getVideoId, videoId)
-                .eq(CommentDO::getStatus, STATUS_NORMAL);
+                .eq(CommentDO::getStatus, RecordStatus.NORMAL.code());
         Long count = commentMapper.selectCount(query);
         return count == null ? 0L : count;
     }
@@ -270,7 +269,7 @@ public class VideoServiceImpl implements VideoService {
         LambdaQueryWrapper<VideoLikeDO> query = new LambdaQueryWrapper<>();
         query.eq(VideoLikeDO::getVideoId, videoId)
                 .eq(VideoLikeDO::getUserId, currentUid)
-                .eq(VideoLikeDO::getStatus, STATUS_NORMAL);
+                .eq(VideoLikeDO::getStatus, RecordStatus.NORMAL.code());
         Long count = videoLikeMapper.selectCount(query);
         return count != null && count > 0;
     }
@@ -279,7 +278,7 @@ public class VideoServiceImpl implements VideoService {
         LambdaQueryWrapper<FollowingDO> query = new LambdaQueryWrapper<>();
         query.eq(FollowingDO::getUserId, currentUid)
                 .eq(FollowingDO::getFollowingUserId, authorUid)
-                .eq(FollowingDO::getStatus, STATUS_NORMAL);
+                .eq(FollowingDO::getStatus, RecordStatus.NORMAL.code());
         Long count = followingMapper.selectCount(query);
         return count != null && count > 0;
     }
@@ -287,7 +286,7 @@ public class VideoServiceImpl implements VideoService {
     private void ensureVideoExists(Long videoId) {
         LambdaQueryWrapper<VideoDO> query = new LambdaQueryWrapper<>();
         query.eq(VideoDO::getId, videoId)
-                .eq(VideoDO::getStatus, STATUS_NORMAL);
+                .eq(VideoDO::getStatus, RecordStatus.NORMAL.code());
         Long count = videoMapper.selectCount(query);
         if (count == null || count <= 0) {
             throw new IllegalArgumentException("video not found");
@@ -297,7 +296,7 @@ public class VideoServiceImpl implements VideoService {
     private void increaseVideoLikeCount(Long videoId) {
         LambdaUpdateWrapper<VideoDO> update = new LambdaUpdateWrapper<>();
         update.eq(VideoDO::getId, videoId)
-                .eq(VideoDO::getStatus, STATUS_NORMAL)
+                .eq(VideoDO::getStatus, RecordStatus.NORMAL.code())
                 .setSql("like_count = like_count + 1");
         int rows = videoMapper.update(null, update);
         if (rows != 1) {
@@ -308,7 +307,7 @@ public class VideoServiceImpl implements VideoService {
     private void decreaseVideoLikeCount(Long videoId) {
         LambdaUpdateWrapper<VideoDO> update = new LambdaUpdateWrapper<>();
         update.eq(VideoDO::getId, videoId)
-                .eq(VideoDO::getStatus, STATUS_NORMAL)
+                .eq(VideoDO::getStatus, RecordStatus.NORMAL.code())
                 .setSql("like_count = GREATEST(like_count - 1, 0)");
         int rows = videoMapper.update(null, update);
         if (rows != 1) {
