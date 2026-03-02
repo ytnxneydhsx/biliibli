@@ -6,6 +6,7 @@ import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.VideoUploadTaskMapper;
 import com.bilibili.model.entity.CommentDO;
 import com.bilibili.model.entity.VideoUploadTaskDO;
+import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -38,11 +39,12 @@ public class AuthzService {
 
     public boolean canAccessUploadTask(Authentication authentication, String uploadId) {
         Long currentUid = resolveUid(authentication);
-        if (currentUid == null || uploadId == null || uploadId.trim().isEmpty()) {
+        String normalizedUploadId = StringTool.normalizeOptional(uploadId);
+        if (currentUid == null || normalizedUploadId == null) {
             return false;
         }
         LambdaQueryWrapper<VideoUploadTaskDO> query = new LambdaQueryWrapper<>();
-        query.eq(VideoUploadTaskDO::getUploadId, uploadId.trim());
+        query.eq(VideoUploadTaskDO::getUploadId, normalizedUploadId);
         VideoUploadTaskDO task = videoUploadTaskMapper.selectOne(query);
         return task != null && currentUid.equals(task.getUserId());
     }

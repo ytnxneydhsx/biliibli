@@ -2,8 +2,10 @@ package com.bilibili.controller;
 
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
+import com.bilibili.model.dto.PageQueryDTO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.SearchService;
+import com.bilibili.tool.StringTool;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,13 +35,12 @@ public class SearchController {
     @Operation(summary = "Search videos")
     public Result<List<VideoVO>> searchVideos(@RequestParam(value = "keyword", required = false) String keyword,
                                               @RequestParam(value = "categoryId", required = false) Long categoryId,
-                                              @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                              PageQueryDTO pageQuery,
                                               @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        if (currentUser != null && currentUser.getUid() != null && keyword != null && !keyword.trim().isEmpty()) {
+        if (currentUser != null && currentUser.getUid() != null && !StringTool.isBlank(keyword)) {
             searchService.recordVideoSearchHistory(currentUser.getUid(), keyword);
         }
-        return Result.success(searchService.searchVideos(keyword, categoryId, pageNo, pageSize));
+        return Result.success(searchService.searchVideos(keyword, categoryId, pageQuery));
     }
 
     @GetMapping("/videos/history")

@@ -10,12 +10,14 @@ import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.UserInfoMapper;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.model.dto.CommentCreateDTO;
+import com.bilibili.model.dto.PageQueryDTO;
 import com.bilibili.model.entity.CommentDO;
 import com.bilibili.model.entity.CommentLikeDO;
 import com.bilibili.model.entity.UserInfoDO;
 import com.bilibili.model.entity.VideoDO;
 import com.bilibili.model.vo.CommentVO;
 import com.bilibili.service.CommentService;
+import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,9 +38,6 @@ public class CommentServiceImpl implements CommentService {
 
     private static final int STATUS_NORMAL = 0;
     private static final int STATUS_DELETED = 1;
-    private static final int DEFAULT_PAGE_NO = 1;
-    private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int MAX_PAGE_SIZE = 50;
     private static final int MAX_CONTENT_LENGTH = 1000;
 
     private final CommentMapper commentMapper;
@@ -71,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         ensureVideoExists(videoId);
-        String content = normalizeRequired(dto.getContent(), "content");
+        String content = StringTool.normalizeRequired(dto.getContent(), "content");
         if (content.length() > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("content is too long");
         }
@@ -118,14 +117,15 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentVO> listComments(Long videoId, Integer pageNo, Integer pageSize, Long currentUid) {
+    public List<CommentVO> listComments(Long videoId, PageQueryDTO pageQuery, Long currentUid) {
         if (videoId == null || videoId <= 0) {
             throw new IllegalArgumentException("videoId is invalid");
         }
         ensureVideoExists(videoId);
 
-        int normalizedPageNo = normalizePageNo(pageNo);
-        int normalizedPageSize = normalizePageSize(pageSize);
+        PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
+        int normalizedPageNo = query.normalizedPageNo();
+        int normalizedPageSize = query.normalizedPageSize();
         int offset = (normalizedPageNo - 1) * normalizedPageSize;
 
         LambdaQueryWrapper<CommentDO> rootQuery = new LambdaQueryWrapper<>();
@@ -444,33 +444,4 @@ public class CommentServiceImpl implements CommentService {
         return vo;
     }
 
-    private static int normalizePageNo(Integer pageNo) {
-        if (pageNo == null || pageNo <= 0) {
-            return DEFAULT_PAGE_NO;
-        }
-        return pageNo;
-    }
-
-    private static int normalizePageSize(Integer pageSize) {
-        if (pageSize == null || pageSize <= 0) {
-            return DEFAULT_PAGE_SIZE;
-        }
-        return Math.min(pageSize, MAX_PAGE_SIZE);
-    }
-
-    private static String normalizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private static String normalizeRequired(String value, String fieldName) {
-        String normalized = normalizeOptional(value);
-        if (normalized == null) {
-            throw new IllegalArgumentException(fieldName + " is required");
-        }
-        return normalized;
-    }
 }

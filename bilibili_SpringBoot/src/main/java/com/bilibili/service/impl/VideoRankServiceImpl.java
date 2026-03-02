@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.config.redis.RedisViewCacheKeys;
 import com.bilibili.config.redis.RedisViewCacheTuning;
 import com.bilibili.mapper.VideoMapper;
+import com.bilibili.model.dto.PageQueryDTO;
 import com.bilibili.model.entity.VideoDO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
@@ -26,10 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class VideoRankServiceImpl implements VideoRankService {
-
-    private static final int DEFAULT_PAGE_NO = 1;
-    private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int MAX_PAGE_SIZE = 50;
 
     private final StringRedisTemplate stringRedisTemplate;
     private final VideoMapper videoMapper;
@@ -61,9 +58,10 @@ public class VideoRankServiceImpl implements VideoRankService {
     }
 
     @Override
-    public IPage<VideoRankVO> listVideoViewRank(Integer pageNo, Integer pageSize) {
-        int normalizedPageNo = normalizePageNo(pageNo);
-        int normalizedPageSize = normalizePageSize(pageSize);
+    public IPage<VideoRankVO> listVideoViewRank(PageQueryDTO pageQuery) {
+        PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
+        int normalizedPageNo = query.normalizedPageNo();
+        int normalizedPageSize = query.normalizedPageSize();
         long start = (long) (normalizedPageNo - 1) * normalizedPageSize;
         long end = start + normalizedPageSize - 1;
         long total = queryRankTotal();
@@ -194,20 +192,6 @@ public class VideoRankServiceImpl implements VideoRankService {
         } catch (NumberFormatException ex) {
             return null;
         }
-    }
-
-    private static int normalizePageNo(Integer pageNo) {
-        if (pageNo == null || pageNo <= 0) {
-            return DEFAULT_PAGE_NO;
-        }
-        return pageNo;
-    }
-
-    private static int normalizePageSize(Integer pageSize) {
-        if (pageSize == null || pageSize <= 0) {
-            return DEFAULT_PAGE_SIZE;
-        }
-        return Math.min(pageSize, MAX_PAGE_SIZE);
     }
 
     private static String buildDeltaKey(Long videoId) {

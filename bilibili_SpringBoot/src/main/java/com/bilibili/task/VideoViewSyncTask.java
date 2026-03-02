@@ -3,6 +3,7 @@ package com.bilibili.task;
 import com.bilibili.config.redis.RedisViewCacheKeys;
 import com.bilibili.config.redis.RedisViewCacheTuning;
 import com.bilibili.mapper.VideoMapper;
+import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -72,11 +73,12 @@ public class VideoViewSyncTask {
     }
 
     private static Long parsePositiveLong(String raw) {
-        if (raw == null || raw.trim().isEmpty()) {
+        String normalized = StringTool.normalizeOptional(raw);
+        if (normalized == null) {
             return null;
         }
         try {
-            long value = Long.parseLong(raw.trim());
+            long value = Long.parseLong(normalized);
             return value <= 0 ? null : value;
         } catch (NumberFormatException ex) {
             return null;

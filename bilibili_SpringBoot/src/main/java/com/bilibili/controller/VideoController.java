@@ -2,6 +2,8 @@ package com.bilibili.controller;
 
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
+import com.bilibili.model.dto.PageQueryDTO;
+import com.bilibili.model.vo.PageVO;
 import com.bilibili.model.vo.VideoDetailVO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
@@ -15,10 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/videos")
@@ -34,16 +33,14 @@ public class VideoController {
 
     @GetMapping
     @Operation(summary = "List videos (paged)")
-    public Result<List<VideoVO>> listVideos(@RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        return Result.success(videoAppService.listVideos(pageNo, pageSize));
+    public Result<PageVO<VideoVO>> listVideos(PageQueryDTO pageQuery) {
+        return Result.success(PageVO.from(videoAppService.listVideos(pageQuery)));
     }
 
     @GetMapping("/rank")
     @Operation(summary = "List video ranking (paged)")
-    public Result<List<VideoRankVO>> listVideoRank(@RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                    @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        return Result.success(videoAppService.listVideoRank(pageNo, pageSize));
+    public Result<PageVO<VideoRankVO>> listVideoRank(PageQueryDTO pageQuery) {
+        return Result.success(PageVO.from(videoAppService.listVideoRank(pageQuery)));
     }
 
     @GetMapping("/{videoId}")

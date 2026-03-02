@@ -1,6 +1,7 @@
 package com.bilibili.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.bilibili.model.dto.PageQueryDTO;
 import com.bilibili.model.vo.VideoDetailVO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
@@ -24,8 +25,8 @@ public class VideoAppServiceImpl implements VideoAppService {
     }
 
     @Override
-    public IPage<VideoVO> listVideos(Integer pageNo, Integer pageSize) {
-        return videoService.listHomepageVideos(null, pageNo, pageSize);
+    public IPage<VideoVO> listVideos(PageQueryDTO pageQuery) {
+        return videoService.listHomepageVideos(null, pageQuery);
     }
 
     @Override
@@ -34,8 +35,8 @@ public class VideoAppServiceImpl implements VideoAppService {
     }
 
     @Override
-    public IPage<VideoRankVO> listVideoRank(Integer pageNo, Integer pageSize) {
-        return videoRankService.listVideoViewRank(pageNo, pageSize);
+    public IPage<VideoRankVO> listVideoRank(PageQueryDTO pageQuery) {
+        return videoRankService.listVideoViewRank(pageQuery);
     }
 
     @Override

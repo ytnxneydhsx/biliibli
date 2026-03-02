@@ -13,6 +13,7 @@ import com.bilibili.mapper.UserInfoMapper;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.mapper.VideoLikeMapper;
 import com.bilibili.mapper.VideoTagMapper;
+import com.bilibili.model.dto.PageQueryDTO;
 import com.bilibili.model.entity.CommentDO;
 import com.bilibili.model.entity.DanmakuDO;
 import com.bilibili.model.entity.FollowingDO;
@@ -36,9 +37,6 @@ import java.util.stream.Collectors;
 @Service
 public class VideoServiceImpl implements VideoService {
 
-    private static final int DEFAULT_PAGE_NO = 1;
-    private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int MAX_PAGE_SIZE = 50;
     private static final int STATUS_NORMAL = 0;
 
     private final VideoMapper videoMapper;
@@ -70,9 +68,10 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public IPage<VideoVO> listHomepageVideos(String title, Integer pageNo, Integer pageSize) {
-        int normalizedPageNo = normalizePageNo(pageNo);
-        int normalizedPageSize = normalizePageSize(pageSize);
+    public IPage<VideoVO> listHomepageVideos(String title, PageQueryDTO pageQuery) {
+        PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
+        int normalizedPageNo = query.normalizedPageNo();
+        int normalizedPageSize = query.normalizedPageSize();
         String normalizedTitle = normalizeOptional(title);
 
         Page<VideoVO> page = new Page<>(normalizedPageNo, normalizedPageSize);
@@ -80,13 +79,14 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public IPage<VideoVO> listPublishedVideos(Long uid, String title, Integer pageNo, Integer pageSize) {
+    public IPage<VideoVO> listPublishedVideos(Long uid, String title, PageQueryDTO pageQuery) {
         if (uid == null || uid <= 0) {
             throw new IllegalArgumentException("uid is invalid");
         }
 
-        int normalizedPageNo = normalizePageNo(pageNo);
-        int normalizedPageSize = normalizePageSize(pageSize);
+        PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
+        int normalizedPageNo = query.normalizedPageNo();
+        int normalizedPageSize = query.normalizedPageSize();
         String normalizedTitle = normalizeOptional(title);
 
         Page<VideoVO> page = new Page<>(normalizedPageNo, normalizedPageSize);
@@ -314,20 +314,6 @@ public class VideoServiceImpl implements VideoService {
         if (rows != 1) {
             throw new RuntimeException("decrease like_count failed");
         }
-    }
-
-    private static int normalizePageNo(Integer pageNo) {
-        if (pageNo == null || pageNo <= 0) {
-            return DEFAULT_PAGE_NO;
-        }
-        return pageNo;
-    }
-
-    private static int normalizePageSize(Integer pageSize) {
-        if (pageSize == null || pageSize <= 0) {
-            return DEFAULT_PAGE_SIZE;
-        }
-        return Math.min(pageSize, MAX_PAGE_SIZE);
     }
 
     private static String normalizeOptional(String value) {

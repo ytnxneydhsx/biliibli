@@ -14,6 +14,7 @@ import com.bilibili.model.vo.VideoUploadCompleteVO;
 import com.bilibili.model.vo.VideoUploadInitVO;
 import com.bilibili.model.vo.VideoUploadStatusVO;
 import com.bilibili.service.VideoUploadService;
+import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,8 +70,8 @@ public class VideoUploadServiceImpl implements VideoUploadService {
             throw new IllegalArgumentException("init upload request is null");
         }
 
-        String fileName = normalizeRequired(dto.getFileName(), "fileName");
-        String contentType = normalizeOptional(dto.getContentType());
+        String fileName = StringTool.normalizeRequired(dto.getFileName(), "fileName");
+        String contentType = StringTool.normalizeOptional(dto.getContentType());
         long totalSize = requirePositive(dto.getTotalSize(), "totalSize");
         int chunkSize = requirePositive(dto.getChunkSize(), "chunkSize");
         int totalChunks = requirePositive(dto.getTotalChunks(), "totalChunks");
@@ -203,12 +204,12 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         }
         ensureTaskUploadable(task);
 
-        String title = normalizeRequired(dto.getTitle(), "title");
+        String title = StringTool.normalizeRequired(dto.getTitle(), "title");
         if (title.length() > 100) {
             throw new IllegalArgumentException("title is too long");
         }
-        String description = normalizeOptional(dto.getDescription());
-        String coverUrl = normalizeOptional(dto.getCoverUrl());
+        String description = StringTool.normalizeOptional(dto.getDescription());
+        String coverUrl = StringTool.normalizeOptional(dto.getCoverUrl());
         long duration = dto.getDuration() == null ? 0L : Math.max(dto.getDuration(), 0L);
 
         List<Integer> uploadedChunks = listUploadedChunkIndexes(task);
@@ -284,7 +285,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
     }
 
     private VideoUploadTaskDO getOwnedTask(Long uid, String uploadId) {
-        String normalizedUploadId = normalizeRequired(uploadId, "uploadId");
+        String normalizedUploadId = StringTool.normalizeRequired(uploadId, "uploadId");
 
         LambdaQueryWrapper<VideoUploadTaskDO> query = new LambdaQueryWrapper<>();
         query.eq(VideoUploadTaskDO::getUploadId, normalizedUploadId);
@@ -402,7 +403,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
     }
 
     private void markTaskFailed(String uploadId, String message) {
-        String errorMessage = normalizeOptional(message);
+        String errorMessage = StringTool.normalizeOptional(message);
         if (errorMessage != null && errorMessage.length() > 255) {
             errorMessage = errorMessage.substring(0, 255);
         }
@@ -449,36 +450,20 @@ public class VideoUploadServiceImpl implements VideoUploadService {
     }
 
     private String buildPublicUrl(String relativePath) {
-        String baseUrl = trimTrailingSlash(storageProperties.getPublicBaseUrl());
+        String baseUrl = StringTool.trimTrailingSlash(storageProperties.getPublicBaseUrl());
         String normalizedRelativePath = relativePath.replace("\\", "/").replaceFirst("^/+", "");
         return baseUrl + "/" + normalizedRelativePath;
     }
 
     private List<String> getAllowedVideoTypes() {
         String csv = storageProperties.getAllowedVideoTypes();
-        if (csv == null || csv.trim().isEmpty()) {
+        if (StringTool.isBlank(csv)) {
             return Collections.emptyList();
         }
         return Arrays.stream(csv.split(","))
                 .map(String::trim)
                 .filter(item -> !item.isEmpty())
                 .collect(Collectors.toList());
-    }
-
-    private static String normalizeRequired(String value, String fieldName) {
-        String normalized = normalizeOptional(value);
-        if (normalized == null) {
-            throw new IllegalArgumentException(fieldName + " is required");
-        }
-        return normalized;
-    }
-
-    private static String normalizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private static int requirePositive(Integer value, String fieldName) {
@@ -493,17 +478,6 @@ public class VideoUploadServiceImpl implements VideoUploadService {
             throw new IllegalArgumentException(fieldName + " must be positive");
         }
         return value;
-    }
-
-    private static String trimTrailingSlash(String value) {
-        if (value == null) {
-            return null;
-        }
-        String result = value.trim();
-        while (result.endsWith("/")) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
     }
 
     private static VideoUploadCompleteVO buildCompleteVO(VideoUploadTaskDO task) {

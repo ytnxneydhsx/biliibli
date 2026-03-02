@@ -14,6 +14,7 @@ import com.bilibili.model.vo.UserProfileVO;
 import com.bilibili.service.UserService;
 import com.bilibili.storage.StorageService;
 import com.bilibili.storage.StoredFile;
+import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,16 +46,16 @@ public class UserServiceImpl implements UserService {
         if (dto == null) {
             throw new IllegalArgumentException("register request is null");
         }
-        if (isBlank(dto.getUsername()) || isBlank(dto.getNickname())
-                || isBlank(dto.getPassword()) || isBlank(dto.getConfirmPassword())) {
+        if (StringTool.isBlank(dto.getUsername()) || StringTool.isBlank(dto.getNickname())
+                || StringTool.isBlank(dto.getPassword()) || StringTool.isBlank(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("username/nickname/password cannot be blank");
         }
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("password and confirmPassword are not equal");
         }
 
-        String username = dto.getUsername().trim();
-        String nickname = dto.getNickname().trim();
+        String username = StringTool.normalizeRequired(dto.getUsername(), "username");
+        String nickname = StringTool.normalizeRequired(dto.getNickname(), "nickname");
 
         LambdaQueryWrapper<UserDO> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserDO::getUsername, username);
@@ -89,10 +90,10 @@ public class UserServiceImpl implements UserService {
         if (dto == null) {
             throw new IllegalArgumentException("login request is null");
         }
-        if (isBlank(dto.getUsername()) || isBlank(dto.getPassword())) {
+        if (StringTool.isBlank(dto.getUsername()) || StringTool.isBlank(dto.getPassword())) {
             throw new IllegalArgumentException("username/password cannot be blank");
         }
-        String username = dto.getUsername().trim();
+        String username = StringTool.normalizeRequired(dto.getUsername(), "username");
         String passwordHash = encryptPassword(dto.getPassword());
 
         LambdaQueryWrapper<UserDO> queryWrapper = new LambdaQueryWrapper<>();
@@ -136,8 +137,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("update request is null");
         }
 
-        String nickname = normalizeOptional(dto.getNickname());
-        String sign = normalizeOptional(dto.getSign());
+        String nickname = StringTool.normalizeOptional(dto.getNickname());
+        String sign = StringTool.normalizeOptional(dto.getSign());
         if (nickname == null && sign == null) {
             throw new IllegalArgumentException("nothing to update");
         }
@@ -189,18 +190,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("user not found");
         }
         return userInfo;
-    }
-
-    private static boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
-
-    private static String normalizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private static String encryptPassword(String rawPassword) {

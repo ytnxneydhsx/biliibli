@@ -1,6 +1,8 @@
 package com.bilibili.controller;
 
 import com.bilibili.common.result.Result;
+import com.bilibili.model.dto.PageQueryDTO;
+import com.bilibili.model.vo.PageVO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.VideoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -28,10 +28,9 @@ public class UserVideoController {
 
     @GetMapping("/{uid}/videos")
     @Operation(summary = "List published videos by user (paged)")
-    public Result<List<VideoVO>> listPublishedVideos(@PathVariable("uid") Long uid,
-                                                     @RequestParam(value = "title", required = false) String title,
-                                                     @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        return Result.success(videoService.listPublishedVideos(uid, title, pageNo, pageSize));
+    public Result<PageVO<VideoVO>> listPublishedVideos(@PathVariable("uid") Long uid,
+                                                       @RequestParam(value = "title", required = false) String title,
+                                                       PageQueryDTO pageQuery) {
+        return Result.success(PageVO.from(videoService.listPublishedVideos(uid, title, pageQuery)));
     }
 }

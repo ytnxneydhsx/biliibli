@@ -3,8 +3,10 @@ package com.bilibili.service.impl;
 import com.bilibili.config.redis.RedisSearchCacheTuning;
 import com.bilibili.config.redis.RedisSearchKeys;
 import com.bilibili.mapper.VideoMapper;
+import com.bilibili.model.dto.PageQueryDTO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.SearchService;
+import com.bilibili.tool.StringTool;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +20,6 @@ import java.util.stream.Collectors;
 @Service
 public class SearchServiceImpl implements SearchService {
 
-    private static final int DEFAULT_PAGE_NO = 1;
-    private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int MAX_PAGE_SIZE = 50;
     private static final int MAX_CANDIDATE_LIMIT = 2000;
     private static final int MIN_CANDIDATE_LIMIT = 200;
     private static final int CANDIDATE_MULTIPLIER = 20;
@@ -35,15 +34,16 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<VideoVO> searchVideos(String keyword, Long categoryId, Integer pageNo, Integer pageSize) {
-        String normalizedKeyword = normalizeOptional(keyword);
+    public List<VideoVO> searchVideos(String keyword, Long categoryId, PageQueryDTO pageQuery) {
+        String normalizedKeyword = StringTool.normalizeOptional(keyword);
         Long normalizedCategoryId = normalizeCategoryId(categoryId);
         if (normalizedKeyword == null && normalizedCategoryId == null) {
             throw new IllegalArgumentException("at least one search condition is required");
         }
 
-        int normalizedPageNo = normalizePageNo(pageNo);
-        int normalizedPageSize = normalizePageSize(pageSize);
+        PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
+        int normalizedPageNo = query.normalizedPageNo();
+        int normalizedPageSize = query.normalizedPageSize();
         int offset = (normalizedPageNo - 1) * normalizedPageSize;
         int candidateLimit = normalizeCandidateLimit(normalizedPageNo, normalizedPageSize);
 
@@ -68,12 +68,12 @@ public class SearchServiceImpl implements SearchService {
             throw new IllegalArgumentException("uid is invalid");
         }
 
-        if (keyword == null || keyword.trim().isEmpty()) {
+        String normalizedKeyword = StringTool.normalizeOptional(keyword);
+        if (normalizedKeyword == null) {
             throw new IllegalArgumentException("keyword is invalid");
         }
 
         String key = RedisSearchKeys.searchHistoryKey(RedisSearchKeys.DOMAIN_VIDEO, uid);
-        String normalizedKeyword = keyword.trim();
 
         stringRedisTemplate.opsForList().leftPush(key, normalizedKeyword);
         stringRedisTemplate.opsForList().trim(key, 0, RedisSearchCacheTuning.SEARCH_HISTORY_MAX_SIZE - 1L);
@@ -108,34 +108,12 @@ public class SearchServiceImpl implements SearchService {
         context.retain(ids);
     }
 
-    private static int normalizePageNo(Integer pageNo) {
-        if (pageNo == null || pageNo <= 0) {
-            return DEFAULT_PAGE_NO;
-        }
-        return pageNo;
-    }
-
-    private static int normalizePageSize(Integer pageSize) {
-        if (pageSize == null || pageSize <= 0) {
-            return DEFAULT_PAGE_SIZE;
-        }
-        return Math.min(pageSize, MAX_PAGE_SIZE);
-    }
-
     private static int normalizeCandidateLimit(int pageNo, int pageSize) {
         int requested = pageNo * pageSize * CANDIDATE_MULTIPLIER;
         if (requested < MIN_CANDIDATE_LIMIT) {
             return MIN_CANDIDATE_LIMIT;
         }
         return Math.min(requested, MAX_CANDIDATE_LIMIT);
-    }
-
-    private static String normalizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private static Long normalizeCategoryId(Long categoryId) {

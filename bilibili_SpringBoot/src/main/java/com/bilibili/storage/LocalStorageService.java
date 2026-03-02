@@ -1,6 +1,7 @@
 package com.bilibili.storage;
 
 import com.bilibili.config.properties.StorageProperties;
+import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +35,7 @@ public class LocalStorageService implements StorageService {
             throw new IllegalArgumentException("avatar file is too large");
         }
 
-        String contentType = normalizeOptional(file.getContentType());
+        String contentType = StringTool.normalizeOptional(file.getContentType());
         if (contentType == null || !getAllowedImageTypes().contains(contentType)) {
             throw new IllegalArgumentException("avatar content type is not allowed");
         }
@@ -67,8 +68,8 @@ public class LocalStorageService implements StorageService {
 
     @Override
     public void deleteByPublicUrl(String publicUrl) {
-        String normalizedBaseUrl = trimTrailingSlash(storageProperties.getPublicBaseUrl());
-        if (publicUrl == null || publicUrl.trim().isEmpty() || !publicUrl.startsWith(normalizedBaseUrl)) {
+        String normalizedBaseUrl = StringTool.trimTrailingSlash(storageProperties.getPublicBaseUrl());
+        if (StringTool.isBlank(publicUrl) || StringTool.isBlank(normalizedBaseUrl) || !publicUrl.startsWith(normalizedBaseUrl)) {
             return;
         }
         String relativePath = publicUrl.substring(normalizedBaseUrl.length()).replaceFirst("^/+", "");
@@ -88,14 +89,14 @@ public class LocalStorageService implements StorageService {
     }
 
     private String buildPublicUrl(String relativePath) {
-        String baseUrl = trimTrailingSlash(storageProperties.getPublicBaseUrl());
+        String baseUrl = StringTool.trimTrailingSlash(storageProperties.getPublicBaseUrl());
         String normalizedPath = relativePath.replace("\\", "/").replaceFirst("^/+", "");
         return baseUrl + "/" + normalizedPath;
     }
 
     private List<String> getAllowedImageTypes() {
         String csv = storageProperties.getAllowedImageTypes();
-        if (csv == null || csv.trim().isEmpty()) {
+        if (StringTool.isBlank(csv)) {
             return java.util.Collections.emptyList();
         }
         return Arrays.stream(csv.split(","))
@@ -123,22 +124,4 @@ public class LocalStorageService implements StorageService {
         return ".jpg";
     }
 
-    private static String normalizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private static String trimTrailingSlash(String value) {
-        if (value == null) {
-            return null;
-        }
-        String result = value.trim();
-        while (result.endsWith("/")) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
-    }
 }
