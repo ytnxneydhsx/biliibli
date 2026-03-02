@@ -1,9 +1,13 @@
 package com.bilibili.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.config.redis.RedisSearchCacheTuning;
 import com.bilibili.config.redis.RedisSearchKeys;
+import com.bilibili.mapper.UserMapper;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.model.dto.PageQueryDTO;
+import com.bilibili.model.vo.UserSearchVO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.SearchService;
 import com.bilibili.tool.StringTool;
@@ -26,11 +30,14 @@ public class SearchServiceImpl implements SearchService {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final VideoMapper videoMapper;
+    private final UserMapper userMapper;
 
     public SearchServiceImpl(StringRedisTemplate stringRedisTemplate,
-                             VideoMapper videoMapper) {
+                             VideoMapper videoMapper,
+                             UserMapper userMapper) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.videoMapper = videoMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -60,6 +67,19 @@ public class SearchServiceImpl implements SearchService {
         List<Long> pageIds = candidateIds.subList(offset, toIndex);
         List<VideoVO> rows = videoMapper.selectPublishedVideosByIds(pageIds);
         return rows == null ? Collections.emptyList() : rows;
+    }
+
+    @Override
+    public IPage<UserSearchVO> searchUsers(String nickname, String timeOrder, PageQueryDTO pageQuery) {
+        String normalizedNickname = StringTool.normalizeRequired(nickname, "nickname");
+        boolean desc = normalizeTimeOrder(timeOrder);
+
+        PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
+        int normalizedPageNo = query.normalizedPageNo();
+        int normalizedPageSize = query.normalizedPageSize();
+
+        Page<UserSearchVO> page = new Page<>(normalizedPageNo, normalizedPageSize);
+        return userMapper.selectUsersByNickname(page, normalizedNickname, desc);
     }
 
     @Override
@@ -124,6 +144,17 @@ public class SearchServiceImpl implements SearchService {
             throw new IllegalArgumentException("categoryId is invalid");
         }
         return categoryId;
+    }
+
+    private static boolean normalizeTimeOrder(String timeOrder) {
+        String normalized = StringTool.normalizeOptional(timeOrder);
+        if (normalized == null || "asc".equalsIgnoreCase(normalized)) {
+            return false;
+        }
+        if ("desc".equalsIgnoreCase(normalized)) {
+            return true;
+        }
+        throw new IllegalArgumentException("timeOrder must be asc or desc");
     }
 
     private static final class SearchCandidateContext {

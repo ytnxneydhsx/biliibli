@@ -3,6 +3,8 @@ package com.bilibili.controller;
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.model.dto.PageQueryDTO;
+import com.bilibili.model.vo.PageVO;
+import com.bilibili.model.vo.UserSearchVO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.SearchService;
 import com.bilibili.tool.StringTool;
@@ -41,6 +43,14 @@ public class SearchController {
             searchService.recordVideoSearchHistory(currentUser.getUid(), keyword);
         }
         return Result.success(searchService.searchVideos(keyword, categoryId, pageQuery));
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "Search users by nickname (paged)")
+    public Result<PageVO<UserSearchVO>> searchUsers(@RequestParam(value = "nickname") String nickname,
+                                                    @RequestParam(value = "timeOrder", required = false, defaultValue = "asc") String timeOrder,
+                                                    PageQueryDTO pageQuery) {
+        return Result.success(PageVO.from(searchService.searchUsers(nickname, timeOrder, pageQuery)));
     }
 
     @GetMapping("/videos/history")
