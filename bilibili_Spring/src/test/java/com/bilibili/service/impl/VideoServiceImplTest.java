@@ -1,6 +1,8 @@
 package com.bilibili.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.mapper.CommentMapper;
 import com.bilibili.mapper.DanmakuMapper;
 import com.bilibili.mapper.FollowingMapper;
@@ -25,9 +27,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -62,40 +64,46 @@ public class VideoServiceImplTest {
     public void listHomepageVideos_shouldUseDefaultPageWhenParamsInvalid() {
         VideoVO item = new VideoVO();
         item.setId(21L);
-        when(videoMapper.selectPublishedVideos(eq(null), eq(0), eq(10)))
-                .thenReturn(Collections.singletonList(item));
+        IPage<VideoVO> mockedPage = new Page<>(1, 10, 1);
+        mockedPage.setRecords(Collections.singletonList(item));
+        when(videoMapper.selectPublishedVideos(argThat(page -> page != null && page.getCurrent() == 1 && page.getSize() == 10), eq(null)))
+                .thenReturn(mockedPage);
 
-        List<VideoVO> result = videoService.listHomepageVideos("   ", 0, -1);
+        IPage<VideoVO> result = videoService.listHomepageVideos("   ", 0, -1);
 
-        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(1, result.getRecords().size());
         verify(videoMapper, times(1))
-                .selectPublishedVideos(eq(null), eq(0), eq(10));
+                .selectPublishedVideos(argThat(page -> page != null && page.getCurrent() == 1 && page.getSize() == 10), eq(null));
     }
 
     @Test
     public void listHomepageVideos_shouldClampPageSize() {
-        when(videoMapper.selectPublishedVideos(eq("abc"), eq(100), eq(50)))
-                .thenReturn(Collections.emptyList());
+        IPage<VideoVO> mockedPage = new Page<>(3, 50, 0);
+        mockedPage.setRecords(Collections.emptyList());
+        when(videoMapper.selectPublishedVideos(argThat(page -> page != null && page.getCurrent() == 3 && page.getSize() == 50), eq("abc")))
+                .thenReturn(mockedPage);
 
-        List<VideoVO> result = videoService.listHomepageVideos("abc", 3, 999);
+        IPage<VideoVO> result = videoService.listHomepageVideos("abc", 3, 999);
 
-        Assert.assertTrue(result.isEmpty());
+        Assert.assertTrue(result.getRecords().isEmpty());
         verify(videoMapper, times(1))
-                .selectPublishedVideos(eq("abc"), eq(100), eq(50));
+                .selectPublishedVideos(argThat(page -> page != null && page.getCurrent() == 3 && page.getSize() == 50), eq("abc"));
     }
 
     @Test
     public void listPublishedVideos_shouldUseDefaultPageWhenParamsInvalid() {
         VideoVO item = new VideoVO();
         item.setId(11L);
-        when(videoMapper.selectMyPublishedVideos(eq(1001L), eq(null), eq(0), eq(10)))
-                .thenReturn(Collections.singletonList(item));
+        IPage<VideoVO> mockedPage = new Page<>(1, 10, 1);
+        mockedPage.setRecords(Collections.singletonList(item));
+        when(videoMapper.selectMyPublishedVideos(argThat(page -> page != null && page.getCurrent() == 1 && page.getSize() == 10), eq(1001L), eq(null)))
+                .thenReturn(mockedPage);
 
-        List<VideoVO> result = videoService.listPublishedVideos(1001L, "   ", 0, -1);
+        IPage<VideoVO> result = videoService.listPublishedVideos(1001L, "   ", 0, -1);
 
-        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(1, result.getRecords().size());
         verify(videoMapper, times(1))
-                .selectMyPublishedVideos(eq(1001L), eq(null), eq(0), eq(10));
+                .selectMyPublishedVideos(argThat(page -> page != null && page.getCurrent() == 1 && page.getSize() == 10), eq(1001L), eq(null));
     }
 
     @Test

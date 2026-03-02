@@ -1,6 +1,8 @@
 package com.bilibili.controller;
 
 import com.bilibili.common.exception.GlobalExceptionHandler;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.VideoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +18,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
@@ -51,10 +52,11 @@ public class UserVideoControllerTest {
         VideoVO item = new VideoVO();
         item.setId(1L);
         item.setTitle("demo");
-        List<VideoVO> mockedList = Collections.singletonList(item);
+        IPage<VideoVO> mockedPage = new Page<>(2, 20, 1);
+        mockedPage.setRecords(Collections.singletonList(item));
 
         when(videoService.listPublishedVideos(1001L, "test", 2, 20))
-                .thenReturn(mockedList);
+                .thenReturn(mockedPage);
 
         MvcResult mvcResult = mockMvc.perform(get("/users/1001/videos")
                         .param("title", "test")
@@ -64,14 +66,17 @@ public class UserVideoControllerTest {
                 .andReturn();
 
         assertEquals(0, objectMapper.readTree(mvcResult.getResponse().getContentAsString()).get("code").asInt());
-        assertEquals(1L, objectMapper.readTree(mvcResult.getResponse().getContentAsString()).get("data").get(0).get("id").asLong());
+        assertEquals(1L, objectMapper.readTree(mvcResult.getResponse().getContentAsString()).get("data").get("records").get(0).get("id").asLong());
         verify(videoService, times(1)).listPublishedVideos(1001L, "test", 2, 20);
     }
 
     @Test
     public void listPublishedVideos_withoutParams_shouldPassNulls() throws Exception {
+        IPage<VideoVO> mockedPage = new Page<>(1, 10, 0);
+        mockedPage.setRecords(Collections.emptyList());
+
         when(videoService.listPublishedVideos(1001L, null, null, null))
-                .thenReturn(Collections.emptyList());
+                .thenReturn(mockedPage);
 
         MvcResult mvcResult = mockMvc.perform(get("/users/1001/videos"))
                 .andExpect(status().isOk())

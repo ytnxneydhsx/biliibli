@@ -1,8 +1,11 @@
 package com.bilibili.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.config.redis.RedisViewCacheKeys;
 import com.bilibili.config.redis.RedisViewCacheTuning;
 import com.bilibili.mapper.VideoMapper;
+import com.bilibili.model.entity.VideoDO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
 import org.junit.Assert;
@@ -20,10 +23,11 @@ import org.springframework.data.redis.core.ZSetOperations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -77,6 +81,7 @@ public class VideoRankServiceImplTest {
     @Test
     public void listVideoViewRank_redisHit_shouldReturnOrderedResult() {
         when(stringRedisTemplate.opsForZSet()).thenReturn(zSetOperations);
+        when(zSetOperations.zCard(eq(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY))).thenReturn(2L);
         Set<ZSetOperations.TypedTuple<String>> tuples = new LinkedHashSet<>();
         tuples.add(new DefaultTypedTuple<>("2", 20D));
         tuples.add(new DefaultTypedTuple<>("1", 10D));
@@ -96,36 +101,45 @@ public class VideoRankServiceImplTest {
         when(videoMapper.selectPublishedVideosByIds(eq(Arrays.asList(2L, 1L))))
                 .thenReturn(Arrays.asList(video1, video2));
 
-        List<VideoRankVO> result = videoRankService.listVideoViewRank(1, 10);
+        IPage<VideoRankVO> result = videoRankService.listVideoViewRank(1, 10);
 
-        Assert.assertEquals(2, result.size());
-        Assert.assertEquals(Long.valueOf(2L), result.get(0).getId());
-        Assert.assertEquals(Integer.valueOf(1), result.get(0).getRank());
-        Assert.assertEquals(Double.valueOf(20D), result.get(0).getScore());
-        Assert.assertEquals(Long.valueOf(1L), result.get(1).getId());
-        Assert.assertEquals(Integer.valueOf(2), result.get(1).getRank());
+        Assert.assertEquals(2, result.getRecords().size());
+        Assert.assertEquals(Long.valueOf(2L), result.getRecords().get(0).getId());
+        Assert.assertEquals(Integer.valueOf(1), result.getRecords().get(0).getRank());
+        Assert.assertEquals(Double.valueOf(20D), result.getRecords().get(0).getScore());
+        Assert.assertEquals(Long.valueOf(1L), result.getRecords().get(1).getId());
+        Assert.assertEquals(Integer.valueOf(2), result.getRecords().get(1).getRank());
     }
 
     @Test
     public void listVideoViewRank_redisEmpty_shouldFallbackToMySql() {
         when(stringRedisTemplate.opsForZSet()).thenReturn(zSetOperations);
+        when(zSetOperations.zCard(eq(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY))).thenReturn(0L);
+        when(videoMapper.selectCount(any())).thenReturn(1L);
         when(zSetOperations.reverseRangeWithScores(eq(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY), eq(0L), eq(9L)))
                 .thenReturn(Collections.emptySet(), Collections.emptySet());
-        when(zSetOperations.zCard(eq(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY))).thenReturn(0L);
-        when(videoMapper.selectPublishedVideosByViewCount(eq(0), eq(RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT)))
-                .thenReturn(Collections.emptyList());
+        IPage<VideoVO> warmupPage = new Page<>(1, RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT, 0);
+        warmupPage.setRecords(Collections.emptyList());
+        when(videoMapper.selectPublishedVideosByViewCount(argThat(page -> page != null
+                && page.getCurrent() == 1
+                && page.getSize() == RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT)))
+                .thenReturn(warmupPage);
 
         VideoVO video = new VideoVO();
         video.setId(10L);
         video.setViewCount(321L);
-        when(videoMapper.selectPublishedVideosByViewCount(eq(0), eq(10)))
-                .thenReturn(Collections.singletonList(video));
+        IPage<VideoVO> fallbackPage = new Page<>(1, 10, 1);
+        fallbackPage.setRecords(Collections.singletonList(video));
+        when(videoMapper.selectPublishedVideosByViewCount(argThat(page -> page != null
+                && page.getCurrent() == 1
+                && page.getSize() == 10)))
+                .thenReturn(fallbackPage);
 
-        List<VideoRankVO> result = videoRankService.listVideoViewRank(1, 10);
+        IPage<VideoRankVO> result = videoRankService.listVideoViewRank(1, 10);
 
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals(Long.valueOf(10L), result.get(0).getId());
-        Assert.assertEquals(Integer.valueOf(1), result.get(0).getRank());
-        Assert.assertEquals(Double.valueOf(321D), result.get(0).getScore());
+        Assert.assertEquals(1, result.getRecords().size());
+        Assert.assertEquals(Long.valueOf(10L), result.getRecords().get(0).getId());
+        Assert.assertEquals(Integer.valueOf(1), result.getRecords().get(0).getRank());
+        Assert.assertEquals(Double.valueOf(321D), result.getRecords().get(0).getScore());
     }
 }

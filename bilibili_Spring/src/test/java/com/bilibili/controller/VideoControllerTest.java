@@ -2,6 +2,8 @@ package com.bilibili.controller;
 
 import com.bilibili.common.exception.GlobalExceptionHandler;
 import com.bilibili.controller.support.TestAuthenticatedUserArgumentResolver;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoDetailVO;
 import com.bilibili.model.vo.VideoVO;
@@ -18,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -55,17 +56,19 @@ public class VideoControllerTest {
         VideoVO item = new VideoVO();
         item.setId(7L);
         item.setTitle("home");
-        List<VideoVO> mockedList = Collections.singletonList(item);
+        IPage<VideoVO> mockedPage = new Page<>(1, 10, 1);
+        mockedPage.setRecords(Collections.singletonList(item));
 
         when(videoAppService.listVideos(eq(1), eq(10)))
-                .thenReturn(mockedList);
+                .thenReturn(mockedPage);
 
         mockMvc.perform(get("/videos")
                         .param("pageNo", "1")
                         .param("pageSize", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data[0].id").value(7L));
+                .andExpect(jsonPath("$.data.records[0].id").value(7L))
+                .andExpect(jsonPath("$.data.total").value(1));
 
         verify(videoAppService, times(1)).listVideos(eq(1), eq(10));
     }
@@ -92,15 +95,19 @@ public class VideoControllerTest {
         item.setId(100L);
         item.setScore(1234D);
 
+        IPage<VideoRankVO> mockedPage = new Page<>(1, 10, 1);
+        mockedPage.setRecords(Collections.singletonList(item));
+
         when(videoAppService.listVideoRank(eq(1), eq(10)))
-                .thenReturn(Collections.singletonList(item));
+                .thenReturn(mockedPage);
 
         mockMvc.perform(get("/videos/rank")
                         .param("pageNo", "1")
                         .param("pageSize", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data[0].rank").value(1));
+                .andExpect(jsonPath("$.data.records[0].rank").value(1))
+                .andExpect(jsonPath("$.data.total").value(1));
 
         verify(videoAppService, times(1)).listVideoRank(eq(1), eq(10));
     }

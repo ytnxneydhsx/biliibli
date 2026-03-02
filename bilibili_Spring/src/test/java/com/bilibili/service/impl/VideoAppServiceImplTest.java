@@ -1,5 +1,7 @@
 package com.bilibili.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.model.vo.VideoDetailVO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
@@ -13,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -35,12 +36,14 @@ public class VideoAppServiceImplTest {
     public void listVideos_shouldDelegateToVideoService() {
         VideoVO vo = new VideoVO();
         vo.setId(1L);
+        IPage<VideoVO> mockedPage = new Page<>(1, 10, 1);
+        mockedPage.setRecords(Collections.singletonList(vo));
         when(videoService.listHomepageVideos(eq(null), eq(1), eq(10)))
-                .thenReturn(Collections.singletonList(vo));
+                .thenReturn(mockedPage);
 
-        List<VideoVO> result = videoAppService.listVideos(1, 10);
+        IPage<VideoVO> result = videoAppService.listVideos(1, 10);
 
-        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(1, result.getRecords().size());
         verify(videoService, times(1)).listHomepageVideos(eq(null), eq(1), eq(10));
     }
 
@@ -48,12 +51,14 @@ public class VideoAppServiceImplTest {
     public void listVideoRank_shouldDelegateToRankService() {
         VideoRankVO vo = new VideoRankVO();
         vo.setId(10L);
+        IPage<VideoRankVO> mockedPage = new Page<>(1, 10, 1);
+        mockedPage.setRecords(Collections.singletonList(vo));
         when(videoRankService.listVideoViewRank(eq(1), eq(10)))
-                .thenReturn(Collections.singletonList(vo));
+                .thenReturn(mockedPage);
 
-        List<VideoRankVO> result = videoAppService.listVideoRank(1, 10);
+        IPage<VideoRankVO> result = videoAppService.listVideoRank(1, 10);
 
-        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(1, result.getRecords().size());
         verify(videoRankService, times(1)).listVideoViewRank(eq(1), eq(10));
     }
 
