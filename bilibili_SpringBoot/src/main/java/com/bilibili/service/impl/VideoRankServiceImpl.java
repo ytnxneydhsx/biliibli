@@ -1,14 +1,11 @@
 package com.bilibili.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.config.redis.RedisViewCacheKeys;
 import com.bilibili.config.redis.RedisViewCacheTuning;
 import com.bilibili.mapper.VideoMapper;
 import com.bilibili.model.dto.PageQueryDTO;
-import com.bilibili.model.entity.VideoDO;
 import com.bilibili.model.vo.VideoRankVO;
 import com.bilibili.model.vo.VideoVO;
 import com.bilibili.service.VideoRankService;
@@ -65,49 +62,23 @@ public class VideoRankServiceImpl implements VideoRankService {
         int normalizedPageSize = query.normalizedPageSize();
         long start = (long) (normalizedPageNo - 1) * normalizedPageSize;
         long end = start + normalizedPageSize - 1;
-        long total = queryRankTotal();
 
         try {
+            long total = queryRankTotal();
             Set<ZSetOperations.TypedTuple<String>> tuples = fetchByScoreDesc(start, end);
             if (tuples == null || tuples.isEmpty()) {
-                warmupIfEmpty();
-                tuples = fetchByScoreDesc(start, end);
-            }
-
-            if (tuples == null || tuples.isEmpty()) {
-                return buildFallbackByMySql(normalizedPageNo, normalizedPageSize);
+                return toPage(Collections.emptyList(), normalizedPageNo, normalizedPageSize, total);
             }
             List<VideoRankVO> records = buildRankResultFromRedis(tuples, start);
             return toPage(records, normalizedPageNo, normalizedPageSize, total);
         } catch (Exception ex) {
-            return buildFallbackByMySql(normalizedPageNo, normalizedPageSize);
+            return toPage(Collections.emptyList(), normalizedPageNo, normalizedPageSize, 0L);
         }
     }
 
     private Set<ZSetOperations.TypedTuple<String>> fetchByScoreDesc(long start, long end) {
         return stringRedisTemplate.opsForZSet()
                 .reverseRangeWithScores(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY, start, end);
-    }
-
-    private void warmupIfEmpty() {
-        Long size = stringRedisTemplate.opsForZSet().zCard(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY);
-        if (size != null && size > 0) {
-            return;
-        }
-        Page<VideoVO> warmupPage = new Page<>(1, RedisViewCacheTuning.VIDEO_VIEW_RANK_WARMUP_LIMIT);
-        IPage<VideoVO> topVideoPage = videoMapper.selectPublishedVideosByViewCount(warmupPage);
-        List<VideoVO> topVideos = topVideoPage == null ? Collections.emptyList() : topVideoPage.getRecords();
-        if (topVideos == null || topVideos.isEmpty()) {
-            return;
-        }
-        ZSetOperations<String, String> zSetOps = stringRedisTemplate.opsForZSet();
-        for (VideoVO video : topVideos) {
-            if (video.getId() == null) {
-                continue;
-            }
-            double score = video.getViewCount() == null ? 0D : video.getViewCount().doubleValue();
-            zSetOps.add(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY, String.valueOf(video.getId()), score);
-        }
     }
 
     private List<VideoRankVO> buildRankResultFromRedis(Set<ZSetOperations.TypedTuple<String>> tuples, long start) {
@@ -154,24 +125,6 @@ public class VideoRankServiceImpl implements VideoRankService {
         return result;
     }
 
-    private IPage<VideoRankVO> buildFallbackByMySql(int pageNo, int pageSize) {
-        int offset = (pageNo - 1) * pageSize;
-        Page<VideoVO> page = new Page<>(pageNo, pageSize);
-        IPage<VideoVO> videoPage = videoMapper.selectPublishedVideosByViewCount(page);
-        List<VideoVO> videos = videoPage == null ? Collections.emptyList() : videoPage.getRecords();
-        if (videos == null || videos.isEmpty()) {
-            return toPage(Collections.emptyList(), pageNo, pageSize, videoPage == null ? 0L : videoPage.getTotal());
-        }
-        List<VideoRankVO> result = new ArrayList<>(videos.size());
-        int rank = offset + 1;
-        for (VideoVO video : videos) {
-            double score = video.getViewCount() == null ? 0D : video.getViewCount().doubleValue();
-            result.add(toRankVO(video, score, rank));
-            rank++;
-        }
-        return toPage(result, pageNo, pageSize, videoPage == null ? 0L : videoPage.getTotal());
-    }
-
     private VideoRankVO toRankVO(VideoVO video, Double score, Integer rank) {
         VideoRankVO vo = new VideoRankVO();
         vo.setRank(rank);
@@ -201,13 +154,7 @@ public class VideoRankServiceImpl implements VideoRankService {
 
     private long queryRankTotal() {
         Long redisTotal = stringRedisTemplate.opsForZSet().zCard(RedisViewCacheKeys.VIDEO_VIEW_RANK_KEY);
-        if (redisTotal != null && redisTotal > 0) {
-            return redisTotal;
-        }
-        LambdaQueryWrapper<VideoDO> query = new LambdaQueryWrapper<>();
-        query.eq(VideoDO::getStatus, RecordStatus.NORMAL.code());
-        Long mysqlTotal = videoMapper.selectCount(query);
-        return mysqlTotal == null ? 0L : mysqlTotal;
+        return redisTotal == null ? 0L : redisTotal;
     }
 
     private IPage<VideoRankVO> toPage(List<VideoRankVO> records, int pageNo, int pageSize, long total) {
