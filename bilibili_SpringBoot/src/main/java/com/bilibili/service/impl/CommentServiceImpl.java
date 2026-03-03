@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.common.exception.ForbiddenException;
 import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.mapper.CommentLikeMapper;
@@ -125,16 +126,15 @@ public class CommentServiceImpl implements CommentService {
         PageQueryDTO query = pageQuery == null ? new PageQueryDTO() : pageQuery;
         int normalizedPageNo = query.normalizedPageNo();
         int normalizedPageSize = query.normalizedPageSize();
-        int offset = (normalizedPageNo - 1) * normalizedPageSize;
 
         LambdaQueryWrapper<CommentDO> rootQuery = new LambdaQueryWrapper<>();
         rootQuery.eq(CommentDO::getVideoId, videoId)
                 .eq(CommentDO::getStatus, RecordStatus.NORMAL.code())
                 .eq(CommentDO::getParentId, 0L)
                 .orderByDesc(CommentDO::getCreateTime)
-                .orderByDesc(CommentDO::getId)
-                .last("LIMIT " + offset + ", " + normalizedPageSize);
-        List<CommentDO> roots = commentMapper.selectList(rootQuery);
+                .orderByDesc(CommentDO::getId);
+        Page<CommentDO> page = new Page<>(normalizedPageNo, normalizedPageSize, false);
+        List<CommentDO> roots = commentMapper.selectPage(page, rootQuery).getRecords();
         if (roots == null || roots.isEmpty()) {
             return Collections.emptyList();
         }
