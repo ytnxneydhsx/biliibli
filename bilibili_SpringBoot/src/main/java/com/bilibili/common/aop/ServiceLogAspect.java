@@ -19,7 +19,7 @@ public class ServiceLogAspect {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceLogAspect.class);
 
-    @Around("execution(public * com.bilibili.service.impl..*(..))")
+    @Around("execution(public * com.bilibili..service.impl..*(..))")
     public Object aroundService(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.nanoTime();
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();

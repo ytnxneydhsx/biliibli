@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bilibili.mapper.UserMapper">
+<mapper namespace="com.bilibili.user.mapper.UserMapper">
 
-    <select id="selectUsersByNickname" resultType="com.bilibili.model.vo.UserSearchVO">
+    <select id="selectUsersByNickname" resultType="com.bilibili.search.model.vo.UserSearchVO">
         SELECT
             u.id AS uid,
             ui.nickname AS nickname,
