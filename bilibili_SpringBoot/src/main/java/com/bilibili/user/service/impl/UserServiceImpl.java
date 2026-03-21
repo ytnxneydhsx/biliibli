@@ -13,13 +13,10 @@ import com.bilibili.user.model.entity.UserInfoDO;
 import com.bilibili.user.model.vo.UserLoginVO;
 import com.bilibili.user.model.vo.UserProfileVO;
 import com.bilibili.user.service.UserService;
-import com.bilibili.storage.StorageService;
-import com.bilibili.storage.StoredFile;
 import com.bilibili.tool.StringTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -30,15 +27,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final UserInfoMapper userInfoMapper;
-    private final StorageService storageService;
 
     @Autowired
     public UserServiceImpl(UserMapper userMapper,
-                           UserInfoMapper userInfoMapper,
-                           StorageService storageService) {
+                           UserInfoMapper userInfoMapper) {
         this.userMapper = userMapper;
         this.userInfoMapper = userInfoMapper;
-        this.storageService = storageService;
     }
 
     @Override
@@ -158,30 +152,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("user not found or no changes");
         }
     }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public String uploadAvatar(Long uid, MultipartFile file) {
-        if (uid == null || uid <= 0) {
-            throw new IllegalArgumentException("uid is invalid");
-        }
-        UserInfoDO userInfo = getUserInfoByUid(uid);
-        StoredFile storedFile = storageService.saveAvatar(file);
-        String avatarUrl = storedFile.getPublicUrl();
-
-        LambdaUpdateWrapper<UserInfoDO> uw = new LambdaUpdateWrapper<>();
-        uw.eq(UserInfoDO::getUserId, uid)
-                .set(UserInfoDO::getAvatarUrl, avatarUrl);
-        int rows = userInfoMapper.update(null, uw);
-        if (rows != 1) {
-            storageService.deleteByPublicUrl(avatarUrl);
-            throw new IllegalArgumentException("user not found");
-        }
-
-        storageService.deleteByPublicUrl(userInfo.getAvatarUrl());
-        return avatarUrl;
-    }
-
 
     private UserInfoDO getUserInfoByUid(Long uid) {
         LambdaQueryWrapper<UserInfoDO> queryWrapper = new LambdaQueryWrapper<>();

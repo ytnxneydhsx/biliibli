@@ -5,7 +5,6 @@ import com.bilibili.user.model.dto.UserProfileUpdateDTO;
 import com.bilibili.user.model.dto.UserRegisterDTO;
 import com.bilibili.user.model.vo.UserLoginVO;
 import com.bilibili.user.model.vo.UserProfileVO;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
@@ -16,7 +15,4 @@ public interface UserService {
     UserProfileVO getPublicProfile(Long uid);
 
     void updatePublicProfile(Long uid, UserProfileUpdateDTO dto);
-
-    String uploadAvatar(Long uid, MultipartFile file);
-
 }

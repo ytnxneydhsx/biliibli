@@ -18,7 +18,7 @@ import javax.sql.DataSource;
         "com.bilibili.video.mapper",
         "com.bilibili.comment.mapper",
         "com.bilibili.following.mapper",
-        "com.bilibili.upload.mapper"
+        "com.bilibili.upload.video.mapper"
 })
 public class MybatisPlusConfig {
 

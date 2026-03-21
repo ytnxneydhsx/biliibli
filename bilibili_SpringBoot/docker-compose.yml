@@ -31,11 +31,19 @@ services:
       DB_URL: jdbc:mysql://mysql:3306/bilibili?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
       DB_USERNAME: huangnv
       DB_PASSWORD: 11447
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_REGION: ${MINIO_REGION:-us-east-1}
+      MINIO_BUCKET: ${MINIO_BUCKET:-bilibili-media}
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_started
     expose:
       - "8080"
     volumes:
@@ -56,6 +64,21 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:latest
+    container_name: bilibili-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_REGION: ${MINIO_REGION:-us-east-1}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
   nginx:
     image: nginx:1.28-alpine
     container_name: bilibili-nginx
@@ -71,4 +94,5 @@ services:
 volumes:
   mysql_data:
   bilibili_storage:
+  minio_data:
   redis_data:

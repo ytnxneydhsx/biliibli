@@ -6,21 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class StorageProperties {
 
-    @Value("${storage.rootDir:F:/bilibili-data}")
-    private String rootDir;
-
-    @Value("${storage.publicBaseUrl:http://localhost:9000/media}")
-    private String publicBaseUrl;
-
-    @Value("${storage.avatarSubDir:avatar}")
-    private String avatarSubDir;
-
-    @Value("${storage.coverSubDir:cover}")
-    private String coverSubDir;
-
-    @Value("${storage.videoSubDir:video}")
-    private String videoSubDir;
-
     @Value("${storage.avatar.maxSize:2097152}")
     private long avatarMaxSize;
 
@@ -30,31 +15,17 @@ public class StorageProperties {
     @Value("${storage.video.maxSize:2147483648}")
     private long videoMaxSize;
 
+    @Value("${storage.video.chunkSize:10485760}")
+    private int videoChunkSize;
+
     @Value("${storage.allowedImageTypes:image/jpeg,image/png,image/webp}")
     private String allowedImageTypes;
 
     @Value("${storage.allowedVideoTypes:video/mp4}")
     private String allowedVideoTypes;
 
-    public String getRootDir() {
-        return rootDir;
-    }
-
-    public String getPublicBaseUrl() {
-        return publicBaseUrl;
-    }
-
-    public String getAvatarSubDir() {
-        return avatarSubDir;
-    }
-
-    public String getCoverSubDir() {
-        return coverSubDir;
-    }
-
-    public String getVideoSubDir() {
-        return videoSubDir;
-    }
+    @Value("${storage.allowedVideoExtensions:.mp4,.mov,.webm,.m4v,.mkv,.ogv}")
+    private String allowedVideoExtensions;
 
     public long getAvatarMaxSize() {
         return avatarMaxSize;
@@ -68,11 +39,19 @@ public class StorageProperties {
         return videoMaxSize;
     }
 
+    public int getVideoChunkSize() {
+        return videoChunkSize;
+    }
+
     public String getAllowedImageTypes() {
         return allowedImageTypes;
     }
 
     public String getAllowedVideoTypes() {
         return allowedVideoTypes;
+    }
+
+    public String getAllowedVideoExtensions() {
+        return allowedVideoExtensions;
     }
 }
