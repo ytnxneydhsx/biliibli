@@ -2,9 +2,9 @@ package com.bilibili.authorization;
 
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.comment.mapper.CommentMapper;
-import com.bilibili.upload.mapper.VideoUploadTaskMapper;
 import com.bilibili.comment.model.entity.CommentDO;
-import com.bilibili.upload.model.entity.VideoUploadTaskDO;
+import com.bilibili.upload.video.mapper.VideoUploadTaskMapper;
+import com.bilibili.upload.video.model.entity.VideoUploadTaskDO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

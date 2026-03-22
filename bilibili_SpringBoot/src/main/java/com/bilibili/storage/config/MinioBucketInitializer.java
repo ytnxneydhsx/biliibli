@@ -3,11 +3,13 @@ package com.bilibili.storage.config;
 import com.bilibili.config.properties.MinioProperties;
 import com.bilibili.tool.StringTool;
 import io.minio.BucketExistsArgs;
-import io.minio.CreateBucketArgs;
+import io.minio.MakeBucketArgs;
 import io.minio.MinioAsyncClient;
 import io.minio.SetBucketCorsArgs;
 import io.minio.SetBucketPolicyArgs;
 import io.minio.messages.CORSConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,6 +22,8 @@ import java.util.concurrent.CompletionException;
 
 @Component
 public class MinioBucketInitializer implements ApplicationRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(MinioBucketInitializer.class);
 
     private final MinioAsyncClient minioInternalClient;
     private final MinioProperties minioProperties;
@@ -40,8 +44,8 @@ public class MinioBucketInitializer implements ApplicationRunner {
                             .build()
             ).join();
             if (!exists) {
-                minioInternalClient.createBucket(
-                        CreateBucketArgs.builder()
+                minioInternalClient.makeBucket(
+                        MakeBucketArgs.builder()
                                 .bucket(bucket)
                                 .build()
                 ).join();
@@ -54,13 +58,18 @@ public class MinioBucketInitializer implements ApplicationRunner {
                             .build()
             ).join();
 
-            minioInternalClient.setBucketCors(
-                    SetBucketCorsArgs.builder()
-                            .bucket(bucket)
-                            .config(buildCorsConfiguration())
-                            .build()
-            ).join();
-        } catch (CompletionException e) {
+            try {
+                minioInternalClient.setBucketCors(
+                        SetBucketCorsArgs.builder()
+                                .bucket(bucket)
+                                .config(buildCorsConfiguration())
+                                .build()
+                ).join();
+            } catch (Exception e) {
+                log.warn("set MinIO bucket cors failed, continue without bucket cors: bucket={}, cause={}",
+                        bucket, unwrap(e).getMessage());
+            }
+        } catch (Exception e) {
             throw new RuntimeException("initialize MinIO bucket failed", unwrap(e));
         }
     }

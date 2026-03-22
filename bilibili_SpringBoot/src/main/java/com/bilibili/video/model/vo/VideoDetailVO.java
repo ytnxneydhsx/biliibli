@@ -1,5 +1,6 @@
 package com.bilibili.video.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ public class VideoDetailVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
     private String videoUrl;
     private String title;
@@ -34,6 +36,7 @@ public class VideoDetailVO implements Serializable {
     public static class AuthorVO implements Serializable {
         private static final long serialVersionUID = 1L;
 
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
         private Long uid;
         private String nickname;
         private String avatar;

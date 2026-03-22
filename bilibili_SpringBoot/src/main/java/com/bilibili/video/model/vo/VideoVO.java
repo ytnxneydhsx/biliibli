@@ -1,5 +1,6 @@
 package com.bilibili.video.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,7 +10,9 @@ public class VideoVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long authorUid;
     private String title;
     private String coverUrl;

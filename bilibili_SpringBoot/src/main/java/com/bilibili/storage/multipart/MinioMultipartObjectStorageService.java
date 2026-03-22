@@ -4,27 +4,18 @@ import com.bilibili.config.properties.MinioProperties;
 import com.bilibili.config.properties.StorageProperties;
 import com.bilibili.tool.StringTool;
 import com.bilibili.upload.video.model.dto.VideoUploadPartETagDTO;
-import io.minio.AbortMultipartUploadArgs;
-import io.minio.CreateMultipartUploadArgs;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import io.minio.CreateMultipartUploadResponse;
 import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.Http;
+import io.minio.ListPartsResponse;
 import io.minio.MinioAsyncClient;
 import io.minio.RemoveObjectArgs;
+import io.minio.messages.ListPartsResult;
 import io.minio.messages.Part;
+import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.StringReader;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -41,7 +32,6 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
     private final MinioAsyncClient minioPresignClient;
     private final MinioProperties minioProperties;
     private final StorageProperties storageProperties;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public MinioMultipartObjectStorageService(@Qualifier("minioInternalClient") MinioAsyncClient minioInternalClient,
                                               @Qualifier("minioPresignClient") MinioAsyncClient minioPresignClient,
@@ -111,21 +101,24 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
     @Override
     public String createMultipartUpload(String objectKey, String contentType) {
         try {
-            Http.Headers headers = null;
+            Multimap<String, String> headers = null;
             String normalizedContentType = StringTool.normalizeOptional(contentType);
             if (normalizedContentType != null) {
-                headers = new Http.Headers(Map.of("Content-Type", normalizedContentType));
+                headers = LinkedListMultimap.create();
+                headers.put("Content-Type", normalizedContentType);
             }
-            return minioInternalClient.createMultipartUpload(
-                    CreateMultipartUploadArgs.builder()
-                            .bucket(minioProperties.getBucket())
-                            .region(minioProperties.getRegion())
-                            .object(objectKey)
-                            .headers(headers)
-                            .build()
-            ).join().result().uploadId();
+            CreateMultipartUploadResponse response = minioInternalClient.createMultipartUploadAsync(
+                    minioProperties.getBucket(),
+                    minioProperties.getRegion(),
+                    objectKey,
+                    headers,
+                    null
+            ).join();
+            return response.result().uploadId();
         } catch (CompletionException e) {
             throw new RuntimeException("create multipart upload failed", unwrap(e));
+        } catch (Exception e) {
+            throw new RuntimeException("create multipart upload failed", e);
         }
     }
 
@@ -139,7 +132,7 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
             try {
                 String url = minioPresignClient.getPresignedObjectUrl(
                         GetPresignedObjectUrlArgs.builder()
-                                .method(Http.Method.PUT)
+                                .method(Method.PUT)
                                 .bucket(minioProperties.getBucket())
                                 .region(minioProperties.getRegion())
                                 .object(objectKey)
@@ -161,28 +154,24 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
             return List.of();
         }
         try {
-            Map<String, String> queryParams = new LinkedHashMap<>();
-            queryParams.put("uploadId", multipartUploadId);
-            queryParams.put("max-parts", "1000");
-            String url = minioInternalClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Http.Method.GET)
-                            .bucket(minioProperties.getBucket())
-                            .region(minioProperties.getRegion())
-                            .object(objectKey)
-                            .expiry(60)
-                            .extraQueryParams(queryParams)
-                            .build()
-            );
-
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                    .GET()
-                    .build();
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            ListPartsResponse response = minioInternalClient.listPartsAsync(
+                    minioProperties.getBucket(),
+                    minioProperties.getRegion(),
+                    objectKey,
+                    1000,
+                    0,
+                    multipartUploadId,
+                    null,
+                    null
+            ).join();
+            ListPartsResult result = response.result();
+            if (result == null || result.partList() == null) {
                 return List.of();
             }
-            return parsePartNumbers(response.body());
+            return result.partList().stream()
+                    .map(Part::partNumber)
+                    .sorted()
+                    .toList();
         } catch (Exception e) {
             return List.of();
         }
@@ -195,17 +184,19 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
                 .map(part -> new Part(part.getPartNumber(), part.getEtag()))
                 .toArray(Part[]::new);
         try {
-            minioInternalClient.completeMultipartUpload(
-                    io.minio.CompleteMultipartUploadArgs.builder()
-                            .bucket(minioProperties.getBucket())
-                            .region(minioProperties.getRegion())
-                            .object(objectKey)
-                            .uploadId(multipartUploadId)
-                            .parts(minioParts)
-                            .build()
+            minioInternalClient.completeMultipartUploadAsync(
+                    minioProperties.getBucket(),
+                    minioProperties.getRegion(),
+                    objectKey,
+                    multipartUploadId,
+                    minioParts,
+                    null,
+                    null
             ).join();
         } catch (CompletionException e) {
             throw new RuntimeException("complete multipart upload failed", unwrap(e));
+        } catch (Exception e) {
+            throw new RuntimeException("complete multipart upload failed", e);
         }
     }
 
@@ -215,15 +206,17 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
             return;
         }
         try {
-            minioInternalClient.abortMultipartUpload(
-                    AbortMultipartUploadArgs.builder()
-                            .bucket(minioProperties.getBucket())
-                            .region(minioProperties.getRegion())
-                            .object(objectKey)
-                            .uploadId(multipartUploadId)
-                            .build()
+            minioInternalClient.abortMultipartUploadAsync(
+                    minioProperties.getBucket(),
+                    minioProperties.getRegion(),
+                    objectKey,
+                    multipartUploadId,
+                    null,
+                    null
             ).join();
         } catch (CompletionException ignore) {
+            // Ignore cleanup errors after a failed or cancelled upload.
+        } catch (Exception ignore) {
             // Ignore cleanup errors after a failed or cancelled upload.
         }
     }
@@ -239,6 +232,8 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
                             .build()
             ).join();
         } catch (CompletionException ignore) {
+            // Ignore cleanup errors after a failed finalize step.
+        } catch (Exception ignore) {
             // Ignore cleanup errors after a failed finalize step.
         }
     }
@@ -264,36 +259,6 @@ public class MinioMultipartObjectStorageService implements MultipartObjectStorag
             return ".ogv";
         }
         return ".mp4";
-    }
-
-    private static List<Integer> parsePartNumbers(String xml) {
-        if (StringTool.isBlank(xml)) {
-            return List.of();
-        }
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            factory.setXIncludeAware(false);
-            factory.setExpandEntityReferences(false);
-
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new StringReader(xml)));
-            NodeList nodes = document.getElementsByTagName("PartNumber");
-            java.util.ArrayList<Integer> partNumbers = new java.util.ArrayList<>(nodes.getLength());
-            for (int i = 0; i < nodes.getLength(); i++) {
-                String value = nodes.item(i).getTextContent();
-                if (!StringTool.isBlank(value)) {
-                    partNumbers.add(Integer.parseInt(value.trim()));
-                }
-            }
-            partNumbers.sort(Integer::compareTo);
-            return partNumbers;
-        } catch (Exception e) {
-            return List.of();
-        }
     }
 
     private static String resolveOriginalExtension(String originalFileName) {

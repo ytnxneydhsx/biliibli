@@ -1,5 +1,6 @@
 package com.bilibili.upload.video.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -28,6 +29,7 @@ public class VideoUploadStatusVO implements Serializable {
 
     private String expireTime;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long videoId;
 
     private String videoUrl;

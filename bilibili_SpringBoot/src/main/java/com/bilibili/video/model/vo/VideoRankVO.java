@@ -1,5 +1,6 @@
 package com.bilibili.video.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,7 +13,9 @@ public class VideoRankVO implements Serializable {
     private Integer rank;
     private Double score;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long authorUid;
     private String title;
     private String coverUrl;

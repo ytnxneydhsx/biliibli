@@ -85,6 +85,8 @@ public class MinioImageStorageService implements ImageStorageService {
             ).join();
         } catch (CompletionException ignore) {
             // Ignore cleanup errors for stale or already removed objects.
+        } catch (Exception ignore) {
+            // Ignore cleanup errors for stale or already removed objects.
         }
     }
 

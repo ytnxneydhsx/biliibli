@@ -1,5 +1,7 @@
 package com.bilibili.upload.video.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 
 public class VideoUploadCompleteVO implements Serializable {
@@ -8,6 +10,7 @@ public class VideoUploadCompleteVO implements Serializable {
 
     private String uploadId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long videoId;
 
     private String videoUrl;
