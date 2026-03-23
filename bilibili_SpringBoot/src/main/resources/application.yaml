@@ -21,6 +21,11 @@ spring:
       mode: never
       schema-locations: classpath:bilibili.sql
       encoding: UTF-8
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    locations: classpath:db/migration
 
 server:
   forward-headers-strategy: framework
@@ -75,3 +80,9 @@ springdoc:
 app:
   docs:
     public: false
+  video:
+    rankSize: 100
+    switchIntervalMinutes: 5
+    activeWindowMinutes: 5
+    copyBatchSize: 100
+    flushBatchSize: 100

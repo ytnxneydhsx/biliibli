@@ -115,4 +115,11 @@
           AND status = 0
     </update>
 
+    <update id="updateViewCountAbsolute">
+        UPDATE t_video
+        SET view_count = #{viewCount}
+        WHERE id = #{videoId}
+          AND status = 0
+    </update>
+
 </mapper>

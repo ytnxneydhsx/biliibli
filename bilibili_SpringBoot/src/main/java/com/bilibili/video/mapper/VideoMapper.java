@@ -30,4 +30,7 @@ public interface VideoMapper extends BaseMapper<VideoDO> {
 
     int updateViewCountByDelta(@Param("videoId") Long videoId,
                                @Param("delta") Long delta);
+
+    int updateViewCountAbsolute(@Param("videoId") Long videoId,
+                                @Param("viewCount") Long viewCount);
 }
