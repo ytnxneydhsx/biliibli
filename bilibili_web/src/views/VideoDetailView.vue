@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import CommentList from '../components/CommentList.vue'
 import { authState } from '../lib/auth'
@@ -163,7 +163,6 @@ async function deleteComment(comment: CommentVO) {
 }
 
 watch(() => route.params.id, loadVideo, { immediate: true })
-onMounted(loadVideo)
 </script>
 
 <template>
