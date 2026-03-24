@@ -29,6 +29,7 @@ end
 
 local thresholdTuple = redis.call('ZRANGE', rankKey, 0, 0, 'WITHSCORES')
 if thresholdTuple == nil or #thresholdTuple < 2 then
+    redis.call('ZREMRANGEBYRANK', rankKey, 0, 0)
     redis.call('ZADD', rankKey, newViewCount, videoId)
     redis.call('HSET', cardKey, 'scope', 'top')
     return newViewCount
@@ -39,9 +40,7 @@ local thresholdScore = tonumber(thresholdTuple[2])
 if newViewCount > thresholdScore then
     redis.call('ZADD', rankKey, newViewCount, videoId)
     redis.call('HSET', cardKey, 'scope', 'top')
-    if thresholdVideoId and thresholdVideoId ~= videoId then
-        redis.call('HSET', cardKeyPrefix .. thresholdVideoId, 'scope', 'ephemeral')
-    end
+    redis.call('HSET', cardKeyPrefix .. thresholdVideoId, 'scope', 'ephemeral')
     redis.call('ZREMRANGEBYRANK', rankKey, 0, 0)
 else
     redis.call('HSET', cardKey, 'scope', 'ephemeral')
