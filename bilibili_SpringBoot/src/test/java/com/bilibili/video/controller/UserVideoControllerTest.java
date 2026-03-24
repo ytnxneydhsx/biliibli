@@ -6,7 +6,7 @@ import com.bilibili.common.result.Result;
 import com.bilibili.common.page.PageQueryDTO;
 import com.bilibili.common.page.PageVO;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.service.VideoService;
+import com.bilibili.video.service.application.VideoApplicationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class UserVideoControllerTest {
 
     @Mock
-    private VideoService videoService;
+    private VideoApplicationService videoApplicationService;
 
     @InjectMocks
     private UserVideoController userVideoController;
@@ -36,7 +36,7 @@ class UserVideoControllerTest {
         item.setId(1L);
         IPage<VideoVO> page = new Page<>(2, 20, 1);
         page.setRecords(Collections.singletonList(item));
-        when(videoService.listPublishedVideos(eq(1001L), eq("test"), argThat(p -> p != null
+        when(videoApplicationService.listPublishedVideos(eq(1001L), eq("test"), argThat(p -> p != null
                 && Integer.valueOf(2).equals(p.getPageNo())
                 && Integer.valueOf(20).equals(p.getPageSize())))).thenReturn(page);
 
@@ -49,7 +49,7 @@ class UserVideoControllerTest {
         Assertions.assertEquals(0, result.getCode());
         Assertions.assertEquals(1, result.getData().getRecords().size());
         Assertions.assertEquals(1L, result.getData().getRecords().get(0).getId());
-        verify(videoService).listPublishedVideos(eq(1001L), eq("test"), argThat(p -> p != null
+        verify(videoApplicationService).listPublishedVideos(eq(1001L), eq("test"), argThat(p -> p != null
                 && Integer.valueOf(2).equals(p.getPageNo())
                 && Integer.valueOf(20).equals(p.getPageSize())));
     }

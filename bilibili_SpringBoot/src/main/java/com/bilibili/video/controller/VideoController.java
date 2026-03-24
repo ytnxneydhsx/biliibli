@@ -7,7 +7,7 @@ import com.bilibili.common.page.PageVO;
 import com.bilibili.video.model.vo.VideoDetailVO;
 import com.bilibili.video.model.vo.VideoRankVO;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.service.VideoAppService;
+import com.bilibili.video.service.application.VideoApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,23 +24,23 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Video", description = "Video browse and stats APIs")
 public class VideoController {
 
-    private final VideoAppService videoAppService;
+    private final VideoApplicationService videoApplicationService;
 
     @Autowired
-    public VideoController(VideoAppService videoAppService) {
-        this.videoAppService = videoAppService;
+    public VideoController(VideoApplicationService videoApplicationService) {
+        this.videoApplicationService = videoApplicationService;
     }
 
     @GetMapping
     @Operation(summary = "List videos (paged)")
     public Result<PageVO<VideoVO>> listVideos(PageQueryDTO pageQuery) {
-        return Result.success(PageVO.from(videoAppService.listVideos(pageQuery)));
+        return Result.success(PageVO.from(videoApplicationService.listVideos(pageQuery)));
     }
 
     @GetMapping("/rank")
     @Operation(summary = "List video ranking (paged)")
     public Result<PageVO<VideoRankVO>> listVideoRank(PageQueryDTO pageQuery) {
-        return Result.success(PageVO.from(videoAppService.listVideoRank(pageQuery)));
+        return Result.success(PageVO.from(videoApplicationService.listVideoRank(pageQuery)));
     }
 
     @GetMapping("/{videoId}")
@@ -48,13 +48,13 @@ public class VideoController {
     public Result<VideoDetailVO> getVideoDetail(@PathVariable("videoId") Long videoId,
                                                 @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
         Long currentUid = currentUser == null ? null : currentUser.getUid();
-        return Result.success(videoAppService.getVideoDetail(videoId, currentUid));
+        return Result.success(videoApplicationService.getVideoDetail(videoId, currentUid));
     }
 
     @PostMapping("/{videoId}/views")
     @Operation(summary = "Increase video view count")
     public Result<Void> increaseViewCount(@PathVariable("videoId") Long videoId) {
-        videoAppService.increaseViewCount(videoId);
+        videoApplicationService.increaseViewCount(videoId);
         return Result.success(null);
     }
 }

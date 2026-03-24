@@ -2,7 +2,7 @@ package com.bilibili.video.controller;
 
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
-import com.bilibili.video.service.VideoService;
+import com.bilibili.video.service.application.VideoApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,18 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Me Video Like", description = "Current user video like APIs")
 public class MeVideoLikeController {
 
-    private final VideoService videoService;
+    private final VideoApplicationService videoApplicationService;
 
     @Autowired
-    public MeVideoLikeController(VideoService videoService) {
-        this.videoService = videoService;
+    public MeVideoLikeController(VideoApplicationService videoApplicationService) {
+        this.videoApplicationService = videoApplicationService;
     }
 
     @PostMapping("/{videoId}/likes")
     @Operation(summary = "Like video")
     public Result<Void> likeVideo(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                   @PathVariable("videoId") Long videoId) {
-        videoService.likeVideo(currentUser.getUid(), videoId);
+        videoApplicationService.likeVideo(currentUser.getUid(), videoId);
         return Result.success(null);
     }
 
@@ -40,7 +40,7 @@ public class MeVideoLikeController {
     @Operation(summary = "Unlike video")
     public Result<Void> unlikeVideo(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                     @PathVariable("videoId") Long videoId) {
-        videoService.unlikeVideo(currentUser.getUid(), videoId);
+        videoApplicationService.unlikeVideo(currentUser.getUid(), videoId);
         return Result.success(null);
     }
 }

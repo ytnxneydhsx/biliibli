@@ -1,32 +1,31 @@
-package com.bilibili.video.service.impl;
+package com.bilibili.video.service.domain.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bilibili.common.enums.RecordStatus;
 import com.bilibili.comment.mapper.CommentMapper;
-import com.bilibili.video.mapper.DanmakuMapper;
-import com.bilibili.following.mapper.FollowingMapper;
-import com.bilibili.video.mapper.TagMapper;
-import com.bilibili.user.mapper.UserInfoMapper;
-import com.bilibili.video.mapper.VideoMapper;
-import com.bilibili.video.mapper.VideoLikeMapper;
-import com.bilibili.video.mapper.VideoTagMapper;
-import com.bilibili.common.page.PageQueryDTO;
 import com.bilibili.comment.model.entity.CommentDO;
-import com.bilibili.video.model.entity.DanmakuDO;
+import com.bilibili.common.enums.RecordStatus;
+import com.bilibili.common.page.PageQueryDTO;
+import com.bilibili.following.mapper.FollowingMapper;
 import com.bilibili.following.model.entity.FollowingDO;
-import com.bilibili.video.model.entity.TagDO;
+import com.bilibili.user.mapper.UserInfoMapper;
 import com.bilibili.user.model.entity.UserInfoDO;
+import com.bilibili.video.mapper.DanmakuMapper;
+import com.bilibili.video.mapper.TagMapper;
+import com.bilibili.video.mapper.VideoLikeMapper;
+import com.bilibili.video.mapper.VideoMapper;
+import com.bilibili.video.mapper.VideoTagMapper;
+import com.bilibili.video.model.entity.DanmakuDO;
+import com.bilibili.video.model.entity.TagDO;
 import com.bilibili.video.model.entity.VideoDO;
 import com.bilibili.video.model.entity.VideoLikeDO;
 import com.bilibili.video.model.entity.VideoTagDO;
 import com.bilibili.video.model.vo.VideoDetailVO;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.service.VideoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.bilibili.video.service.domain.VideoDomainService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +35,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class VideoServiceImpl implements VideoService {
+public class VideoDomainServiceImpl implements VideoDomainService {
 
     private final VideoMapper videoMapper;
     private final UserInfoMapper userInfoMapper;
@@ -47,15 +46,14 @@ public class VideoServiceImpl implements VideoService {
     private final DanmakuMapper danmakuMapper;
     private final CommentMapper commentMapper;
 
-    @Autowired
-    public VideoServiceImpl(VideoMapper videoMapper,
-                            UserInfoMapper userInfoMapper,
-                            VideoTagMapper videoTagMapper,
-                            TagMapper tagMapper,
-                            VideoLikeMapper videoLikeMapper,
-                            FollowingMapper followingMapper,
-                            DanmakuMapper danmakuMapper,
-                            CommentMapper commentMapper) {
+    public VideoDomainServiceImpl(VideoMapper videoMapper,
+                                  UserInfoMapper userInfoMapper,
+                                  VideoTagMapper videoTagMapper,
+                                  TagMapper tagMapper,
+                                  VideoLikeMapper videoLikeMapper,
+                                  FollowingMapper followingMapper,
+                                  DanmakuMapper danmakuMapper,
+                                  CommentMapper commentMapper) {
         this.videoMapper = videoMapper;
         this.userInfoMapper = userInfoMapper;
         this.videoTagMapper = videoTagMapper;
@@ -322,5 +320,4 @@ public class VideoServiceImpl implements VideoService {
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
     }
-
 }
