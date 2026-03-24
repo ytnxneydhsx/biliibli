@@ -1,7 +1,6 @@
-package com.bilibili.video.redis.repository;
+package com.bilibili.video.redis;
 
 import com.bilibili.config.properties.VideoHotProperties;
-import com.bilibili.video.redis.key.VideoRedisKeys;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;

@@ -1,10 +1,10 @@
-package com.bilibili.video.hot;
+package com.bilibili.video.service.hot;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.config.properties.VideoHotProperties;
 import com.bilibili.video.mapper.VideoMapper;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.redis.repository.VideoHotRedisRepository;
+import com.bilibili.video.redis.VideoHotRedisRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;

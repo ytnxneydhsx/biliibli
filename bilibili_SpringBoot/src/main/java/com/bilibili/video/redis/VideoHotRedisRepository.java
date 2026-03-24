@@ -1,9 +1,8 @@
-package com.bilibili.video.redis.repository;
+package com.bilibili.video.redis;
 
 import com.bilibili.config.properties.VideoHotProperties;
 import com.bilibili.video.model.hot.VideoHotCardCache;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.redis.key.VideoRedisKeys;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;

@@ -1,9 +1,9 @@
-package com.bilibili.video.hot;
+package com.bilibili.video.service.hot;
 
 import com.bilibili.config.properties.VideoHotProperties;
 import com.bilibili.video.mapper.VideoMapper;
 import com.bilibili.video.model.hot.VideoHotCardCache;
-import com.bilibili.video.redis.repository.VideoHotRedisRepository;
+import com.bilibili.video.redis.VideoHotRedisRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;

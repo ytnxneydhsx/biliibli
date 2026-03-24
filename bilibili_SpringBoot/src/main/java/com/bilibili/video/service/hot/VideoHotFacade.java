@@ -1,4 +1,4 @@
-package com.bilibili.video.hot;
+package com.bilibili.video.service.hot;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,10 +8,10 @@ import com.bilibili.video.model.hot.VideoHotCardCache;
 import com.bilibili.video.model.vo.VideoDetailVO;
 import com.bilibili.video.model.vo.VideoRankVO;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.redis.queue.VideoFrozenWriteQueue;
-import com.bilibili.video.redis.repository.VideoHotLuaRepository;
-import com.bilibili.video.redis.repository.VideoHotRedisRepository;
-import com.bilibili.video.service.VideoService;
+import com.bilibili.video.redis.VideoFrozenWriteQueue;
+import com.bilibili.video.redis.VideoHotLuaRepository;
+import com.bilibili.video.redis.VideoHotRedisRepository;
+import com.bilibili.video.service.domain.VideoDomainService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,18 +26,18 @@ public class VideoHotFacade {
     private static final String SCOPE_TOP = "top";
     private static final String SCOPE_EPHEMERAL = "ephemeral";
 
-    private final VideoService videoService;
+    private final VideoDomainService videoDomainService;
     private final VideoMapper videoMapper;
     private final VideoHotRedisRepository videoHotRedisRepository;
     private final VideoHotLuaRepository videoHotLuaRepository;
     private final VideoFrozenWriteQueue videoFrozenWriteQueue;
 
-    public VideoHotFacade(VideoService videoService,
+    public VideoHotFacade(VideoDomainService videoDomainService,
                           VideoMapper videoMapper,
                           VideoHotRedisRepository videoHotRedisRepository,
                           VideoHotLuaRepository videoHotLuaRepository,
                           VideoFrozenWriteQueue videoFrozenWriteQueue) {
-        this.videoService = videoService;
+        this.videoDomainService = videoDomainService;
         this.videoMapper = videoMapper;
         this.videoHotRedisRepository = videoHotRedisRepository;
         this.videoHotLuaRepository = videoHotLuaRepository;
@@ -70,7 +70,7 @@ public class VideoHotFacade {
     }
 
     public VideoDetailVO getVideoDetail(Long videoId, Long currentUid) {
-        VideoDetailVO detail = videoService.getVideoDetail(videoId, currentUid);
+        VideoDetailVO detail = videoDomainService.getVideoDetail(videoId, currentUid);
         String slot = videoHotRedisRepository.getActiveSlot();
         VideoHotCardCache card = videoHotRedisRepository.loadCard(slot, videoId);
         if (card != null && card.getViewCount() != null) {

@@ -1,6 +1,6 @@
 package com.bilibili.video.task;
 
-import com.bilibili.video.hot.VideoHotRotationService;
+import com.bilibili.video.service.hot.VideoHotRotationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

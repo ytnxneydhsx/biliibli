@@ -1,4 +1,4 @@
-package com.bilibili.video.redis.queue;
+package com.bilibili.video.redis;
 
 import org.springframework.stereotype.Component;
 

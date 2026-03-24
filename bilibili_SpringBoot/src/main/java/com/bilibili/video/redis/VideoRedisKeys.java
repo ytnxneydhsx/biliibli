@@ -1,4 +1,4 @@
-package com.bilibili.video.redis.key;
+package com.bilibili.video.redis;
 
 public final class VideoRedisKeys {
 
