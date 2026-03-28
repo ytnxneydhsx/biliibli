@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bilibili.im.conversation.mapper.ChatConversationMapper">
+
+    <resultMap id="ChatConversationMap" type="com.bilibili.im.conversation.model.entity.ChatConversationDO">
+        <id column="id" property="id"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="owner_user_id" property="ownerUserId"/>
+        <result column="target_id" property="targetId"/>
+        <result column="type" property="type"/>
+        <result column="last_message" property="lastMessage"/>
+        <result column="last_message_time" property="lastMessageTime"/>
+        <result column="unread_count" property="unreadCount"/>
+        <result column="is_muted" property="isMuted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectByOwnerTargetAndType" resultMap="ChatConversationMap">
+        SELECT
+            id,
+            conversation_id,
+            owner_user_id,
+            target_id,
+            type,
+            last_message,
+            last_message_time,
+            unread_count,
+            is_muted,
+            create_time,
+            update_time
+        FROM chat_conversation
+        WHERE owner_user_id = #{ownerUserId}
+          AND target_id = #{targetId}
+          AND type = #{type}
+        LIMIT 1
+    </select>
+
+    <insert id="insertIgnoreConversation">
+        INSERT IGNORE INTO chat_conversation (
+            conversation_id,
+            owner_user_id,
+            target_id,
+            type,
+            unread_count,
+            is_muted
+        ) VALUES (
+            #{conversationId},
+            #{ownerUserId},
+            #{targetId},
+            #{type},
+            #{unreadCount},
+            #{isMuted}
+        )
+    </insert>
+
+</mapper>
