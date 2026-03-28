@@ -20,23 +20,25 @@ import java.util.Collections;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenService jwtTokenService;
+    private final TokenResolver tokenResolver;
+    private final AuthenticatedUserResolver authenticatedUserResolver;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtTokenService jwtTokenService) {
-        this.jwtTokenService = jwtTokenService;
+    public JwtAuthenticationFilter(TokenResolver tokenResolver,
+                                   AuthenticatedUserResolver authenticatedUserResolver) {
+        this.tokenResolver = tokenResolver;
+        this.authenticatedUserResolver = authenticatedUserResolver;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
+        String token = tokenResolver.resolve(request);
 
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        if (StringUtils.hasText(token)) {
             try {
-                AuthenticatedUser principal = jwtTokenService.parse(token);
+                AuthenticatedUser principal = authenticatedUserResolver.resolve(token);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 principal,
@@ -53,4 +55,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
