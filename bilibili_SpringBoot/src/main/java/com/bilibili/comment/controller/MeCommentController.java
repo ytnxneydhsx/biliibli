@@ -31,6 +31,7 @@ public class MeCommentController {
     }
 
     @PostMapping("/videos/{videoId}/comments")
+    @PreAuthorize("@accessAuthz.canComment(authentication)")
     @Operation(summary = "Create comment")
     public Result<Long> createComment(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                       @PathVariable("videoId") Long videoId,
@@ -48,6 +49,7 @@ public class MeCommentController {
     }
 
     @PostMapping("/comments/{commentId}/likes")
+    @PreAuthorize("@accessAuthz.canLike(authentication)")
     @Operation(summary = "Like comment")
     public Result<Void> likeComment(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                     @PathVariable("commentId") Long commentId) {
@@ -56,6 +58,7 @@ public class MeCommentController {
     }
 
     @DeleteMapping("/comments/{commentId}/likes")
+    @PreAuthorize("@accessAuthz.canLike(authentication)")
     @Operation(summary = "Unlike comment")
     public Result<Void> unlikeComment(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                       @PathVariable("commentId") Long commentId) {

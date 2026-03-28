@@ -29,6 +29,7 @@ public class MeVideoLikeController {
     }
 
     @PostMapping("/{videoId}/likes")
+    @PreAuthorize("@accessAuthz.canLike(authentication)")
     @Operation(summary = "Like video")
     public Result<Void> likeVideo(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                   @PathVariable("videoId") Long videoId) {
@@ -37,6 +38,7 @@ public class MeVideoLikeController {
     }
 
     @DeleteMapping("/{videoId}/likes")
+    @PreAuthorize("@accessAuthz.canLike(authentication)")
     @Operation(summary = "Unlike video")
     public Result<Void> unlikeVideo(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                     @PathVariable("videoId") Long videoId) {

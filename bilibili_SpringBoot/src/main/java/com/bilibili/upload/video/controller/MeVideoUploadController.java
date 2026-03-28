@@ -38,6 +38,7 @@ public class MeVideoUploadController {
     }
 
     @PostMapping("/init-session")
+    @PreAuthorize("@accessAuthz.canUploadVideo(authentication)")
     @Operation(summary = "Initialize upload session")
     public Result<VideoUploadInitVO> initUpload(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                                 @RequestBody VideoUploadInitDTO dto) {
@@ -45,7 +46,7 @@ public class MeVideoUploadController {
     }
 
     @PostMapping("/{uploadId}/parts/sign")
-    @PreAuthorize("@authz.canAccessUploadTask(authentication, #uploadId)")
+    @PreAuthorize("@accessAuthz.canUploadVideo(authentication) and @authz.canAccessUploadTask(authentication, #uploadId)")
     @Operation(summary = "Sign multipart upload part URLs")
     public Result<VideoUploadPartSignVO> signUploadParts(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                                          @PathVariable("uploadId") String uploadId,
@@ -62,7 +63,7 @@ public class MeVideoUploadController {
     }
 
     @PostMapping("/{uploadId}/complete")
-    @PreAuthorize("@authz.canAccessUploadTask(authentication, #uploadId)")
+    @PreAuthorize("@accessAuthz.canUploadVideo(authentication) and @authz.canAccessUploadTask(authentication, #uploadId)")
     @Operation(summary = "Complete upload")
     public Result<VideoUploadCompleteVO> completeUpload(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                                         @PathVariable("uploadId") String uploadId,

@@ -29,6 +29,7 @@ public class MeUserController {
     }
 
     @PutMapping("/profile")
+    @PreAuthorize("@accessAuthz.canEditProfile(authentication)")
     @Operation(summary = "Update my profile")
     public Result<Void> updateMyProfile(@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
                                         @RequestBody UserProfileUpdateDTO dto) {
