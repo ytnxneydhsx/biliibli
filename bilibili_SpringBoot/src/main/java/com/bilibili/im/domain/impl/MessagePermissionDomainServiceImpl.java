@@ -5,6 +5,7 @@ import com.bilibili.im.contact.service.ContactRelationQueryService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
 import com.bilibili.im.privacy.model.enums.PrivateMessagePolicy;
 import com.bilibili.im.privacy.service.UserPrivacyService;
+import com.bilibili.user.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,11 +13,14 @@ public class MessagePermissionDomainServiceImpl implements MessagePermissionDoma
 
     private final UserPrivacyService userPrivacyService;
     private final ContactRelationQueryService contactRelationQueryService;
+    private final UserMapper userMapper;
 
     public MessagePermissionDomainServiceImpl(UserPrivacyService userPrivacyService,
-                                              ContactRelationQueryService contactRelationQueryService) {
+                                              ContactRelationQueryService contactRelationQueryService,
+                                              UserMapper userMapper) {
         this.userPrivacyService = userPrivacyService;
         this.contactRelationQueryService = contactRelationQueryService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -26,6 +30,9 @@ public class MessagePermissionDomainServiceImpl implements MessagePermissionDoma
         }
         if (receiverId == null || receiverId <= 0) {
             throw new IllegalArgumentException("receiverId is invalid");
+        }
+        if (userMapper.selectById(receiverId) == null) {
+            throw new IllegalArgumentException("receiver user not found");
         }
         if (senderId.equals(receiverId)) {
             throw new IllegalArgumentException("cannot send message to self");

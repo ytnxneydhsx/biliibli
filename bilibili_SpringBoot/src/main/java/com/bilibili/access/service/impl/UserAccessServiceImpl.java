@@ -4,6 +4,7 @@ import com.bilibili.access.mapper.UserAccessMapper;
 import com.bilibili.access.model.entity.UserAccessDO;
 import com.bilibili.access.model.state.UserAccessState;
 import com.bilibili.access.service.UserAccessService;
+import com.bilibili.user.mapper.UserMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,12 @@ public class UserAccessServiceImpl implements UserAccessService {
     private static final int ENABLED = 1;
 
     private final UserAccessMapper userAccessMapper;
+    private final UserMapper userMapper;
 
-    public UserAccessServiceImpl(UserAccessMapper userAccessMapper) {
+    public UserAccessServiceImpl(UserAccessMapper userAccessMapper,
+                                 UserMapper userMapper) {
         this.userAccessMapper = userAccessMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -80,6 +84,9 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public void validateCanSendImMessage(Long userId) {
+        if (userMapper.selectById(userId) == null) {
+            throw new IllegalArgumentException("sender user not found");
+        }
         if (!canSendImMessage(userId)) {
             throw new AccessDeniedException("current user cannot send im message");
         }
