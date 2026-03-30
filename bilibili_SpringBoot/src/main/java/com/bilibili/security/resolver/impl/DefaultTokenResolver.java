@@ -1,6 +1,6 @@
-package com.bilibili.security.impl;
+package com.bilibili.security.resolver.impl;
 
-import com.bilibili.security.TokenResolver;
+import com.bilibili.security.resolver.TokenResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @Component
 public class DefaultTokenResolver implements TokenResolver {
@@ -33,18 +32,11 @@ public class DefaultTokenResolver implements TokenResolver {
             return null;
         }
 
-        String tokenFromHeader = resolveTokenFromHeaders(request.getHeaders().get(HttpHeaders.AUTHORIZATION));
+        String tokenFromHeader = resolveTokenFromHeader(request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
         if (StringUtils.hasText(tokenFromHeader)) {
             return tokenFromHeader;
         }
         return resolveTokenFromQuery(request.getURI());
-    }
-
-    private String resolveTokenFromHeaders(List<String> authHeaders) {
-        if (authHeaders == null || authHeaders.isEmpty()) {
-            return null;
-        }
-        return resolveTokenFromHeader(authHeaders.get(0));
     }
 
     private String resolveTokenFromHeader(String authHeader) {

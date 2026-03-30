@@ -1,6 +1,8 @@
 package com.bilibili.security;
 
 import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.security.resolver.AuthenticatedUserResolver;
+import com.bilibili.security.resolver.TokenResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

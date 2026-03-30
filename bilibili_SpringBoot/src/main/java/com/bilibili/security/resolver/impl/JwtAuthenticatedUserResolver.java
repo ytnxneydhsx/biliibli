@@ -1,8 +1,8 @@
-package com.bilibili.security.impl;
+package com.bilibili.security.resolver.impl;
 
 import com.bilibili.common.auth.AuthenticatedUser;
-import com.bilibili.security.AuthenticatedUserResolver;
 import com.bilibili.security.JwtTokenService;
+import com.bilibili.security.resolver.AuthenticatedUserResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 

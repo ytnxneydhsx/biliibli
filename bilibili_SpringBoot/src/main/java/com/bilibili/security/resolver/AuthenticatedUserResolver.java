@@ -1,4 +1,4 @@
-package com.bilibili.security;
+package com.bilibili.security.resolver;
 
 import com.bilibili.common.auth.AuthenticatedUser;
 
