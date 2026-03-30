@@ -1,4 +1,4 @@
-package com.bilibili.im.privacy.model.enum;
+package com.bilibili.im.privacy.model.enums;
 
 import lombok.Getter;
 

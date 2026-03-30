@@ -1,7 +1,7 @@
 package com.bilibili.im.privacy.service;
 
 import com.bilibili.im.privacy.model.dto.UpdatePrivateMessagePolicyDTO;
-import com.bilibili.im.privacy.model.enum.PrivateMessagePolicy;
+import com.bilibili.im.privacy.model.enums.PrivateMessagePolicy;
 import com.bilibili.im.privacy.model.vo.UserPrivacySettingVO;
 
 public interface UserPrivacyService {

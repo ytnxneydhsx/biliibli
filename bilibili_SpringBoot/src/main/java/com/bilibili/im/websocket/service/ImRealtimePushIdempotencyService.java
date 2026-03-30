@@ -3,7 +3,7 @@ package com.bilibili.im.websocket.service;
 public interface ImRealtimePushIdempotencyService {
 
     /**
-     * TODO: use Redis SETNX with a short TTL, e.g.
+     * Redis SETNX based short-lived deduplication for realtime websocket push.
      * key = im:push:{senderId}:{clientMessageId}
      * Only the first successful acquisition should trigger websocket push.
      */

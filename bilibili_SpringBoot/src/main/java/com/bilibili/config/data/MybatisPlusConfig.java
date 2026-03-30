@@ -13,14 +13,16 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan(basePackages = {
-        "com.bilibili.access.mapper",
-        "com.bilibili.user.mapper",
-        "com.bilibili.video.mapper",
-        "com.bilibili.comment.mapper",
-        "com.bilibili.following.mapper",
-        "com.bilibili.upload.video.mapper"
-})
+@MapperScan(
+        basePackages = {
+                "com.bilibili.user.mapper",
+                "com.bilibili.video.mapper",
+                "com.bilibili.comment.mapper",
+                "com.bilibili.following.mapper",
+                "com.bilibili.upload.video.mapper"
+        },
+        sqlSessionFactoryRef = "sqlSessionFactory"
+)
 public class MybatisPlusConfig {
 
     @Bean

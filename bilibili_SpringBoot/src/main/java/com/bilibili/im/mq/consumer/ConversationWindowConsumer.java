@@ -1,6 +1,6 @@
 package com.bilibili.im.mq.consumer;
 
-import com.bilibili.im.conversation.service.ChatConversationService;
+import com.bilibili.im.app.ConversationWindowApplicationService;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,10 +15,10 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
 public class ConversationWindowConsumer {
 
-    private final ChatConversationService chatConversationService;
+    private final ConversationWindowApplicationService conversationWindowApplicationService;
 
-    public ConversationWindowConsumer(ChatConversationService chatConversationService) {
-        this.chatConversationService = chatConversationService;
+    public ConversationWindowConsumer(ConversationWindowApplicationService conversationWindowApplicationService) {
+        this.conversationWindowApplicationService = conversationWindowApplicationService;
     }
 
     @RabbitListener(queues = "#{@imMqProperties.conversationProjectionQueue}")
@@ -27,12 +27,16 @@ public class ConversationWindowConsumer {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
-        chatConversationService.projectSingleMessageToConversationSummaries(
+        conversationWindowApplicationService.projectSingleMessageToConversationWindows(
                 event.getConversationId(),
                 event.getSenderId(),
                 event.getReceiverId(),
                 buildConversationSummary(event.getContent()),
                 event.getSendTime()
+        );
+        conversationWindowApplicationService.pushUpdatedSingleConversationWindows(
+                event.getSenderId(),
+                event.getReceiverId()
         );
     }
 

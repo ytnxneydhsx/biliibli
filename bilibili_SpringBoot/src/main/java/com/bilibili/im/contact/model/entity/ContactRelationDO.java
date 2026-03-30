@@ -12,6 +12,7 @@ public class ContactRelationDO implements Serializable {
     private Long userId;
     private Long targetUserId;
     private Integer isContact;
+    private Integer isDmContact;
     private Integer isBlocked;
     private Integer isMuted;
 }

@@ -37,6 +37,12 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_GET_PATHS = {
+            "/im-lab",
+            "/im-lab/",
+            "/im-lab/**",
+            "/messages",
+            "/messages/",
+            "/messages/**",
             "/videos",
             "/videos/*",
             "/videos/*/comments",

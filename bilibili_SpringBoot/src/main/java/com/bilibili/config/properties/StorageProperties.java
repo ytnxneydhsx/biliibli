@@ -12,6 +12,9 @@ public class StorageProperties {
     @Value("${storage.cover.maxSize:5242880}")
     private long coverMaxSize;
 
+    @Value("${storage.imImage.maxSize:5242880}")
+    private long imImageMaxSize;
+
     @Value("${storage.video.maxSize:2147483648}")
     private long videoMaxSize;
 
@@ -33,6 +36,10 @@ public class StorageProperties {
 
     public long getCoverMaxSize() {
         return coverMaxSize;
+    }
+
+    public long getImImageMaxSize() {
+        return imImageMaxSize;
     }
 
     public long getVideoMaxSize() {

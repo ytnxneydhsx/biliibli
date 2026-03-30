@@ -2,7 +2,7 @@ package com.bilibili.im.privacy.service.impl;
 
 import com.bilibili.im.privacy.mapper.UserPrivacySettingMapper;
 import com.bilibili.im.privacy.model.dto.UpdatePrivateMessagePolicyDTO;
-import com.bilibili.im.privacy.model.enum.PrivateMessagePolicy;
+import com.bilibili.im.privacy.model.enums.PrivateMessagePolicy;
 import com.bilibili.im.privacy.model.vo.UserPrivacySettingVO;
 import com.bilibili.im.privacy.service.UserPrivacyService;
 import org.springframework.stereotype.Service;

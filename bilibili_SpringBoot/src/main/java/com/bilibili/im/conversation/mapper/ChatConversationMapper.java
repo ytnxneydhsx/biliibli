@@ -51,4 +51,16 @@ public interface ChatConversationMapper {
                                           @Param("type") Integer type,
                                           @Param("lastMessage") String lastMessage,
                                           @Param("lastMessageTime") java.time.LocalDateTime lastMessageTime);
+
+    @Update("""
+            UPDATE chat_conversation
+            SET unread_count = 0,
+                update_time = CURRENT_TIMESTAMP
+            WHERE owner_user_id = #{ownerUserId}
+              AND target_id = #{targetId}
+              AND type = #{type}
+            """)
+    int resetUnreadCount(@Param("ownerUserId") Long ownerUserId,
+                         @Param("targetId") Long targetId,
+                         @Param("type") Integer type);
 }

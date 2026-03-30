@@ -12,6 +12,7 @@ public class SendMessageVO {
     private String conversationId;
     private Integer messageType;
     private MessageContentDTO content;
+    private String senderLocation;
     private LocalDateTime sendTime;
     private Integer status;
 }

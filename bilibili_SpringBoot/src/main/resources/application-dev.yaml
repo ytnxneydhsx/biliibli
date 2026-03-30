@@ -12,3 +12,6 @@ springdoc:
 app:
   docs:
     public: true
+  im:
+    mq:
+      enabled: true

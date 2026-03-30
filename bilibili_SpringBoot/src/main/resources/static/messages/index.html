@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息中心 - bilibili</title>
+    <link rel="stylesheet" href="/messages/styles.css">
+</head>
+<body>
+<div class="page-shell">
+    <header class="site-header">
+        <div class="site-brand">
+            <div class="brand-mark">
+                <span class="brand-ear left"></span>
+                <span class="brand-ear right"></span>
+                <span class="brand-text">bili</span>
+            </div>
+            <div class="brand-copy">
+                <p class="brand-caption">站内消息</p>
+                <h1>消息中心</h1>
+            </div>
+        </div>
+        <div class="header-meta">
+            <span class="nav-pill is-active">私信</span>
+            <span id="connectionStatus" class="status-pill is-idle">未连接</span>
+            <span id="loginStatus" class="status-pill is-muted">未登录</span>
+        </div>
+    </header>
+
+    <main class="workspace">
+        <aside class="account-rail">
+            <section class="surface account-card">
+                <div class="card-head">
+                    <div>
+                        <p class="section-kicker">账号状态</p>
+                        <h2>当前会话</h2>
+                    </div>
+                </div>
+                <div class="account-summary">
+                    <div class="avatar-chip">私</div>
+                    <div>
+                        <p id="accountPrimary" class="account-primary">未登录</p>
+                        <p class="account-secondary">这个页面只展示你当前在线期间的实时推送。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="surface">
+                <div class="card-head">
+                    <div>
+                        <p class="section-kicker">登录</p>
+                        <h2>获取令牌</h2>
+                    </div>
+                    <p class="section-note">和现有站点接口共用一套登录。</p>
+                </div>
+                <form id="loginForm" class="form-stack">
+                    <label class="field">
+                        <span>API Base</span>
+                        <input id="apiBase" type="text" placeholder="http://localhost:8080">
+                    </label>
+                    <label class="field">
+                        <span>用户名</span>
+                        <input id="username" type="text" placeholder="输入测试账号">
+                    </label>
+                    <label class="field">
+                        <span>密码</span>
+                        <input id="password" type="password" placeholder="输入密码">
+                    </label>
+                    <button class="primary-btn" type="submit">登录</button>
+                </form>
+            </section>
+
+            <section class="surface">
+                <div class="card-head">
+                    <div>
+                        <p class="section-kicker">连接</p>
+                        <h2>实时通道</h2>
+                    </div>
+                    <p class="section-note">这里只接你后端已经落地的能力。</p>
+                </div>
+                <div class="form-stack">
+                    <label class="field">
+                        <span>当前 UID</span>
+                        <input id="currentUid" type="text" placeholder="登录后自动填充">
+                    </label>
+                    <label class="field">
+                        <span>JWT Token</span>
+                        <textarea id="token" rows="4" placeholder="可手动粘贴 token"></textarea>
+                    </label>
+                    <label class="field">
+                        <span>WebSocket URL</span>
+                        <input id="wsUrl" type="text" placeholder="ws://localhost:8080/ws/im">
+                    </label>
+                    <div class="button-row">
+                        <button id="connectButton" class="primary-btn" type="button">连接</button>
+                        <button id="disconnectButton" class="ghost-btn" type="button">断开</button>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <section class="inbox-rail surface">
+            <div class="card-head">
+                <div>
+                    <p class="section-kicker">会话列表</p>
+                    <h2>最近消息</h2>
+                </div>
+                <p id="conversationCount" class="section-note">暂无会话</p>
+            </div>
+
+            <div class="manual-peer">
+                <label class="field">
+                    <span>手动输入对方 UID</span>
+                    <input id="peerUid" type="text" placeholder="输入对方 uid">
+                </label>
+                <button id="usePeerButton" class="ghost-btn full-width" type="button">进入这个会话</button>
+            </div>
+
+            <div id="conversationList" class="conversation-list"></div>
+        </section>
+
+        <section class="chat-stage">
+            <section class="surface chat-hero">
+                <div>
+                    <p class="section-kicker">当前会话</p>
+                    <h2 id="chatTitle">请选择一个会话</h2>
+                    <p id="chatSubtitle" class="hero-note">这页更像站内私信页，但不会伪装出历史分页、图片上传、已读回执这些你后端还没支持的功能。</p>
+                </div>
+            </section>
+
+            <section class="surface chat-panel">
+                <div id="messageStream" class="message-stream"></div>
+                <form id="sendForm" class="composer">
+                    <label class="field composer-field">
+                        <span>消息内容</span>
+                        <textarea id="messageInput" rows="3" placeholder="输入一条文本消息"></textarea>
+                    </label>
+                    <button class="primary-btn send-btn" type="submit">发送</button>
+                </form>
+            </section>
+
+            <details class="surface debug-panel">
+                <summary>
+                    <span>调试事件</span>
+                    <span class="summary-note">需要排链路时再展开</span>
+                </summary>
+                <div id="eventLog" class="event-log"></div>
+            </details>
+        </section>
+    </main>
+</div>
+<script src="/messages/app.js"></script>
+</body>
+</html>

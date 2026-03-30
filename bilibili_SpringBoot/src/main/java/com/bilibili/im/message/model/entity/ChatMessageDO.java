@@ -15,6 +15,7 @@ public class ChatMessageDO implements Serializable {
     private Long senderId;
     private Long receiverId;
     private Long clientMessageId;
+    private String senderLocation;
     private Integer messageType;
     private String content;
     private LocalDateTime sendTime;

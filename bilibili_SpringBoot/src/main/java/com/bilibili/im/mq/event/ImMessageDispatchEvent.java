@@ -15,4 +15,5 @@ public class ImMessageDispatchEvent {
     private MessageContentDTO content;
     private LocalDateTime sendTime;
     private Long clientMessageId;
+    private String senderLocation;
 }

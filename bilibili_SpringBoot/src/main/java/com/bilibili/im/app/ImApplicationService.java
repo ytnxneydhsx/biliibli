@@ -1,6 +1,6 @@
 package com.bilibili.im.app;
 
-import com.bilibili.im.message.model.dto.SendMessageDTO;
+import com.bilibili.im.message.model.command.SendMessageCommand;
 import com.bilibili.im.message.model.vo.SendMessageVO;
 
 /**
@@ -9,5 +9,5 @@ import com.bilibili.im.message.model.vo.SendMessageVO;
  */
 public interface ImApplicationService {
 
-    SendMessageVO acceptMessage(Long senderId, SendMessageDTO dto);
+    SendMessageVO acceptMessage(Long senderId, String clientIp, SendMessageCommand command);
 }

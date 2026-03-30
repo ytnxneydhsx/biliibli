@@ -2,7 +2,7 @@ package com.bilibili.im.conversation.service.impl;
 
 import com.bilibili.im.conversation.mapper.ChatConversationMapper;
 import com.bilibili.im.conversation.model.entity.ChatConversationDO;
-import com.bilibili.im.conversation.model.enum.ConversationType;
+import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.conversation.service.ChatConversationService;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +47,21 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     }
 
     @Override
+    public ChatConversationDO getSingleConversation(Long ownerUserId, Long peerUserId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (peerUserId == null || peerUserId <= 0) {
+            throw new IllegalArgumentException("peerUserId is invalid");
+        }
+        return chatConversationMapper.selectByOwnerTargetAndType(
+                ownerUserId,
+                peerUserId,
+                ConversationType.SINGLE.getCode()
+        );
+    }
+
+    @Override
     public void updateSenderConversationSummary(String conversationId,
                                                 Long senderId,
                                                 Long receiverId,
@@ -87,6 +102,22 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                             LocalDateTime lastMessageTime) {
         updateSenderConversationSummary(conversationId, senderId, receiverId, lastMessage, lastMessageTime);
         updateReceiverConversationSummary(conversationId, senderId, receiverId, lastMessage, lastMessageTime);
+    }
+
+    @Override
+    public void clearSingleConversationUnread(Long ownerUserId, Long peerUserId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (peerUserId == null || peerUserId <= 0) {
+            throw new IllegalArgumentException("peerUserId is invalid");
+        }
+
+        chatConversationMapper.resetUnreadCount(
+                ownerUserId,
+                peerUserId,
+                ConversationType.SINGLE.getCode()
+        );
     }
 
     private static String buildSingleConversationId(Long firstUserId, Long secondUserId) {

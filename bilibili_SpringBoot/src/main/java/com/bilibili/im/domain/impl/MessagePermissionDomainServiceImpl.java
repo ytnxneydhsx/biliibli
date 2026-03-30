@@ -3,7 +3,7 @@ package com.bilibili.im.domain.impl;
 import com.bilibili.im.contact.model.entity.ContactRelationDO;
 import com.bilibili.im.contact.service.ContactRelationQueryService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
-import com.bilibili.im.privacy.model.enum.PrivateMessagePolicy;
+import com.bilibili.im.privacy.model.enums.PrivateMessagePolicy;
 import com.bilibili.im.privacy.service.UserPrivacyService;
 import org.springframework.stereotype.Service;
 
@@ -35,14 +35,14 @@ public class MessagePermissionDomainServiceImpl implements MessagePermissionDoma
         if (receiverViewRelation != null && isTrue(receiverViewRelation.getIsBlocked())) {
             throw new IllegalArgumentException("receiver has blocked sender");
         }
+        ContactRelationDO senderViewRelation = contactRelationQueryService.getRelation(senderId, receiverId);
 
         PrivateMessagePolicy policy = userPrivacyService.getPrivateMessagePolicy(receiverId);
         switch (policy) {
             case ALLOW_ALL:
                 return;
             case STRANGER_FIRST_MESSAGE_ONLY:
-                // TODO: first-message-only rule is not enforced yet.
-                // Current behavior temporarily degrades to allow.
+                validateStrangerFirstMessageOnly(senderViewRelation, receiverViewRelation);
                 return;
             case CONTACT_ONLY:
                 if (receiverViewRelation != null && isTrue(receiverViewRelation.getIsContact())) {
@@ -58,5 +58,19 @@ public class MessagePermissionDomainServiceImpl implements MessagePermissionDoma
 
     private static boolean isTrue(Integer value) {
         return value != null && value == 1;
+    }
+
+    private void validateStrangerFirstMessageOnly(ContactRelationDO senderViewRelation,
+                                                  ContactRelationDO receiverViewRelation) {
+        boolean senderCanDm = senderViewRelation != null && isTrue(senderViewRelation.getIsDmContact());
+        if (!senderCanDm) {
+            return;
+        }
+
+        boolean receiverHasReplied = receiverViewRelation != null && isTrue(receiverViewRelation.getIsDmContact());
+        if (receiverHasReplied) {
+            return;
+        }
+        throw new IllegalArgumentException("receiver has not replied yet");
     }
 }

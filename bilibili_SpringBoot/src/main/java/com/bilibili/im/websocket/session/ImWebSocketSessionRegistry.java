@@ -10,7 +10,11 @@ public interface ImWebSocketSessionRegistry {
 
     void unregister(Long userId, String sessionId);
 
+    void touch(Long userId, String sessionId);
+
     List<WebSocketSession> getSessions(Long userId);
 
     boolean isOnline(Long userId);
+
+    List<WebSocketSession> removeExpiredSessions(long expireBeforeEpochMillis);
 }

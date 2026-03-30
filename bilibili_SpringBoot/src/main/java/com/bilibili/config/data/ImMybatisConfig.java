@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan(
         basePackages = {
+                "com.bilibili.access.mapper",
                 "com.bilibili.im.privacy.mapper",
                 "com.bilibili.im.contact.mapper",
                 "com.bilibili.im.conversation.mapper",

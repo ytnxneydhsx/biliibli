@@ -1,17 +1,18 @@
 package com.bilibili.im.app.impl;
 
+import com.bilibili.access.service.UserAccessService;
 import com.bilibili.im.app.ImApplicationService;
 import com.bilibili.im.common.time.ImTimeService;
 import com.bilibili.im.conversation.service.ChatConversationService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
+import com.bilibili.im.message.model.command.SendMessageCommand;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
-import com.bilibili.im.message.model.dto.SendMessageDTO;
-import com.bilibili.im.message.model.enum.MessageStatus;
-import com.bilibili.im.message.model.enum.MessageType;
+import com.bilibili.im.message.model.enums.MessageStatus;
+import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.SendMessageVO;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
-import com.bilibili.im.websocket.service.ImRealtimePushIdempotencyService;
+import com.bilibili.location.service.IpLocationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,48 +23,51 @@ import java.util.List;
 @Service
 public class ImApplicationServiceImpl implements ImApplicationService {
 
+    private final UserAccessService userAccessService;
     private final MessagePermissionDomainService messagePermissionDomainService;
     private final ChatConversationService chatConversationService;
     private final ImTimeService imTimeService;
     private final ImMessageProducer imMessageProducer;
-    private final ImRealtimePushIdempotencyService realtimePushIdempotencyService;
+    private final IpLocationService ipLocationService;
 
-    public ImApplicationServiceImpl(MessagePermissionDomainService messagePermissionDomainService,
+    public ImApplicationServiceImpl(UserAccessService userAccessService,
+                                    MessagePermissionDomainService messagePermissionDomainService,
                                     ChatConversationService chatConversationService,
                                     ImTimeService imTimeService,
                                     ImMessageProducer imMessageProducer,
-                                    ImRealtimePushIdempotencyService realtimePushIdempotencyService) {
+                                    IpLocationService ipLocationService) {
+        this.userAccessService = userAccessService;
         this.messagePermissionDomainService = messagePermissionDomainService;
         this.chatConversationService = chatConversationService;
         this.imTimeService = imTimeService;
         this.imMessageProducer = imMessageProducer;
-        this.realtimePushIdempotencyService = realtimePushIdempotencyService;
+        this.ipLocationService = ipLocationService;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public SendMessageVO acceptMessage(Long senderId, SendMessageDTO dto) {
+    public SendMessageVO acceptMessage(Long senderId, String clientIp, SendMessageCommand command) {
         if (senderId == null || senderId <= 0) {
             throw new IllegalArgumentException("senderId is invalid");
         }
-        if (dto == null) {
-            throw new IllegalArgumentException("dto is invalid");
+        if (command == null) {
+            throw new IllegalArgumentException("command is invalid");
         }
-        messagePermissionDomainService.validateCanSendMessage(senderId, dto.getReceiverId());
-        validateMessageContent(dto.getMessageType(), dto.getContent());
-        boolean acquired = realtimePushIdempotencyService.tryAcquire(senderId, dto.getClientMessageId());
-        if (!acquired) {
-            throw new IllegalStateException("duplicate realtime push request");
-        }
-        String conversationId = chatConversationService.resolveSingleConversationId(senderId, dto.getReceiverId());
+        userAccessService.validateCanSendImMessage(senderId);
+        messagePermissionDomainService.validateCanSendMessage(senderId, command.getReceiverId());
+        validateMessageContent(command.getMessageType(), command.getContent());
+
+        String conversationId = chatConversationService.resolveSingleConversationId(senderId, command.getReceiverId());
         LocalDateTime sendTime = imTimeService.now();
-        ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(conversationId, senderId, dto, sendTime);
+        String senderLocation = ipLocationService.resolveLocation(clientIp);
+        ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(conversationId, senderId, command, sendTime, senderLocation);
         imMessageProducer.publish(dispatchEvent);
 
         SendMessageVO sendMessageVO = new SendMessageVO();
         sendMessageVO.setConversationId(conversationId);
-        sendMessageVO.setMessageType(dto.getMessageType());
-        sendMessageVO.setContent(dto.getContent());
+        sendMessageVO.setMessageType(command.getMessageType());
+        sendMessageVO.setContent(command.getContent());
+        sendMessageVO.setSenderLocation(senderLocation);
         sendMessageVO.setSendTime(sendTime);
         sendMessageVO.setStatus(MessageStatus.ACCEPTED.getCode());
         return sendMessageVO;
@@ -71,16 +75,18 @@ public class ImApplicationServiceImpl implements ImApplicationService {
 
     private static ImMessageDispatchEvent buildDispatchEvent(String conversationId,
                                                              Long senderId,
-                                                             SendMessageDTO dto,
-                                                             LocalDateTime sendTime) {
+                                                             SendMessageCommand command,
+                                                             LocalDateTime sendTime,
+                                                             String senderLocation) {
         ImMessageDispatchEvent dispatchEvent = new ImMessageDispatchEvent();
         dispatchEvent.setConversationId(conversationId);
         dispatchEvent.setSenderId(senderId);
-        dispatchEvent.setReceiverId(dto.getReceiverId());
-        dispatchEvent.setMessageType(dto.getMessageType());
-        dispatchEvent.setContent(dto.getContent());
+        dispatchEvent.setReceiverId(command.getReceiverId());
+        dispatchEvent.setMessageType(command.getMessageType());
+        dispatchEvent.setContent(command.getContent());
         dispatchEvent.setSendTime(sendTime);
-        dispatchEvent.setClientMessageId(dto.getClientMessageId());
+        dispatchEvent.setClientMessageId(command.getClientMessageId());
+        dispatchEvent.setSenderLocation(senderLocation);
         return dispatchEvent;
     }
 

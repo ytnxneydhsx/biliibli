@@ -106,14 +106,16 @@ onMounted(loadUserSpace)
           <span>{{ friends.length }} 互关好友</span>
         </div>
       </div>
-      <button
-        v-if="authState.token && !isSelf"
-        class="primary-button"
-        type="button"
-        @click="toggleFollow"
-      >
-        {{ followed ? '取消关注' : '关注用户' }}
-      </button>
+      <div v-if="authState.token && !isSelf" class="profile-actions">
+        <RouterLink class="secondary-button message-link" :to="{ name: 'messages', query: { peerUid: uid } }">私信</RouterLink>
+        <button
+          class="primary-button"
+          type="button"
+          @click="toggleFollow"
+        >
+          {{ followed ? '取消关注' : '关注用户' }}
+        </button>
+      </div>
     </article>
 
     <section class="user-grid-layout">
@@ -168,6 +170,16 @@ onMounted(loadUserSpace)
   gap: 20px;
   align-items: center;
   padding: 24px;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.message-link {
+  text-decoration: none;
 }
 
 .profile-avatar {

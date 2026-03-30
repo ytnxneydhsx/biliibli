@@ -1,4 +1,4 @@
-package com.bilibili.im.message.model.enum;
+package com.bilibili.im.message.model.enums;
 
 import lombok.Getter;
 

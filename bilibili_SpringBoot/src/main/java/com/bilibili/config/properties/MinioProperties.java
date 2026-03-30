@@ -30,6 +30,9 @@ public class MinioProperties {
     @Value("${minio.coverPrefix:cover}")
     private String coverPrefix;
 
+    @Value("${minio.imImagePrefix:im}")
+    private String imImagePrefix;
+
     @Value("${minio.videoPrefix:video}")
     private String videoPrefix;
 
@@ -72,6 +75,10 @@ public class MinioProperties {
 
     public String getCoverPrefix() {
         return coverPrefix;
+    }
+
+    public String getImImagePrefix() {
+        return imImagePrefix;
     }
 
     public String getVideoPrefix() {
