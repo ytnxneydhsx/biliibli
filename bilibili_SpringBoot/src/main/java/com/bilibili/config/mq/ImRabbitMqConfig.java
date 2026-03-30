@@ -9,6 +9,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
@@ -35,12 +36,17 @@ public class ImRabbitMqConfig {
     }
 
     @Bean
-    public Queue conversationProjectionQueue(ImMqProperties properties) {
-        return new Queue(properties.getConversationProjectionQueue(), true);
+    public Queue conversationPersistQueue(ImMqProperties properties) {
+        return new Queue(properties.getConversationPersistQueue(), true);
     }
 
     @Bean
-    public Binding realtimePushBinding(Queue realtimePushQueue,
+    public Queue conversationRedisProjectionQueue(ImMqProperties properties) {
+        return new Queue(properties.getConversationRedisProjectionQueue(), true);
+    }
+
+    @Bean
+    public Binding realtimePushBinding(@Qualifier("realtimePushQueue") Queue realtimePushQueue,
                                        TopicExchange imEventExchange,
                                        ImMqProperties properties) {
         return BindingBuilder.bind(realtimePushQueue)
@@ -49,7 +55,7 @@ public class ImRabbitMqConfig {
     }
 
     @Bean
-    public Binding messagePersistBinding(Queue messagePersistQueue,
+    public Binding messagePersistBinding(@Qualifier("messagePersistQueue") Queue messagePersistQueue,
                                          TopicExchange imEventExchange,
                                          ImMqProperties properties) {
         return BindingBuilder.bind(messagePersistQueue)
@@ -58,10 +64,19 @@ public class ImRabbitMqConfig {
     }
 
     @Bean
-    public Binding conversationProjectionBinding(Queue conversationProjectionQueue,
-                                                 TopicExchange imEventExchange,
-                                                 ImMqProperties properties) {
-        return BindingBuilder.bind(conversationProjectionQueue)
+    public Binding conversationPersistBinding(@Qualifier("conversationPersistQueue") Queue conversationPersistQueue,
+                                              TopicExchange imEventExchange,
+                                              ImMqProperties properties) {
+        return BindingBuilder.bind(conversationPersistQueue)
+                .to(imEventExchange)
+                .with(properties.getRoutingKey());
+    }
+
+    @Bean
+    public Binding conversationRedisProjectionBinding(@Qualifier("conversationRedisProjectionQueue") Queue conversationRedisProjectionQueue,
+                                                      TopicExchange imEventExchange,
+                                                      ImMqProperties properties) {
+        return BindingBuilder.bind(conversationRedisProjectionQueue)
                 .to(imEventExchange)
                 .with(properties.getRoutingKey());
     }

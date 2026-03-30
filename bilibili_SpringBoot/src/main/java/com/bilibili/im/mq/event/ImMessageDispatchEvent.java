@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class ImMessageDispatchEvent {
 
+    private Long serverMessageId;
     private String conversationId;
     private Long senderId;
     private Long receiverId;

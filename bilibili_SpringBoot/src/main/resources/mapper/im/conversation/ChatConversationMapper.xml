@@ -10,6 +10,7 @@
         <result column="type" property="type"/>
         <result column="last_message" property="lastMessage"/>
         <result column="last_message_time" property="lastMessageTime"/>
+        <result column="last_server_message_id" property="lastServerMessageId"/>
         <result column="unread_count" property="unreadCount"/>
         <result column="is_muted" property="isMuted"/>
         <result column="create_time" property="createTime"/>
@@ -25,6 +26,7 @@
             type,
             last_message,
             last_message_time,
+            last_server_message_id,
             unread_count,
             is_muted,
             create_time,

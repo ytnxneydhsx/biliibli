@@ -21,8 +21,11 @@ public class ImMqProperties {
     @Value("${app.im.mq.messagePersistQueue:im.message.persist.queue}")
     private String messagePersistQueue;
 
-    @Value("${app.im.mq.conversationProjectionQueue:im.message.conversation.queue}")
-    private String conversationProjectionQueue;
+    @Value("${app.im.mq.conversationPersistQueue:im.message.conversation.queue}")
+    private String conversationPersistQueue;
+
+    @Value("${app.im.mq.conversationRedisProjectionQueue:im.message.conversation.redis.queue}")
+    private String conversationRedisProjectionQueue;
 
     public boolean isEnabled() {
         return enabled;
@@ -44,7 +47,11 @@ public class ImMqProperties {
         return messagePersistQueue;
     }
 
-    public String getConversationProjectionQueue() {
-        return conversationProjectionQueue;
+    public String getConversationPersistQueue() {
+        return conversationPersistQueue;
+    }
+
+    public String getConversationRedisProjectionQueue() {
+        return conversationRedisProjectionQueue;
     }
 }

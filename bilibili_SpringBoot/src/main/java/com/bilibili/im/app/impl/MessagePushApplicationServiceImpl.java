@@ -23,6 +23,14 @@ public class MessagePushApplicationServiceImpl implements MessagePushApplication
         messagePushService.pushMessageReceived(event.getReceiverId(), toMessagePush(event));
     }
 
+    @Override
+    public void pushMessageToSender(ImMessageDispatchEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("event is invalid");
+        }
+        messagePushService.pushMessageReceived(event.getSenderId(), toMessagePush(event));
+    }
+
     private MessagePushDTO toMessagePush(ImMessageDispatchEvent event) {
         MessagePushDTO messagePush = new MessagePushDTO();
         messagePush.setConversationId(event.getConversationId());

@@ -3,6 +3,7 @@ package com.bilibili.im.conversation.controller;
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.im.app.ConversationWindowApplicationService;
+import com.bilibili.im.conversation.model.vo.ConversationWindowListVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,16 @@ public class ImConversationController {
 
     public ImConversationController(ConversationWindowApplicationService conversationWindowApplicationService) {
         this.conversationWindowApplicationService = conversationWindowApplicationService;
+    }
+
+    @GetMapping
+    @PreAuthorize("@accessAuthz.canSendImMessage(authentication)")
+    @Operation(summary = "List recent single conversation windows for current user")
+    public Result<ConversationWindowListVO> listRecentConversations(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        return Result.success(
+                conversationWindowApplicationService.listRecentConversations(currentUser.getUid())
+        );
     }
 
     @PostMapping("/read")

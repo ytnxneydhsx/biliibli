@@ -1,5 +1,6 @@
 package com.bilibili.im.conversation.service.impl;
 
+import com.bilibili.im.conversation.ConversationWindowTuning;
 import com.bilibili.im.conversation.mapper.ChatConversationMapper;
 import com.bilibili.im.conversation.model.entity.ChatConversationDO;
 import com.bilibili.im.conversation.model.enums.ConversationType;
@@ -7,6 +8,7 @@ import com.bilibili.im.conversation.service.ChatConversationService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ChatConversationServiceImpl implements ChatConversationService {
@@ -47,6 +49,18 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     }
 
     @Override
+    public List<ChatConversationDO> listRecentSingleConversations(Long ownerUserId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        return chatConversationMapper.selectRecentByOwnerAndType(
+                ownerUserId,
+                ConversationType.SINGLE.getCode(),
+                ConversationWindowTuning.RECENT_WINDOW_LIMIT
+        );
+    }
+
+    @Override
     public ChatConversationDO getSingleConversation(Long ownerUserId, Long peerUserId) {
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");
@@ -66,10 +80,11 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                 Long senderId,
                                                 Long receiverId,
                                                 String lastMessage,
-                                                LocalDateTime lastMessageTime) {
+                                                LocalDateTime lastMessageTime,
+                                                Long lastServerMessageId) {
         Integer type = ConversationType.SINGLE.getCode();
         int senderRows = chatConversationMapper.updateSenderConversationSummary(
-                conversationId, senderId, receiverId, type, lastMessage, lastMessageTime);
+                conversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
         if (senderRows <= 0) {
             throw new RuntimeException("update sender conversation summary failed");
         }
@@ -80,7 +95,8 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                   Long senderId,
                                                   Long receiverId,
                                                   String lastMessage,
-                                                  LocalDateTime lastMessageTime) {
+                                                  LocalDateTime lastMessageTime,
+                                                  Long lastServerMessageId) {
         String resolvedConversationId = resolveSingleConversationId(receiverId, senderId);
         if (!resolvedConversationId.equals(conversationId)) {
             throw new IllegalStateException("receiver conversation id does not match sender conversation id");
@@ -88,7 +104,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
         Integer type = ConversationType.SINGLE.getCode();
         int receiverRows = chatConversationMapper.updateReceiverConversationSummary(
-                resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime);
+                resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
         if (receiverRows <= 0) {
             throw new RuntimeException("update receiver conversation summary failed");
         }
@@ -99,9 +115,24 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                             Long senderId,
                                                             Long receiverId,
                                                             String lastMessage,
-                                                            LocalDateTime lastMessageTime) {
-        updateSenderConversationSummary(conversationId, senderId, receiverId, lastMessage, lastMessageTime);
-        updateReceiverConversationSummary(conversationId, senderId, receiverId, lastMessage, lastMessageTime);
+                                                            LocalDateTime lastMessageTime,
+                                                            Long lastServerMessageId) {
+        updateSenderConversationSummary(
+                conversationId,
+                senderId,
+                receiverId,
+                lastMessage,
+                lastMessageTime,
+                lastServerMessageId
+        );
+        updateReceiverConversationSummary(
+                conversationId,
+                senderId,
+                receiverId,
+                lastMessage,
+                lastMessageTime,
+                lastServerMessageId
+        );
     }
 
     @Override

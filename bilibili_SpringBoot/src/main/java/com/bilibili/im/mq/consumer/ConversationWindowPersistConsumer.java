@@ -13,15 +13,15 @@ import java.util.List;
 
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
-public class ConversationWindowConsumer {
+public class ConversationWindowPersistConsumer {
 
     private final ConversationWindowApplicationService conversationWindowApplicationService;
 
-    public ConversationWindowConsumer(ConversationWindowApplicationService conversationWindowApplicationService) {
+    public ConversationWindowPersistConsumer(ConversationWindowApplicationService conversationWindowApplicationService) {
         this.conversationWindowApplicationService = conversationWindowApplicationService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.conversationProjectionQueue}")
+    @RabbitListener(queues = "#{@imMqProperties.conversationPersistQueue}")
     @Transactional(rollbackFor = Exception.class)
     public void consume(ImMessageDispatchEvent event) {
         if (event == null) {
@@ -32,11 +32,8 @@ public class ConversationWindowConsumer {
                 event.getSenderId(),
                 event.getReceiverId(),
                 buildConversationSummary(event.getContent()),
-                event.getSendTime()
-        );
-        conversationWindowApplicationService.pushUpdatedSingleConversationWindows(
-                event.getSenderId(),
-                event.getReceiverId()
+                event.getSendTime(),
+                event.getServerMessageId()
         );
     }
 

@@ -93,7 +93,8 @@ app:
       routingKey: im.message.dispatch
       realtimePushQueue: im.message.realtime.queue
       messagePersistQueue: im.message.persist.queue
-      conversationProjectionQueue: im.message.conversation.queue
+      conversationPersistQueue: im.message.conversation.queue
+      conversationRedisProjectionQueue: im.message.conversation.redis.queue
     websocket:
       enabled: true
       path: /ws/im

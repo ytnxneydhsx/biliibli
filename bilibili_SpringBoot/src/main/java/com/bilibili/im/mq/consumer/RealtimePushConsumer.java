@@ -22,6 +22,7 @@ public class RealtimePushConsumer {
             throw new IllegalArgumentException("event is invalid");
         }
 
+        messagePushApplicationService.pushMessageToSender(event);
         messagePushApplicationService.pushMessageToReceiver(event);
     }
 }

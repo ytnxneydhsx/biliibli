@@ -2,6 +2,7 @@ package com.bilibili.im.app.impl;
 
 import com.bilibili.access.service.UserAccessService;
 import com.bilibili.im.app.ImApplicationService;
+import com.bilibili.im.common.id.MessageIdGenerator;
 import com.bilibili.im.common.time.ImTimeService;
 import com.bilibili.im.conversation.service.ChatConversationService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
@@ -29,19 +30,22 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     private final ImTimeService imTimeService;
     private final ImMessageProducer imMessageProducer;
     private final IpLocationService ipLocationService;
+    private final MessageIdGenerator messageIdGenerator;
 
     public ImApplicationServiceImpl(UserAccessService userAccessService,
                                     MessagePermissionDomainService messagePermissionDomainService,
                                     ChatConversationService chatConversationService,
                                     ImTimeService imTimeService,
                                     ImMessageProducer imMessageProducer,
-                                    IpLocationService ipLocationService) {
+                                    IpLocationService ipLocationService,
+                                    MessageIdGenerator messageIdGenerator) {
         this.userAccessService = userAccessService;
         this.messagePermissionDomainService = messagePermissionDomainService;
         this.chatConversationService = chatConversationService;
         this.imTimeService = imTimeService;
         this.imMessageProducer = imMessageProducer;
         this.ipLocationService = ipLocationService;
+        this.messageIdGenerator = messageIdGenerator;
     }
 
     @Override
@@ -60,7 +64,15 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         String conversationId = chatConversationService.resolveSingleConversationId(senderId, command.getReceiverId());
         LocalDateTime sendTime = imTimeService.now();
         String senderLocation = ipLocationService.resolveLocation(clientIp);
-        ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(conversationId, senderId, command, sendTime, senderLocation);
+        long serverMessageId = messageIdGenerator.nextId();
+        ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(
+                conversationId,
+                senderId,
+                command,
+                sendTime,
+                senderLocation,
+                serverMessageId
+        );
         imMessageProducer.publish(dispatchEvent);
 
         SendMessageVO sendMessageVO = new SendMessageVO();
@@ -77,8 +89,10 @@ public class ImApplicationServiceImpl implements ImApplicationService {
                                                              Long senderId,
                                                              SendMessageCommand command,
                                                              LocalDateTime sendTime,
-                                                             String senderLocation) {
+                                                             String senderLocation,
+                                                             Long serverMessageId) {
         ImMessageDispatchEvent dispatchEvent = new ImMessageDispatchEvent();
+        dispatchEvent.setServerMessageId(serverMessageId);
         dispatchEvent.setConversationId(conversationId);
         dispatchEvent.setSenderId(senderId);
         dispatchEvent.setReceiverId(command.getReceiverId());

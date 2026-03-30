@@ -17,6 +17,7 @@ public class ChatConversationDO implements Serializable {
     private Integer type;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
+    private Long lastServerMessageId;
     private Integer unreadCount;
     private Integer isMuted;
     private LocalDateTime createTime;
