@@ -7,6 +7,8 @@ import type {
   AcceptedPayload,
   ConnectionState,
   ConversationItem,
+  ConversationWindowListVO,
+  ConversationWindowVO,
   ConversationUpdatedPayload,
   DraftImageItem,
   EventLogItem,
@@ -35,6 +37,7 @@ export function useMessagesPage() {
   const pendingMessages = ref<Record<string, MessageItem>>({})
   const peerProfiles = ref<Record<string, UserProfileVO>>({})
   const loadingPeer = ref(false)
+  const loadingConversations = ref(false)
   const loadingHistory = ref(false)
   const readingConversation = ref(false)
   const uploadError = ref('')
@@ -124,11 +127,12 @@ export function useMessagesPage() {
 
   watch(
     currentToken,
-    (token) => {
+    async (token) => {
       if (!token) {
         disconnectSocket()
         return
       }
+      await loadConversationWindows()
       if (!socket.value || socket.value.readyState === WebSocket.CLOSED) {
         connectSocket()
       }
@@ -137,6 +141,9 @@ export function useMessagesPage() {
   )
 
   onMounted(async () => {
+    if (currentToken.value) {
+      await loadConversationWindows()
+    }
     if (peerUidFromRoute.value) {
       await loadPeerProfile(peerUidFromRoute.value)
     }
@@ -183,6 +190,36 @@ export function useMessagesPage() {
       return
     }
     await loadHistoryPage(peerUid, false)
+  }
+
+  async function loadConversationWindows() {
+    if (!currentToken.value || loadingConversations.value) {
+      return
+    }
+
+    loadingConversations.value = true
+    try {
+      const payload = await api.get<ConversationWindowListVO>('/me/im/conversations')
+      const records = payload.records || []
+      const loadedPeerUids: string[] = []
+      for (const record of records) {
+        const peerUid = applyConversationWindow(record)
+        if (peerUid) {
+          loadedPeerUids.push(peerUid)
+        }
+      }
+      await Promise.all(
+        loadedPeerUids
+          .map((peerUid) => loadPeerProfile(peerUid)),
+      )
+      if (!peerUidFromRoute.value && !activePeerUid.value && loadedPeerUids.length > 0) {
+        openConversation(loadedPeerUids[0])
+      }
+    } catch (error) {
+      pushEvent('error', (error as Error).message || '会话窗口加载失败')
+    } finally {
+      loadingConversations.value = false
+    }
   }
 
   async function loadHistoryPage(peerUid: string, appendOlder: boolean) {
@@ -374,10 +411,15 @@ export function useMessagesPage() {
 
     const senderId = String(data.senderId || '')
     const receiverId = String(data.receiverId || '')
+    const clientKey = String(data.clientMessageId || '')
     const peerUid = senderId === currentUid.value ? receiverId : senderId
 
     await loadPeerProfile(peerUid)
     ensureConversation(peerUid)
+
+    if (senderId === currentUid.value && clientKey) {
+      clearPendingMessage(clientKey, data)
+    }
 
     mergeMessages(peerUid, [toRealtimeMessageItem(data, peerUid)])
 
@@ -405,22 +447,11 @@ export function useMessagesPage() {
     if (!data?.conversationId) {
       return
     }
-
-    const peerUid = String(data.targetUserId || resolvePeerUidFromConversation(data.conversationId, currentUid.value))
+    const peerUid = applyConversationWindow(data)
     if (!peerUid) {
       return
     }
-
     await loadPeerProfile(peerUid)
-    ensureConversation(peerUid)
-
-    upsertConversation(peerUid, {
-      conversationId: data.conversationId,
-      lastMessage: data.lastMessage || '',
-      lastMessageTime: formatDateTime(data.lastMessageTime),
-      lastMessageEpoch: toEpoch(data.lastMessageTime),
-      unreadCount: Number(data.unreadCount || 0),
-    })
   }
 
   async function sendMessage() {
@@ -516,6 +547,27 @@ export function useMessagesPage() {
       nextBeforeMessageId: '',
       historyLoaded: false,
     })
+  }
+
+  function applyConversationWindow(data?: ConversationUpdatedPayload | ConversationWindowVO) {
+    if (!data?.conversationId) {
+      return ''
+    }
+
+    const peerUid = String(data.targetId || (data as ConversationUpdatedPayload).targetUserId || resolvePeerUidFromConversation(data.conversationId, currentUid.value))
+    if (!peerUid) {
+      return ''
+    }
+
+    ensureConversation(peerUid)
+    upsertConversation(peerUid, {
+      conversationId: data.conversationId,
+      lastMessage: data.lastMessage || '',
+      lastMessageTime: formatDateTime(data.lastMessageTime),
+      lastMessageEpoch: toEpoch(data.lastMessageTime),
+      unreadCount: Number(data.unreadCount || 0),
+    })
+    return peerUid
   }
 
   function upsertConversation(peerUid: string, patch: Partial<ConversationItem>) {
@@ -667,6 +719,22 @@ export function useMessagesPage() {
 
   function findPendingByConversationId(conversationId: string) {
     return Object.values(pendingMessages.value).find((item) => buildSingleConversationId(currentUid.value, item.peerUid) === conversationId)
+  }
+
+  function clearPendingMessage(clientKey: string, data?: MessagePushPayload) {
+    const pending = pendingMessages.value[clientKey]
+    if (!pending) {
+      return
+    }
+
+    pending.pending = false
+    pending.senderLocation = String(data?.senderLocation || pending.senderLocation || '')
+    pending.time = formatDateTime(data?.sendTime) || pending.time
+    pending.epoch = toEpoch(data?.sendTime) || pending.epoch
+
+    const nextPending = { ...pendingMessages.value }
+    delete nextPending[clientKey]
+    pendingMessages.value = nextPending
   }
 
   function buildConversationPreview(content?: MessageContent) {

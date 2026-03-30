@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios'
+import JSONBigFactory from 'json-bigint'
 
 type ApiResult<T> = {
   code: number
@@ -6,8 +7,28 @@ type ApiResult<T> = {
   data: T
 }
 
+const JSONBig = JSONBigFactory({ storeAsString: true })
+
+function parseResponseBody(data: unknown) {
+  if (typeof data !== 'string') {
+    return data
+  }
+
+  const trimmed = data.trim()
+  if (!trimmed) {
+    return data
+  }
+
+  try {
+    return JSONBig.parse(trimmed)
+  } catch {
+    return data
+  }
+}
+
 const http = axios.create({
   timeout: 30000,
+  transformResponse: [(data) => parseResponseBody(data)],
 })
 
 http.interceptors.request.use((config) => {

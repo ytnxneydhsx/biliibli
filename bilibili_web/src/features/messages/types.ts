@@ -47,10 +47,27 @@ export type MessagePushPayload = {
 
 export type ConversationUpdatedPayload = {
   conversationId?: string
+  targetId?: string | number
   targetUserId?: string | number
   lastMessage?: string
   lastMessageTime?: string
   unreadCount?: number
+  isMuted?: number
+}
+
+export type ConversationWindowVO = {
+  conversationId?: string
+  targetId?: string | number
+  lastMessage?: string
+  lastMessageTime?: string
+  unreadCount?: number
+  isMuted?: number
+}
+
+export type ConversationWindowListVO = {
+  ownerUserId?: string | number
+  size?: number
+  records?: ConversationWindowVO[]
 }
 
 export type AcceptedPayload = {
