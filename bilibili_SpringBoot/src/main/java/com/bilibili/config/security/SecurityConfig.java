@@ -37,6 +37,10 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_GET_PATHS = {
+            "/actuator/health",
+            "/actuator/metrics",
+            "/actuator/metrics/**",
+            "/actuator/prometheus",
             "/im-lab",
             "/im-lab/",
             "/im-lab/**",
