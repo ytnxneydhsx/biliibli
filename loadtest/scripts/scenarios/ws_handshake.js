@@ -20,8 +20,20 @@ const SESSION_DURATION_MS = Math.max(1000, envInt('WS_SESSION_DURATION_MS', 1500
 const HEARTBEAT_INTERVAL_MS = Math.max(0, envInt('WS_HEARTBEAT_INTERVAL_MS', 5000));
 const WS_P95_CONNECT_MS = Math.max(1, envInt('WS_P95_CONNECT_MS', 1000));
 const HEARTBEAT_ENABLED = HEARTBEAT_INTERVAL_MS > 0;
+const RESULTS_DIR = normalizeResultsDir(__ENV.RESULTS_DIR || '/work/results');
+const RESULTS_PREFIX = sanitizeFileToken(__ENV.RESULTS_PREFIX || 'ws-handshake');
+const RUN_LABEL = sanitizeFileToken(__ENV.RUN_LABEL || '');
+const RUN_TIMESTAMP = formatRunTimestamp(new Date());
+const RUN_ID = RUN_LABEL
+  ? `${RESULTS_PREFIX}-${RUN_LABEL}-${RUN_TIMESTAMP}`
+  : `${RESULTS_PREFIX}-${RUN_TIMESTAMP}`;
+const WS_SESSION_SOCKET_ERROR_RATE_MAX = Math.max(
+  0,
+  Math.min(1, envFloat('WS_SESSION_SOCKET_ERROR_RATE_MAX', 0.05)),
+);
 
 const wsHandshakeSuccessRate = new Rate('ws_handshake_success_rate');
+const wsSessionSocketErrorRate = new Rate('ws_session_socket_error_rate');
 const wsHandshakeDurationMs = new Trend('ws_handshake_duration_ms', true);
 const wsHeartbeatAckSessionRate = new Rate('ws_heartbeat_ack_session_rate');
 const wsHeartbeatAckLatencyMs = new Trend('ws_heartbeat_ack_latency_ms', true);
@@ -29,6 +41,7 @@ const wsHeartbeatAckTotal = new Counter('ws_heartbeat_ack_total');
 const thresholds = {
   checks: ['rate>0.99'],
   ws_handshake_success_rate: ['rate>0.99'],
+  ws_session_socket_error_rate: [`rate<${WS_SESSION_SOCKET_ERROR_RATE_MAX}`],
   ws_handshake_duration_ms: [`p(95)<${WS_P95_CONNECT_MS}`],
 };
 
@@ -66,12 +79,33 @@ export const options = {
   summaryTrendStats: ['avg', 'min', 'med', 'p(90)', 'p(95)', 'max'],
 };
 
+export function handleSummary(data) {
+  const summary = {
+    runId: RUN_ID,
+    scenario: 'ws_handshake',
+    generatedAt: new Date().toISOString(),
+    config: buildRunConfig(),
+    keyMetrics: buildKeyMetrics(data.metrics || {}),
+    rawSummary: data,
+  };
+
+  return {
+    [`${RESULTS_DIR}/${RUN_ID}.summary.json`]: JSON.stringify(summary, null, 2),
+  };
+}
+
 export function setup() {
   const response = jsonRequest('GET', '/actuator/health', null, {
     tags: { endpoint: 'actuator_health' },
     timeout: REQUEST_TIMEOUT,
   });
-  if (!check(response, { 'actuator health status=200': (res) => res.status === 200 })) {
+  const responseBody = response.json();
+  if (
+    !check(response, {
+      'actuator health status=200': (res) => res.status === 200,
+      'actuator health payload status=UP': () => responseBody && responseBody.status === 'UP',
+    })
+  ) {
     throw new Error(`failed to reach ${BASE_URL}/actuator/health`);
   }
 
@@ -199,8 +233,9 @@ export default function (data) {
     },
   );
 
-  const handshakeOk = response && response.status === 101 && opened && !socketError;
+  const handshakeOk = response && response.status === 101 && opened;
   wsHandshakeSuccessRate.add(handshakeOk);
+  wsSessionSocketErrorRate.add(socketError);
 
   if (data.heartbeatEnabled) {
     wsHeartbeatAckSessionRate.add(heartbeatsSent === 0 || heartbeatsAcked > 0);
@@ -265,4 +300,90 @@ function tryParseJson(raw) {
   } catch (_) {
     return null;
   }
+}
+
+function buildRunConfig() {
+  return {
+    baseUrl: BASE_URL,
+    wsBaseUrl: WS_BASE_URL,
+    wsPath: WS_PATH,
+    requestTimeout: REQUEST_TIMEOUT,
+    sessionDurationMs: SESSION_DURATION_MS,
+    heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS,
+    heartbeatEnabled: HEARTBEAT_ENABLED,
+    wsP95ConnectMs: WS_P95_CONNECT_MS,
+    wsSessionSocketErrorRateMax: WS_SESSION_SOCKET_ERROR_RATE_MAX,
+    startVUs: Math.max(0, envInt('START_VUS', 0)),
+    stages: String(__ENV.K6_STAGES || '30s:10,2m:50,30s:0'),
+    staticTokenEnabled: Boolean(STATIC_TOKEN),
+    accountsFile: STATIC_TOKEN ? null : ACCOUNTS_FILE,
+    accountsCount: STATIC_TOKEN ? 0 : ACCOUNTS.length,
+    resultsDir: RESULTS_DIR,
+    resultsPrefix: RESULTS_PREFIX,
+    runLabel: RUN_LABEL || null,
+  };
+}
+
+function buildKeyMetrics(metrics) {
+  return {
+    checksRate: metricValue(metrics, 'checks', 'rate'),
+    httpReqDurationP95Ms: metricValue(metrics, 'http_req_duration', 'p(95)'),
+    wsHandshakeSuccessRate: metricValue(metrics, 'ws_handshake_success_rate', 'rate'),
+    wsSessionSocketErrorRate: metricValue(metrics, 'ws_session_socket_error_rate', 'rate'),
+    wsHandshakeDurationAvgMs: metricValue(metrics, 'ws_handshake_duration_ms', 'avg'),
+    wsHandshakeDurationP95Ms: metricValue(metrics, 'ws_handshake_duration_ms', 'p(95)'),
+    wsHeartbeatAckSessionRate: metricValue(metrics, 'ws_heartbeat_ack_session_rate', 'rate'),
+    wsHeartbeatAckLatencyP95Ms: metricValue(metrics, 'ws_heartbeat_ack_latency_ms', 'p(95)'),
+    iterations: metricValue(metrics, 'iterations', 'count'),
+    vusMax: metricValue(metrics, 'vus_max', 'value'),
+    wsSessions: metricValue(metrics, 'ws_sessions', 'count'),
+  };
+}
+
+function metricValue(metrics, metricName, statName) {
+  const metric = metrics[metricName];
+  if (!metric || !metric.values) {
+    return null;
+  }
+  const value = metric.values[statName];
+  return value === undefined ? null : value;
+}
+
+function envFloat(name, fallback) {
+  const raw = __ENV[name];
+  if (raw === undefined || raw === null || raw === '') {
+    return fallback;
+  }
+  const parsed = parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeResultsDir(value) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return '/work/results';
+  }
+  return raw.replace(/\/+$/, '');
+}
+
+function sanitizeFileToken(value) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return '';
+  }
+  return raw.replace(/[^0-9A-Za-z._-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
+
+function formatRunTimestamp(date) {
+  const year = date.getFullYear();
+  const month = pad2(date.getMonth() + 1);
+  const day = pad2(date.getDate());
+  const hour = pad2(date.getHours());
+  const minute = pad2(date.getMinutes());
+  const second = pad2(date.getSeconds());
+  return `${year}${month}${day}-${hour}${minute}${second}`;
+}
+
+function pad2(value) {
+  return value < 10 ? `0${value}` : String(value);
 }

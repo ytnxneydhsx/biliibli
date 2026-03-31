@@ -100,6 +100,10 @@ cp loadtest/.env.example loadtest/.env
 - `WS_SESSION_DURATION_MS`：每个连接保持多久，默认 `15000`
 - `WS_HEARTBEAT_INTERVAL_MS`：心跳间隔，默认 `5000`，填 `0` 表示只测握手不发心跳
 - `WS_P95_CONNECT_MS`：握手耗时 `p95` 阈值，默认 `1000`
+- `WS_SESSION_SOCKET_ERROR_RATE_MAX`：会话期 `socket error` 比例阈值，默认 `0.05`
+- `RESULTS_DIR`：结果输出目录，默认 `/work/results`
+- `RESULTS_PREFIX`：结果文件前缀，默认 `ws-handshake`
+- `RUN_LABEL`：本次压测标签，可选，适合写成 `baseline`、`100vu`、`after-fix`
 
 示例：
 
@@ -148,9 +152,31 @@ WebSocket 握手与心跳压测：
 
 ```bash
 docker compose -f loadtest/docker-compose.yml run --rm \
-  k6 run --summary-export /work/results/ws-handshake-summary.json \
-  scripts/scenarios/ws_handshake.js
+  k6 run scripts/scenarios/ws_handshake.js
 ```
+
+`ws_handshake.js` 现在会自动把每次运行保存成独立快照，不会再只保留最新一份。
+
+每次运行结束后，`loadtest/results/` 里会新增一份文件：
+
+- `ws-handshake-时间戳.summary.json`
+
+这两份快照里会带上：
+
+- 本次运行时间
+- 当前 `.env` 里的关键配置
+- 关键结果指标
+- `k6` 原始汇总结果
+
+如果你想给这次压测起一个更容易识别的名字，可以在 `.env` 里加：
+
+```env
+RUN_LABEL=100vu-5min
+```
+
+这样结果文件会变成：
+
+- `ws-handshake-100vu-5min-时间戳.summary.json`
 
 如果只是想先快速验证单 token 的建连稳定性，可以在 `loadtest/.env` 里先填：
 
