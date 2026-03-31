@@ -31,6 +31,14 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
     }
 
     @Override
+    public boolean isInitialized(Long ownerUserId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(ConversationWindowCacheKeys.initKey(ownerUserId)));
+    }
+
+    @Override
     public List<ConversationWindowVO> listRecentConversations(Long ownerUserId) {
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");
@@ -41,8 +49,7 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         String metaKey = ConversationWindowCacheKeys.metaKey(ownerUserId);
         String initKey = ConversationWindowCacheKeys.initKey(ownerUserId);
 
-        Boolean initExists = stringRedisTemplate.hasKey(initKey);
-        if (!Boolean.TRUE.equals(initExists)) {
+        if (!isInitialized(ownerUserId)) {
             return null;
         }
 

@@ -160,6 +160,9 @@ public class ConversationWindowApplicationServiceImpl implements ConversationWin
                                                   String lastMessage,
                                                   LocalDateTime lastMessageTime,
                                                   Long lastServerMessageId) {
+        if (!conversationWindowCacheService.isInitialized(senderId)) {
+            return;
+        }
         ConversationWindowCacheValue redisWindow = conversationWindowCacheService.getConversationWindow(senderId, conversationId);
         ConversationWindowCacheValue persistedWindow = null;
         ConversationWindowCacheValue baselineWindow = redisWindow;
@@ -196,6 +199,9 @@ public class ConversationWindowApplicationServiceImpl implements ConversationWin
                                                     String lastMessage,
                                                     LocalDateTime lastMessageTime,
                                                     Long lastServerMessageId) {
+        if (!conversationWindowCacheService.isInitialized(receiverId)) {
+            return;
+        }
         ConversationWindowCacheValue redisWindow = conversationWindowCacheService.getConversationWindow(receiverId, conversationId);
         ConversationWindowCacheValue persistedWindow = null;
         ConversationWindowCacheValue baselineWindow = redisWindow;

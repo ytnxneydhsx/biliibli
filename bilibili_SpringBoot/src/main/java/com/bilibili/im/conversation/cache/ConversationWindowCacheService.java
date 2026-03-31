@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface ConversationWindowCacheService {
 
+    boolean isInitialized(Long ownerUserId);
+
     List<ConversationWindowVO> listRecentConversations(Long ownerUserId);
 
     void replaceRecentConversations(Long ownerUserId, List<ConversationWindowVO> records);

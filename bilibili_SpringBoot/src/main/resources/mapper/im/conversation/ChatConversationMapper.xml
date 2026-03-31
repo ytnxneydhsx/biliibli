@@ -38,6 +38,31 @@
         LIMIT 1
     </select>
 
+    <select id="selectRecentByOwnerAndType" resultMap="ChatConversationMap">
+        SELECT
+            id,
+            conversation_id,
+            owner_user_id,
+            target_id,
+            type,
+            last_message,
+            last_message_time,
+            last_server_message_id,
+            unread_count,
+            is_muted,
+            create_time,
+            update_time
+        FROM chat_conversation
+        WHERE owner_user_id = #{ownerUserId}
+          AND type = #{type}
+        ORDER BY
+            CASE WHEN last_message_time IS NULL THEN 1 ELSE 0 END ASC,
+            last_message_time DESC,
+            update_time DESC,
+            id DESC
+        LIMIT #{limit}
+    </select>
+
     <insert id="insertIgnoreConversation">
         INSERT IGNORE INTO chat_conversation (
             conversation_id,
