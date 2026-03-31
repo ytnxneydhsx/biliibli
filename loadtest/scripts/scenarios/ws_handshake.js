@@ -20,6 +20,7 @@ const SESSION_DURATION_MS = Math.max(1000, envInt('WS_SESSION_DURATION_MS', 1500
 const HEARTBEAT_INTERVAL_MS = Math.max(0, envInt('WS_HEARTBEAT_INTERVAL_MS', 5000));
 const WS_P95_CONNECT_MS = Math.max(1, envInt('WS_P95_CONNECT_MS', 1000));
 const HEARTBEAT_ENABLED = HEARTBEAT_INTERVAL_MS > 0;
+const WS_LOGIN_MODE = normalizeLoginMode(__ENV.WS_LOGIN_MODE || 'setup_shared');
 const RESULTS_DIR = normalizeResultsDir(__ENV.RESULTS_DIR || '/work/results');
 const RESULTS_PREFIX = sanitizeFileToken(__ENV.RESULTS_PREFIX || 'ws-handshake');
 const RUN_LABEL = sanitizeFileToken(__ENV.RUN_LABEL || '');
@@ -109,18 +110,33 @@ export function setup() {
     throw new Error(`failed to reach ${BASE_URL}/actuator/health`);
   }
 
+  let sharedSession = null;
+  if (!STATIC_TOKEN && WS_LOGIN_MODE === 'setup_shared') {
+    sharedSession = performLogin(selectAccount(0), 'ws shared login');
+  }
+
   return {
     heartbeatEnabled: HEARTBEAT_ENABLED,
     wsBaseUrl: WS_BASE_URL,
+    sharedSession,
   };
 }
 
-function ensureSession() {
+function ensureSession(setupData) {
   if (STATIC_TOKEN) {
     return {
       uid: 'shared-token',
       token: STATIC_TOKEN,
     };
+  }
+
+  if (
+    setupData &&
+    setupData.sharedSession &&
+    setupData.sharedSession.token &&
+    WS_LOGIN_MODE === 'setup_shared'
+  ) {
+    return setupData.sharedSession;
   }
 
   if (currentSession !== null) {
@@ -133,38 +149,12 @@ function ensureSession() {
     );
   }
 
-  const account = ACCOUNTS[(__VU - 1) % ACCOUNTS.length];
-  const response = jsonRequest(
-    'POST',
-    '/users/login',
-    {
-      username: account.username,
-      password: account.password,
-    },
-    {
-      tags: { endpoint: 'users_login_for_ws' },
-      timeout: REQUEST_TIMEOUT,
-    },
-  );
-
-  if (!assertApiOk(response, 'ws user login')) {
-    throw new Error(`login failed for username=${account.username}`);
-  }
-
-  const data = getResultData(response) || {};
-  if (!data.token) {
-    throw new Error(`login response missing token for username=${account.username}`);
-  }
-
-  currentSession = {
-    uid: String(data.uid || account.uid),
-    token: data.token,
-  };
+  currentSession = performLogin(selectAccount(__VU - 1), 'ws user login');
   return currentSession;
 }
 
 export default function (data) {
-  const session = ensureSession();
+  const session = ensureSession(data);
   const wsUrl = buildWsUrl(data.wsBaseUrl, session.token);
   const connectStart = Date.now();
 
@@ -302,6 +292,44 @@ function tryParseJson(raw) {
   }
 }
 
+function selectAccount(index) {
+  if (!ACCOUNTS.length) {
+    throw new Error(
+      `missing websocket credentials: set WS_TOKEN or provide ${ACCOUNTS_FILE}`,
+    );
+  }
+  return ACCOUNTS[index % ACCOUNTS.length];
+}
+
+function performLogin(account, label) {
+  const response = jsonRequest(
+    'POST',
+    '/users/login',
+    {
+      username: account.username,
+      password: account.password,
+    },
+    {
+      tags: { endpoint: 'users_login_for_ws' },
+      timeout: REQUEST_TIMEOUT,
+    },
+  );
+
+  if (!assertApiOk(response, label)) {
+    throw new Error(`login failed for username=${account.username}`);
+  }
+
+  const data = getResultData(response) || {};
+  if (!data.token) {
+    throw new Error(`login response missing token for username=${account.username}`);
+  }
+
+  return {
+    uid: String(data.uid || account.uid || account.username),
+    token: data.token,
+  };
+}
+
 function buildRunConfig() {
   return {
     baseUrl: BASE_URL,
@@ -311,6 +339,7 @@ function buildRunConfig() {
     sessionDurationMs: SESSION_DURATION_MS,
     heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS,
     heartbeatEnabled: HEARTBEAT_ENABLED,
+    wsLoginMode: WS_LOGIN_MODE,
     wsP95ConnectMs: WS_P95_CONNECT_MS,
     wsSessionSocketErrorRateMax: WS_SESSION_SOCKET_ERROR_RATE_MAX,
     startVUs: Math.max(0, envInt('START_VUS', 0)),
@@ -364,6 +393,14 @@ function normalizeResultsDir(value) {
     return '/work/results';
   }
   return raw.replace(/\/+$/, '');
+}
+
+function normalizeLoginMode(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'per_vu') {
+    return 'per_vu';
+  }
+  return 'setup_shared';
 }
 
 function sanitizeFileToken(value) {

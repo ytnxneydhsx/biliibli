@@ -97,6 +97,7 @@ cp loadtest/.env.example loadtest/.env
 - `WS_BASE_URL`：可选，直接写成 `ws://` 或 `wss://` 地址
 - `WS_PATH`：默认 `/ws/im`
 - `WS_TOKEN`：可选，若提供则所有 VU 共用这个 token，不再走登录
+- `WS_LOGIN_MODE`：`setup_shared` 或 `per_vu`，默认 `setup_shared`
 - `WS_SESSION_DURATION_MS`：每个连接保持多久，默认 `15000`
 - `WS_HEARTBEAT_INTERVAL_MS`：心跳间隔，默认 `5000`，填 `0` 表示只测握手不发心跳
 - `WS_P95_CONNECT_MS`：握手耗时 `p95` 阈值，默认 `1000`
@@ -153,6 +154,14 @@ WebSocket 握手与心跳压测：
 ```bash
 docker compose -f loadtest/docker-compose.yml run --rm \
   k6 run scripts/scenarios/ws_handshake.js
+```
+
+默认模式下，脚本会先用 `loadtest/data/ws_accounts.json` 里的一个测试账号在 `setup()` 阶段登录一次，拿到 token 后再开始并发压 WebSocket。
+
+如果你想恢复成“每个 VU 自己登录再建连”，可以在 `.env` 里改成：
+
+```env
+WS_LOGIN_MODE=per_vu
 ```
 
 `ws_handshake.js` 现在会自动把每次运行保存成独立快照，不会再只保留最新一份。
