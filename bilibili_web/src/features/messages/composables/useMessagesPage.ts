@@ -227,23 +227,22 @@ export function useMessagesPage() {
       return
     }
     const conversation = conversations.value[peerUid]
-    if (appendOlder && (!conversation || !conversation.hasMoreHistory || !conversation.nextBeforeMessageId)) {
+    if (appendOlder && (!conversation || !conversation.hasMoreHistory || !conversation.nextBeforeServerMessageId)) {
       return
     }
 
     loadingHistory.value = true
     try {
-      const beforeMessageId = appendOlder ? conversation?.nextBeforeMessageId || undefined : undefined
+      const beforeServerMessageId = appendOlder ? conversation?.nextBeforeServerMessageId || undefined : undefined
       const history = await api.get<MessageHistoryVO>('/me/im/messages/history', {
         peerUid,
-        beforeMessageId,
-        pageSize: 20,
+        beforeServerMessageId,
       })
       const mapped = (history.records || []).map((record) => toMessageItem(record, peerUid))
       mergeMessages(peerUid, mapped)
       upsertConversation(peerUid, {
         hasMoreHistory: Boolean(history.hasMore),
-        nextBeforeMessageId: String(history.nextBeforeMessageId || ''),
+        nextBeforeServerMessageId: String(history.nextBeforeServerMessageId || ''),
         historyLoaded: true,
       })
     } catch (error) {
@@ -544,7 +543,7 @@ export function useMessagesPage() {
       lastMessageEpoch: 0,
       unreadCount: 0,
       hasMoreHistory: false,
-      nextBeforeMessageId: '',
+      nextBeforeServerMessageId: '',
       historyLoaded: false,
     })
   }
@@ -579,7 +578,7 @@ export function useMessagesPage() {
       lastMessageEpoch: 0,
       unreadCount: 0,
       hasMoreHistory: false,
-      nextBeforeMessageId: '',
+      nextBeforeServerMessageId: '',
       historyLoaded: false,
     }
 

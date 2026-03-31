@@ -46,6 +46,11 @@ public class ImRabbitMqConfig {
     }
 
     @Bean
+    public Queue recentMessageCacheProjectionQueue(ImMqProperties properties) {
+        return new Queue(properties.getRecentMessageCacheProjectionQueue(), true);
+    }
+
+    @Bean
     public Binding realtimePushBinding(@Qualifier("realtimePushQueue") Queue realtimePushQueue,
                                        TopicExchange imEventExchange,
                                        ImMqProperties properties) {
@@ -77,6 +82,15 @@ public class ImRabbitMqConfig {
                                                       TopicExchange imEventExchange,
                                                       ImMqProperties properties) {
         return BindingBuilder.bind(conversationRedisProjectionQueue)
+                .to(imEventExchange)
+                .with(properties.getRoutingKey());
+    }
+
+    @Bean
+    public Binding recentMessageCacheProjectionBinding(@Qualifier("recentMessageCacheProjectionQueue") Queue recentMessageCacheProjectionQueue,
+                                                       TopicExchange imEventExchange,
+                                                       ImMqProperties properties) {
+        return BindingBuilder.bind(recentMessageCacheProjectionQueue)
                 .to(imEventExchange)
                 .with(properties.getRoutingKey());
     }

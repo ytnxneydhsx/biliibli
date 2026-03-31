@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class MessageVO {
 
     private Long id;
+    private Long serverMessageId;
     private String conversationId;
     private Long senderId;
     private Long receiverId;

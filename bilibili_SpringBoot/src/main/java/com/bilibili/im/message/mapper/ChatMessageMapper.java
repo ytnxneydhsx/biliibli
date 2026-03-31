@@ -13,6 +13,7 @@ public interface ChatMessageMapper {
     @Select("""
             SELECT
                 id,
+                server_message_id AS serverMessageId,
                 conversation_id AS conversationId,
                 sender_id AS senderId,
                 receiver_id AS receiverId,
@@ -34,6 +35,7 @@ public interface ChatMessageMapper {
 
     @Insert("""
             INSERT INTO chat_message (
+                server_message_id,
                 conversation_id,
                 sender_id,
                 receiver_id,
@@ -44,6 +46,7 @@ public interface ChatMessageMapper {
                 send_time,
                 status
             ) VALUES (
+                #{serverMessageId},
                 #{conversationId},
                 #{senderId},
                 #{receiverId},
@@ -62,6 +65,7 @@ public interface ChatMessageMapper {
             <script>
             SELECT
                 id,
+                server_message_id AS serverMessageId,
                 conversation_id AS conversationId,
                 sender_id AS senderId,
                 receiver_id AS receiverId,
@@ -75,14 +79,14 @@ public interface ChatMessageMapper {
                 update_time AS updateTime
             FROM chat_message
             WHERE conversation_id = #{conversationId}
-            <if test="beforeMessageId != null">
-              AND id &lt; #{beforeMessageId}
+            <if test="beforeServerMessageId != null">
+              AND server_message_id &lt; #{beforeServerMessageId}
             </if>
-            ORDER BY id DESC
+            ORDER BY server_message_id DESC
             LIMIT #{limit}
             </script>
             """)
     List<ChatMessageDO> selectHistoryByConversationId(@Param("conversationId") String conversationId,
-                                                      @Param("beforeMessageId") Long beforeMessageId,
+                                                      @Param("beforeServerMessageId") Long beforeServerMessageId,
                                                       @Param("limit") Integer limit);
 }

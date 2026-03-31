@@ -9,5 +9,5 @@ public class MessageHistoryVO {
 
     private List<MessageVO> records;
     private Boolean hasMore;
-    private Long nextBeforeMessageId;
+    private Long nextBeforeServerMessageId;
 }

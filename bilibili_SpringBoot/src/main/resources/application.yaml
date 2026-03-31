@@ -95,6 +95,7 @@ app:
       messagePersistQueue: im.message.persist.queue
       conversationPersistQueue: im.message.conversation.queue
       conversationRedisProjectionQueue: im.message.conversation.redis.queue
+      recentMessageCacheProjectionQueue: im.message.recent.cache.queue
     websocket:
       enabled: true
       path: /ws/im

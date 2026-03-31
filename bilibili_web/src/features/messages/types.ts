@@ -10,7 +10,7 @@ export type ConversationItem = {
   lastMessageEpoch: number
   unreadCount: number
   hasMoreHistory: boolean
-  nextBeforeMessageId: string
+  nextBeforeServerMessageId: string
   historyLoaded: boolean
 }
 
@@ -86,6 +86,7 @@ export type WsPacket<T = unknown> = {
 
 export type MessageVO = {
   id: string | number
+  serverMessageId?: string | number
   conversationId?: string
   senderId?: string | number
   receiverId?: string | number
@@ -100,7 +101,7 @@ export type MessageVO = {
 export type MessageHistoryVO = {
   records: MessageVO[]
   hasMore: boolean
-  nextBeforeMessageId?: string | number | null
+  nextBeforeServerMessageId?: string | number | null
 }
 
 export type DraftImageItem = {

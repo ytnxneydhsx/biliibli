@@ -8,5 +8,5 @@ public interface ChatMessageService {
 
     ChatMessageDO persistMessage(PersistMessageCommand command);
 
-    MessageHistoryVO querySingleMessageHistory(Long ownerUserId, Long peerUserId, Long beforeMessageId, Integer pageSize);
+    MessageHistoryVO querySingleMessageHistory(Long ownerUserId, Long peerUserId, Long beforeServerMessageId);
 }

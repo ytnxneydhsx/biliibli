@@ -64,8 +64,7 @@ public class ImMessageController {
         return Result.success(chatMessageService.querySingleMessageHistory(
                 currentUser.getUid(),
                 dto.getPeerUid(),
-                dto.getBeforeMessageId(),
-                dto.getPageSize()
+                dto.getBeforeServerMessageId()
         ));
     }
 

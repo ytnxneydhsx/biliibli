@@ -27,6 +27,9 @@ public class ImMqProperties {
     @Value("${app.im.mq.conversationRedisProjectionQueue:im.message.conversation.redis.queue}")
     private String conversationRedisProjectionQueue;
 
+    @Value("${app.im.mq.recentMessageCacheProjectionQueue:im.message.recent.cache.queue}")
+    private String recentMessageCacheProjectionQueue;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -53,5 +56,9 @@ public class ImMqProperties {
 
     public String getConversationRedisProjectionQueue() {
         return conversationRedisProjectionQueue;
+    }
+
+    public String getRecentMessageCacheProjectionQueue() {
+        return recentMessageCacheProjectionQueue;
     }
 }
