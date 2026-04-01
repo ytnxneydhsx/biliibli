@@ -2,6 +2,7 @@ package com.bilibili.im.websocket.handler;
 
 import com.bilibili.im.app.ImApplicationService;
 import com.bilibili.im.websocket.ImWebSocketAttributes;
+import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
 import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
 import com.bilibili.im.websocket.model.dto.ImWebSocketInboundMessageDTO;
 import com.bilibili.im.websocket.model.dto.ImWebSocketOutboundMessageDTO;
@@ -23,15 +24,18 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     private final ImApplicationService imApplicationService;
     private final ImRealtimePushIdempotencyService realtimePushIdempotencyService;
     private final ObjectMapper objectMapper;
+    private final ImWebSocketMetricsRecorder metricsRecorder;
 
     public ImWebSocketHandler(ImWebSocketSessionRegistry sessionRegistry,
                               ImApplicationService imApplicationService,
                               ImRealtimePushIdempotencyService realtimePushIdempotencyService,
-                              ObjectMapper objectMapper) {
+                              ObjectMapper objectMapper,
+                              ImWebSocketMetricsRecorder metricsRecorder) {
         this.sessionRegistry = sessionRegistry;
         this.imApplicationService = imApplicationService;
         this.realtimePushIdempotencyService = realtimePushIdempotencyService;
         this.objectMapper = objectMapper;
+        this.metricsRecorder = metricsRecorder;
     }
 
     @Override
@@ -41,6 +45,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             throw new IllegalArgumentException("websocket userId is invalid");
         }
         sessionRegistry.register(userId, session);
+        metricsRecorder.recordConnectionOpened();
     }
 
     @Override
@@ -65,17 +70,26 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         try {
             inboundMessage = objectMapper.readValue(payload, ImWebSocketInboundMessageDTO.class);
         } catch (Exception ex) {
+            metricsRecorder.recordInboundPayloadInvalid();
             sendError(session, userId, "websocket message payload is invalid");
             return;
         }
 
         if (inboundMessage == null || inboundMessage.getType() == null || inboundMessage.getType().isBlank()) {
+            metricsRecorder.recordInboundTypeInvalid();
             sendError(session, userId, "websocket message type is invalid");
             return;
         }
 
         if (ImWebSocketMessageType.matches(inboundMessage.getType(), ImWebSocketMessageType.HEARTBEAT)) {
-            sendSimpleMessage(session, userId, ImWebSocketMessageType.HEARTBEAT_ACK, "OK");
+            metricsRecorder.recordHeartbeatReceived();
+            try {
+                sendSimpleMessage(session, userId, ImWebSocketMessageType.HEARTBEAT_ACK, "OK");
+                metricsRecorder.recordHeartbeatAckSent();
+            } catch (Exception ex) {
+                metricsRecorder.recordHeartbeatAckFailed();
+                throw ex;
+            }
             return;
         }
 
@@ -111,6 +125,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
+        metricsRecorder.recordInboundTypeUnsupported();
         sendError(session, userId, "websocket message type is unsupported");
     }
 
@@ -120,6 +135,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         if (userId != null && userId > 0) {
             sessionRegistry.unregister(userId, session.getId());
         }
+        metricsRecorder.recordConnectionClosed(status == null ? "unknown" : "code_" + status.getCode());
     }
 
     private Long resolveUserId(WebSocketSession session) {

@@ -1,6 +1,7 @@
 package com.bilibili.im.websocket.task;
 
 import com.bilibili.config.properties.ImWebSocketProperties;
+import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
 import com.bilibili.im.websocket.session.ImWebSocketSessionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,17 +17,21 @@ public class ImWebSocketHeartbeatCleanupTask {
 
     private final ImWebSocketProperties properties;
     private final ImWebSocketSessionRegistry sessionRegistry;
+    private final ImWebSocketMetricsRecorder metricsRecorder;
 
     public ImWebSocketHeartbeatCleanupTask(ImWebSocketProperties properties,
-                                           ImWebSocketSessionRegistry sessionRegistry) {
+                                           ImWebSocketSessionRegistry sessionRegistry,
+                                           ImWebSocketMetricsRecorder metricsRecorder) {
         this.properties = properties;
         this.sessionRegistry = sessionRegistry;
+        this.metricsRecorder = metricsRecorder;
     }
 
     @Scheduled(fixedDelayString = "#{@imWebSocketProperties.getHeartbeatCleanupIntervalMillis()}")
     public void cleanupExpiredSessions() {
         long expireBeforeEpochMillis = System.currentTimeMillis() - properties.getHeartbeatTimeoutMillis();
         List<WebSocketSession> expiredSessions = sessionRegistry.removeExpiredSessions(expireBeforeEpochMillis);
+        metricsRecorder.recordExpiredSessionCleanup(expiredSessions.size());
         for (WebSocketSession expiredSession : expiredSessions) {
             if (expiredSession == null || !expiredSession.isOpen()) {
                 continue;

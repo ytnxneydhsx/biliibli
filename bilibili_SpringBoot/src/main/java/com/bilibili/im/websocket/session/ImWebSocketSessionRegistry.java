@@ -17,4 +17,8 @@ public interface ImWebSocketSessionRegistry {
     boolean isOnline(Long userId);
 
     List<WebSocketSession> removeExpiredSessions(long expireBeforeEpochMillis);
+
+    int countOpenSessions();
+
+    int countOnlineUsers();
 }

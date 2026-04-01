@@ -139,6 +139,51 @@ public class InMemoryImWebSocketSessionRegistry implements ImWebSocketSessionReg
         return expiredSessions;
     }
 
+    @Override
+    public int countOpenSessions() {
+        int count = 0;
+        for (Map<String, SessionRecord> sessions : sessionsByUser.values()) {
+            if (sessions == null || sessions.isEmpty()) {
+                continue;
+            }
+            for (SessionRecord sessionRecord : sessions.values()) {
+                if (sessionRecord == null) {
+                    continue;
+                }
+                WebSocketSession session = sessionRecord.getSession();
+                if (session != null && session.isOpen()) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int countOnlineUsers() {
+        int count = 0;
+        for (Map<String, SessionRecord> sessions : sessionsByUser.values()) {
+            if (sessions == null || sessions.isEmpty()) {
+                continue;
+            }
+            boolean online = false;
+            for (SessionRecord sessionRecord : sessions.values()) {
+                if (sessionRecord == null) {
+                    continue;
+                }
+                WebSocketSession session = sessionRecord.getSession();
+                if (session != null && session.isOpen()) {
+                    online = true;
+                    break;
+                }
+            }
+            if (online) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     private void removeClosedSessions(Long userId,
                                       Map<String, SessionRecord> sessions,
                                       List<String> closedSessionIds) {
