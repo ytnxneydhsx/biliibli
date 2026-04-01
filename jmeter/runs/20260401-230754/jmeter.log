@@ -1,0 +1,1723 @@
+2026-04-01 23:07:55,547 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2026-04-01 23:07:55,558 INFO o.a.j.JMeter: Loading user properties from: D:\apache-jmeter-5.6.3\bin\user.properties
+2026-04-01 23:07:55,558 INFO o.a.j.JMeter: Loading system properties from: D:\apache-jmeter-5.6.3\bin\system.properties
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: Version 5.6.3
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: java.version=25.0.1
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: os.name=Windows 11
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: os.arch=amd64
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: os.version=10.0
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: file.encoding=UTF-8
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: java.awt.headless=true
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: Max memory     =1073741824
+2026-04-01 23:07:55,563 INFO o.a.j.JMeter: Available Processors =28
+2026-04-01 23:07:55,571 INFO o.a.j.JMeter: Default Locale=English (EN)
+2026-04-01 23:07:55,571 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2026-04-01 23:07:55,571 INFO o.a.j.JMeter: JMeterHome=D:\apache-jmeter-5.6.3
+2026-04-01 23:07:55,571 INFO o.a.j.JMeter: user.dir  =D:\biliibli
+2026-04-01 23:07:55,571 INFO o.a.j.JMeter: PWD       =D:\biliibli
+2026-04-01 23:07:55,572 INFO o.a.j.JMeter: IP: 198.18.0.1 Name: DESKTOP-B7T0SV2 FullName: DESKTOP-B7T0SV2
+2026-04-01 23:07:55,578 INFO o.a.j.JMeter: Setting property 'jmeter.reportgenerator.outputdir' to:'D:\biliibli\jmeter\runs\20260401-230754\report'
+2026-04-01 23:07:55,579 INFO o.a.j.s.FileServer: Default base='D:\biliibli'
+2026-04-01 23:07:55,580 INFO o.a.j.s.FileServer: Set new base='D:\biliibli\jmeter'
+2026-04-01 23:07:55,716 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2026-04-01 23:07:55,727 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2026-04-01 23:07:55,729 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2026-04-01 23:07:55,731 INFO o.a.j.s.SaveService: Loading file: D:\biliibli\jmeter\bilibili_webscoket_hand.jmx
+2026-04-01 23:07:55,771 INFO o.a.j.JMeter: Creating summariser <summary>
+2026-04-01 23:07:55,773 INFO o.a.j.r.d.ReportGenerator: ReportGenerator will use for Parsing the separator: ','
+2026-04-01 23:07:55,774 INFO o.a.j.r.d.ReportGenerator: Will generate report at end of test from  results file: D:\biliibli\jmeter\runs\20260401-230754\results.jtl
+2026-04-01 23:07:55,774 INFO o.a.j.r.d.ReportGenerator: Reading report generator properties from: D:\apache-jmeter-5.6.3\bin\reportgenerator.properties
+2026-04-01 23:07:55,774 INFO o.a.j.r.d.ReportGenerator: Merging with JMeter properties
+2026-04-01 23:07:55,776 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.temp_dir' not found, using default value 'temp' instead.
+2026-04-01 23:07:55,777 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.apdex_per_transaction' not found, using default value 'null' instead.
+2026-04-01 23:07:55,780 INFO o.a.j.r.c.ReportGeneratorConfiguration: apdex_per_transaction is empty, not APDEX per transaction customization
+2026-04-01 23:07:55,780 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.sample_filter' not found, using default value 'null' instead.
+2026-04-01 23:07:55,780 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.report_title' not found, using default value 'null' instead.
+2026-04-01 23:07:55,780 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.start_date' not found, using default value 'null' instead.
+2026-04-01 23:07:55,780 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.end_date' not found, using default value 'null' instead.
+2026-04-01 23:07:55,780 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.date_format' not found, using default value 'null' instead.
+2026-04-01 23:07:55,781 INFO o.a.j.r.c.ReportGeneratorConfiguration: Will use date range start date: null, end date: null
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.totalTPS.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.activeThreadsOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.timeVsThreads.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimeDistribution.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.transactionsPerSecond.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimePercentiles.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimePercentilesOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.responseTimesOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.connectTimeOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,783 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.graph.latenciesOverTime.exclude_controllers' not found, using default value 'false' instead.
+2026-04-01 23:07:55,784 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.json.filters_only_sample_series' not found, using default value 'true' instead.
+2026-04-01 23:07:55,784 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.json.series_filter' not found, using default value '' instead.
+2026-04-01 23:07:55,784 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.json.show_controllers_only' not found, using default value 'false' instead.
+2026-04-01 23:07:55,784 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.html.filters_only_sample_series' not found, using default value 'true' instead.
+2026-04-01 23:07:55,784 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.html.series_filter' not found, using default value '' instead.
+2026-04-01 23:07:55,784 INFO o.a.j.r.c.ReportGeneratorConfiguration: Property 'jmeter.reportgenerator.exporter.html.show_controllers_only' not found, using default value 'false' instead.
+2026-04-01 23:07:55,791 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-04-01 23:07:55,792 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-04-01 23:07:55,792 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-04-01 23:07:55,795 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2026-04-01 23:07:55,795 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2026-04-01 23:07:55,828 INFO o.a.j.r.ClassFinder: Will scan jar D:\apache-jmeter-5.6.3\lib\ext\jmeter-websocket-samplers-1.3.2.jar with filter ExtendsClassFilter [parents=[interface org.apache.jmeter.functions.Function], inner=false, contains=null, notContains=null]. Consider exposing JMeter plugins via META-INF/services, and add JMeter-Skip-Class-Scanning=true manifest attribute so JMeter can skip classfile scanning
+2026-04-01 23:07:55,837 INFO o.a.j.r.ClassFinder: Will scan jar D:\apache-jmeter-5.6.3\lib\ext\jmeter-plugins-manager-1.12.jar with filter ExtendsClassFilter [parents=[interface org.apache.jmeter.functions.Function], inner=false, contains=null, notContains=null]. Consider exposing JMeter plugins via META-INF/services, and add JMeter-Skip-Class-Scanning=true manifest attribute so JMeter can skip classfile scanning
+2026-04-01 23:07:55,889 INFO o.a.j.JMeter: Running test (1775056075889)
+2026-04-01 23:07:55,899 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : 线程组
+2026-04-01 23:07:55,899 INFO o.a.j.e.StandardJMeterEngine: Starting 500 threads for group 线程组.
+2026-04-01 23:07:55,899 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-04-01 23:07:55,899 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=500 ramp-up=60 delayedStart=false
+2026-04-01 23:07:55,904 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-1
+2026-04-01 23:07:55,905 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2026-04-01 23:07:55,905 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to UTF-8
+2026-04-01 23:07:55,905 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2026-04-01 23:07:55,905 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2026-04-01 23:07:55,940 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2026-04-01 23:07:55,940 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2026-04-01 23:07:56,023 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-2
+2026-04-01 23:07:56,142 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-3
+2026-04-01 23:07:56,262 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-4
+2026-04-01 23:07:56,382 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-5
+2026-04-01 23:07:56,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-6
+2026-04-01 23:07:56,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-7
+2026-04-01 23:07:56,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-8
+2026-04-01 23:07:56,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-9
+2026-04-01 23:07:56,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-10
+2026-04-01 23:07:57,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-11
+2026-04-01 23:07:57,222 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-12
+2026-04-01 23:07:57,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-13
+2026-04-01 23:07:57,461 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-14
+2026-04-01 23:07:57,582 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-15
+2026-04-01 23:07:57,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-16
+2026-04-01 23:07:57,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-17
+2026-04-01 23:07:57,939 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-18
+2026-04-01 23:07:58,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-19
+2026-04-01 23:07:58,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-20
+2026-04-01 23:07:58,299 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-21
+2026-04-01 23:07:58,419 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-22
+2026-04-01 23:07:58,540 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-23
+2026-04-01 23:07:58,659 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-24
+2026-04-01 23:07:58,779 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-25
+2026-04-01 23:07:58,900 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-26
+2026-04-01 23:07:59,019 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-27
+2026-04-01 23:07:59,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-28
+2026-04-01 23:07:59,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-29
+2026-04-01 23:07:59,380 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-30
+2026-04-01 23:07:59,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-31
+2026-04-01 23:07:59,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-32
+2026-04-01 23:07:59,739 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-33
+2026-04-01 23:07:59,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-34
+2026-04-01 23:07:59,981 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-35
+2026-04-01 23:08:00,100 INFO o.a.j.r.Summariser: summary +     33 in 00:00:04 =    7.8/s Avg:   389 Min:   111 Max:  2230 Err:     0 (0.00%) Active: 35 Started: 35 Finished: 0
+2026-04-01 23:08:00,102 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-36
+2026-04-01 23:08:00,221 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-37
+2026-04-01 23:08:00,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-38
+2026-04-01 23:08:00,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-39
+2026-04-01 23:08:00,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-40
+2026-04-01 23:08:00,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-41
+2026-04-01 23:08:00,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-42
+2026-04-01 23:08:00,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-43
+2026-04-01 23:08:01,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-44
+2026-04-01 23:08:01,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-45
+2026-04-01 23:08:01,301 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-46
+2026-04-01 23:08:01,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-47
+2026-04-01 23:08:01,540 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-48
+2026-04-01 23:08:01,660 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-49
+2026-04-01 23:08:01,779 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-50
+2026-04-01 23:08:01,900 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-51
+2026-04-01 23:08:02,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-52
+2026-04-01 23:08:02,139 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-53
+2026-04-01 23:08:02,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-54
+2026-04-01 23:08:02,379 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-55
+2026-04-01 23:08:02,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-56
+2026-04-01 23:08:02,619 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-57
+2026-04-01 23:08:02,739 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-58
+2026-04-01 23:08:02,859 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-59
+2026-04-01 23:08:02,979 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-60
+2026-04-01 23:08:03,099 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-61
+2026-04-01 23:08:03,221 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-62
+2026-04-01 23:08:03,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-63
+2026-04-01 23:08:03,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-64
+2026-04-01 23:08:03,582 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-65
+2026-04-01 23:08:03,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-66
+2026-04-01 23:08:03,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-67
+2026-04-01 23:08:03,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-68
+2026-04-01 23:08:04,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-69
+2026-04-01 23:08:04,181 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-70
+2026-04-01 23:08:04,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-71
+2026-04-01 23:08:04,421 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-72
+2026-04-01 23:08:04,540 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-73
+2026-04-01 23:08:04,660 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-74
+2026-04-01 23:08:04,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-75
+2026-04-01 23:08:04,900 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-76
+2026-04-01 23:08:05,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-77
+2026-04-01 23:08:05,141 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-78
+2026-04-01 23:08:05,261 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-79
+2026-04-01 23:08:05,380 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-80
+2026-04-01 23:08:05,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-81
+2026-04-01 23:08:05,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-82
+2026-04-01 23:08:05,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-83
+2026-04-01 23:08:05,859 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-84
+2026-04-01 23:08:05,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-85
+2026-04-01 23:08:06,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-86
+2026-04-01 23:08:06,220 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-87
+2026-04-01 23:08:06,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-88
+2026-04-01 23:08:06,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-89
+2026-04-01 23:08:06,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-90
+2026-04-01 23:08:06,699 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-91
+2026-04-01 23:08:06,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-92
+2026-04-01 23:08:06,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-93
+2026-04-01 23:08:07,061 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-94
+2026-04-01 23:08:07,181 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-95
+2026-04-01 23:08:07,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-96
+2026-04-01 23:08:07,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-97
+2026-04-01 23:08:07,539 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-98
+2026-04-01 23:08:07,660 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-99
+2026-04-01 23:08:07,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-100
+2026-04-01 23:08:07,899 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-101
+2026-04-01 23:08:08,019 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-102
+2026-04-01 23:08:08,139 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-103
+2026-04-01 23:08:08,259 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-104
+2026-04-01 23:08:08,380 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-105
+2026-04-01 23:08:08,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-106
+2026-04-01 23:08:08,621 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-107
+2026-04-01 23:08:08,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-108
+2026-04-01 23:08:08,859 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-109
+2026-04-01 23:08:08,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-110
+2026-04-01 23:08:09,099 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-111
+2026-04-01 23:08:09,219 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-112
+2026-04-01 23:08:09,339 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-113
+2026-04-01 23:08:09,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-114
+2026-04-01 23:08:09,579 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-115
+2026-04-01 23:08:09,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-116
+2026-04-01 23:08:09,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-117
+2026-04-01 23:08:09,939 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-118
+2026-04-01 23:08:10,059 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-119
+2026-04-01 23:08:10,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-120
+2026-04-01 23:08:10,299 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-121
+2026-04-01 23:08:10,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-122
+2026-04-01 23:08:10,540 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-123
+2026-04-01 23:08:10,659 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-124
+2026-04-01 23:08:10,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-125
+2026-04-01 23:08:10,900 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-126
+2026-04-01 23:08:11,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-127
+2026-04-01 23:08:11,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-128
+2026-04-01 23:08:11,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-129
+2026-04-01 23:08:11,380 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-130
+2026-04-01 23:08:11,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-131
+2026-04-01 23:08:11,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-132
+2026-04-01 23:08:11,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-133
+2026-04-01 23:08:11,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-134
+2026-04-01 23:08:11,979 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-135
+2026-04-01 23:08:12,099 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-136
+2026-04-01 23:08:12,219 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-137
+2026-04-01 23:08:12,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-138
+2026-04-01 23:08:12,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-139
+2026-04-01 23:08:12,579 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-140
+2026-04-01 23:08:12,699 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-141
+2026-04-01 23:08:12,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-142
+2026-04-01 23:08:12,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-143
+2026-04-01 23:08:13,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-144
+2026-04-01 23:08:13,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-145
+2026-04-01 23:08:13,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-146
+2026-04-01 23:08:13,419 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-147
+2026-04-01 23:08:13,539 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-148
+2026-04-01 23:08:13,659 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-149
+2026-04-01 23:08:13,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-150
+2026-04-01 23:08:13,899 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-151
+2026-04-01 23:08:14,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-152
+2026-04-01 23:08:14,139 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-153
+2026-04-01 23:08:14,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-154
+2026-04-01 23:08:14,379 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-155
+2026-04-01 23:08:14,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-156
+2026-04-01 23:08:14,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-157
+2026-04-01 23:08:14,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-158
+2026-04-01 23:08:14,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-159
+2026-04-01 23:08:14,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-160
+2026-04-01 23:08:15,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-161
+2026-04-01 23:08:15,220 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-162
+2026-04-01 23:08:15,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-163
+2026-04-01 23:08:15,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-164
+2026-04-01 23:08:15,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-165
+2026-04-01 23:08:15,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-166
+2026-04-01 23:08:15,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-167
+2026-04-01 23:08:15,939 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-168
+2026-04-01 23:08:16,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-169
+2026-04-01 23:08:16,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-170
+2026-04-01 23:08:16,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-171
+2026-04-01 23:08:16,419 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-172
+2026-04-01 23:08:16,539 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-173
+2026-04-01 23:08:16,659 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-174
+2026-04-01 23:08:16,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-175
+2026-04-01 23:08:16,900 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-176
+2026-04-01 23:08:17,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-177
+2026-04-01 23:08:17,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-178
+2026-04-01 23:08:17,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-179
+2026-04-01 23:08:17,380 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-180
+2026-04-01 23:08:17,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-181
+2026-04-01 23:08:17,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-182
+2026-04-01 23:08:17,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-183
+2026-04-01 23:08:17,861 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-184
+2026-04-01 23:08:17,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-185
+2026-04-01 23:08:18,099 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-186
+2026-04-01 23:08:18,219 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-187
+2026-04-01 23:08:18,339 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-188
+2026-04-01 23:08:18,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-189
+2026-04-01 23:08:18,579 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-190
+2026-04-01 23:08:18,699 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-191
+2026-04-01 23:08:18,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-192
+2026-04-01 23:08:18,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-193
+2026-04-01 23:08:19,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-194
+2026-04-01 23:08:19,179 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-195
+2026-04-01 23:08:19,299 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-196
+2026-04-01 23:08:19,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-197
+2026-04-01 23:08:19,539 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-198
+2026-04-01 23:08:19,660 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-199
+2026-04-01 23:08:19,781 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-200
+2026-04-01 23:08:19,901 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-201
+2026-04-01 23:08:20,019 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-202
+2026-04-01 23:08:20,139 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-203
+2026-04-01 23:08:20,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-204
+2026-04-01 23:08:20,379 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-205
+2026-04-01 23:08:20,499 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-206
+2026-04-01 23:08:20,621 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-207
+2026-04-01 23:08:20,739 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-208
+2026-04-01 23:08:20,861 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-209
+2026-04-01 23:08:20,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-210
+2026-04-01 23:08:21,101 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-211
+2026-04-01 23:08:21,220 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-212
+2026-04-01 23:08:21,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-213
+2026-04-01 23:08:21,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-214
+2026-04-01 23:08:21,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-215
+2026-04-01 23:08:21,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-216
+2026-04-01 23:08:21,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-217
+2026-04-01 23:08:21,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-218
+2026-04-01 23:08:22,060 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-219
+2026-04-01 23:08:22,179 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-220
+2026-04-01 23:08:22,299 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-221
+2026-04-01 23:08:22,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-222
+2026-04-01 23:08:22,540 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-223
+2026-04-01 23:08:22,660 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-224
+2026-04-01 23:08:22,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-225
+2026-04-01 23:08:22,900 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-226
+2026-04-01 23:08:23,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-227
+2026-04-01 23:08:23,141 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-228
+2026-04-01 23:08:23,260 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-229
+2026-04-01 23:08:23,379 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-230
+2026-04-01 23:08:23,499 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-231
+2026-04-01 23:08:23,619 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-232
+2026-04-01 23:08:23,739 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-233
+2026-04-01 23:08:23,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-234
+2026-04-01 23:08:23,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-235
+2026-04-01 23:08:24,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-236
+2026-04-01 23:08:24,221 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-237
+2026-04-01 23:08:24,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-238
+2026-04-01 23:08:24,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-239
+2026-04-01 23:08:24,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-240
+2026-04-01 23:08:24,699 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-241
+2026-04-01 23:08:24,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-242
+2026-04-01 23:08:24,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-243
+2026-04-01 23:08:25,065 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-244
+2026-04-01 23:08:25,189 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-245
+2026-04-01 23:08:25,312 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-246
+2026-04-01 23:08:25,421 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-247
+2026-04-01 23:08:25,547 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-248
+2026-04-01 23:08:25,670 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-249
+2026-04-01 23:08:25,779 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-250
+2026-04-01 23:08:25,902 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-251
+2026-04-01 23:08:26,019 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-252
+2026-04-01 23:08:26,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-253
+2026-04-01 23:08:26,261 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-254
+2026-04-01 23:08:26,381 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-255
+2026-04-01 23:08:26,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-256
+2026-04-01 23:08:26,620 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-257
+2026-04-01 23:08:26,739 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-258
+2026-04-01 23:08:26,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-259
+2026-04-01 23:08:26,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-260
+2026-04-01 23:08:27,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-261
+2026-04-01 23:08:27,220 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-262
+2026-04-01 23:08:27,339 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-263
+2026-04-01 23:08:27,459 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-264
+2026-04-01 23:08:27,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-265
+2026-04-01 23:08:27,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-266
+2026-04-01 23:08:27,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-267
+2026-04-01 23:08:27,939 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-268
+2026-04-01 23:08:28,059 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-269
+2026-04-01 23:08:28,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-270
+2026-04-01 23:08:28,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-271
+2026-04-01 23:08:28,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-272
+2026-04-01 23:08:28,539 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-273
+2026-04-01 23:08:28,659 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-274
+2026-04-01 23:08:28,780 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-275
+2026-04-01 23:08:28,899 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-276
+2026-04-01 23:08:29,020 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-277
+2026-04-01 23:08:29,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-278
+2026-04-01 23:08:29,259 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-279
+2026-04-01 23:08:29,379 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-280
+2026-04-01 23:08:29,500 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-281
+2026-04-01 23:08:29,622 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-282
+2026-04-01 23:08:29,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-283
+2026-04-01 23:08:29,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-284
+2026-04-01 23:08:29,992 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-285
+2026-04-01 23:08:30,064 INFO o.a.j.r.Summariser: summary +    347 in 00:00:30 =   11.6/s Avg:  1386 Min:    47 Max: 20002 Err:    56 (16.14%) Active: 285 Started: 285 Finished: 0
+2026-04-01 23:08:30,064 INFO o.a.j.r.Summariser: summary =    380 in 00:00:34 =   11.1/s Avg:  1299 Min:    47 Max: 20002 Err:    56 (14.74%)
+2026-04-01 23:08:30,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-286
+2026-04-01 23:08:30,222 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-287
+2026-04-01 23:08:30,343 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-288
+2026-04-01 23:08:30,466 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-289
+2026-04-01 23:08:30,589 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-290
+2026-04-01 23:08:30,712 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-291
+2026-04-01 23:08:30,834 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-292
+2026-04-01 23:08:30,943 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-293
+2026-04-01 23:08:31,065 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-294
+2026-04-01 23:08:31,188 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-295
+2026-04-01 23:08:31,311 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-296
+2026-04-01 23:08:31,432 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-297
+2026-04-01 23:08:31,553 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-298
+2026-04-01 23:08:31,661 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-299
+2026-04-01 23:08:31,784 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-300
+2026-04-01 23:08:31,907 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-301
+2026-04-01 23:08:32,030 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-302
+2026-04-01 23:08:32,152 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-303
+2026-04-01 23:08:32,259 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-304
+2026-04-01 23:08:32,381 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-305
+2026-04-01 23:08:32,505 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-306
+2026-04-01 23:08:32,628 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-307
+2026-04-01 23:08:32,751 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-308
+2026-04-01 23:08:32,873 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-309
+2026-04-01 23:08:32,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-310
+2026-04-01 23:08:33,101 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-311
+2026-04-01 23:08:33,224 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-312
+2026-04-01 23:08:33,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-313
+2026-04-01 23:08:33,469 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-314
+2026-04-01 23:08:33,581 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-315
+2026-04-01 23:08:33,713 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-316
+2026-04-01 23:08:33,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-317
+2026-04-01 23:08:33,939 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-318
+2026-04-01 23:08:34,068 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-319
+2026-04-01 23:08:34,189 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-320
+2026-04-01 23:08:34,313 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-321
+2026-04-01 23:08:34,421 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-322
+2026-04-01 23:08:34,543 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-323
+2026-04-01 23:08:34,666 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-324
+2026-04-01 23:08:34,788 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-325
+2026-04-01 23:08:34,912 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-326
+2026-04-01 23:08:35,034 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-327
+2026-04-01 23:08:35,142 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-328
+2026-04-01 23:08:35,265 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-329
+2026-04-01 23:08:35,388 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-330
+2026-04-01 23:08:35,510 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-331
+2026-04-01 23:08:35,634 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-332
+2026-04-01 23:08:35,742 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-333
+2026-04-01 23:08:35,865 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-334
+2026-04-01 23:08:35,988 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-335
+2026-04-01 23:08:36,113 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-336
+2026-04-01 23:08:36,220 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-337
+2026-04-01 23:08:36,343 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-338
+2026-04-01 23:08:36,467 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-339
+2026-04-01 23:08:36,592 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-340
+2026-04-01 23:08:36,714 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-341
+2026-04-01 23:08:36,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-342
+2026-04-01 23:08:36,944 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-343
+2026-04-01 23:08:37,035 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:37,067 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-344
+2026-04-01 23:08:37,141 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:37,189 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-345
+2026-04-01 23:08:37,310 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-346
+2026-04-01 23:08:37,433 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-347
+2026-04-01 23:08:37,540 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-348
+2026-04-01 23:08:37,666 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-349
+2026-04-01 23:08:37,789 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-350
+2026-04-01 23:08:37,911 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-351
+2026-04-01 23:08:38,034 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-352
+2026-04-01 23:08:38,141 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-353
+2026-04-01 23:08:38,265 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-354
+2026-04-01 23:08:38,389 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-355
+2026-04-01 23:08:38,514 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-356
+2026-04-01 23:08:38,622 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-357
+2026-04-01 23:08:38,747 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-358
+2026-04-01 23:08:38,868 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-359
+2026-04-01 23:08:38,991 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-360
+2026-04-01 23:08:39,101 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-361
+2026-04-01 23:08:39,225 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-362
+2026-04-01 23:08:39,346 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-363
+2026-04-01 23:08:39,469 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-364
+2026-04-01 23:08:39,591 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-365
+2026-04-01 23:08:39,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-366
+2026-04-01 23:08:39,823 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-367
+2026-04-01 23:08:39,948 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-368
+2026-04-01 23:08:40,071 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-369
+2026-04-01 23:08:40,180 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-370
+2026-04-01 23:08:40,303 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-371
+2026-04-01 23:08:40,427 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-372
+2026-04-01 23:08:40,550 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-373
+2026-04-01 23:08:40,674 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-374
+2026-04-01 23:08:40,782 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-375
+2026-04-01 23:08:40,907 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-376
+2026-04-01 23:08:41,029 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-377
+2026-04-01 23:08:41,152 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-378
+2026-04-01 23:08:41,223 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:41,274 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-379
+2026-04-01 23:08:41,380 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-380
+2026-04-01 23:08:41,502 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-381
+2026-04-01 23:08:41,623 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-382
+2026-04-01 23:08:41,746 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-383
+2026-04-01 23:08:41,868 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-384
+2026-04-01 23:08:41,992 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-385
+2026-04-01 23:08:42,101 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-386
+2026-04-01 23:08:42,226 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-387
+2026-04-01 23:08:42,349 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-388
+2026-04-01 23:08:42,471 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-389
+2026-04-01 23:08:42,594 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-390
+2026-04-01 23:08:42,701 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-391
+2026-04-01 23:08:42,824 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-392
+2026-04-01 23:08:42,948 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-393
+2026-04-01 23:08:43,068 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-394
+2026-04-01 23:08:43,191 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-395
+2026-04-01 23:08:43,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-396
+2026-04-01 23:08:43,420 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-397
+2026-04-01 23:08:43,543 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-398
+2026-04-01 23:08:43,665 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-399
+2026-04-01 23:08:43,787 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-400
+2026-04-01 23:08:43,911 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-401
+2026-04-01 23:08:44,034 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-402
+2026-04-01 23:08:44,143 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-403
+2026-04-01 23:08:44,263 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-404
+2026-04-01 23:08:44,388 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-405
+2026-04-01 23:08:44,510 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-406
+2026-04-01 23:08:44,633 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-407
+2026-04-01 23:08:44,742 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-408
+2026-04-01 23:08:44,865 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-409
+2026-04-01 23:08:44,988 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-410
+2026-04-01 23:08:45,112 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-411
+2026-04-01 23:08:45,219 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-412
+2026-04-01 23:08:45,342 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-413
+2026-04-01 23:08:45,466 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-414
+2026-04-01 23:08:45,588 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-415
+2026-04-01 23:08:45,710 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-416
+2026-04-01 23:08:45,820 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-417
+2026-04-01 23:08:45,943 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-418
+2026-04-01 23:08:46,067 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-419
+2026-04-01 23:08:46,192 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-420
+2026-04-01 23:08:46,300 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-421
+2026-04-01 23:08:46,423 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-422
+2026-04-01 23:08:46,545 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-423
+2026-04-01 23:08:46,668 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-424
+2026-04-01 23:08:46,790 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-425
+2026-04-01 23:08:46,914 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-426
+2026-04-01 23:08:47,022 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-427
+2026-04-01 23:08:47,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-428
+2026-04-01 23:08:47,267 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-429
+2026-04-01 23:08:47,343 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:47,389 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-430
+2026-04-01 23:08:47,514 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-431
+2026-04-01 23:08:47,623 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-432
+2026-04-01 23:08:47,740 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-433
+2026-04-01 23:08:47,860 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-434
+2026-04-01 23:08:47,980 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-435
+2026-04-01 23:08:48,100 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-436
+2026-04-01 23:08:48,220 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-437
+2026-04-01 23:08:48,340 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-438
+2026-04-01 23:08:48,460 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-439
+2026-04-01 23:08:48,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-440
+2026-04-01 23:08:48,700 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-441
+2026-04-01 23:08:48,819 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-442
+2026-04-01 23:08:48,940 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-443
+2026-04-01 23:08:49,059 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-444
+2026-04-01 23:08:49,187 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-445
+2026-04-01 23:08:49,313 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-446
+2026-04-01 23:08:49,421 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-447
+2026-04-01 23:08:49,543 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-448
+2026-04-01 23:08:49,665 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-449
+2026-04-01 23:08:49,786 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-450
+2026-04-01 23:08:49,908 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-451
+2026-04-01 23:08:50,032 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-452
+2026-04-01 23:08:50,140 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-453
+2026-04-01 23:08:50,264 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-454
+2026-04-01 23:08:50,387 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-455
+2026-04-01 23:08:50,509 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-456
+2026-04-01 23:08:50,632 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-457
+2026-04-01 23:08:50,739 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-458
+2026-04-01 23:08:50,861 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-459
+2026-04-01 23:08:50,983 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-460
+2026-04-01 23:08:51,107 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-461
+2026-04-01 23:08:51,229 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-462
+2026-04-01 23:08:51,352 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-463
+2026-04-01 23:08:51,474 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-464
+2026-04-01 23:08:51,580 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-465
+2026-04-01 23:08:51,704 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-466
+2026-04-01 23:08:51,826 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-467
+2026-04-01 23:08:51,948 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-468
+2026-04-01 23:08:52,040 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:52,070 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-469
+2026-04-01 23:08:52,148 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:52,194 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-470
+2026-04-01 23:08:52,305 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-471
+2026-04-01 23:08:52,428 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-472
+2026-04-01 23:08:52,551 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-473
+2026-04-01 23:08:52,673 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-474
+2026-04-01 23:08:52,794 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-475
+2026-04-01 23:08:52,904 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-476
+2026-04-01 23:08:53,025 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-477
+2026-04-01 23:08:53,148 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-478
+2026-04-01 23:08:53,270 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-479
+2026-04-01 23:08:53,392 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-480
+2026-04-01 23:08:53,515 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-481
+2026-04-01 23:08:53,623 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-482
+2026-04-01 23:08:53,746 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-483
+2026-04-01 23:08:53,868 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-484
+2026-04-01 23:08:53,992 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-485
+2026-04-01 23:08:54,114 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-486
+2026-04-01 23:08:54,222 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-487
+2026-04-01 23:08:54,346 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-488
+2026-04-01 23:08:54,467 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-489
+2026-04-01 23:08:54,590 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-490
+2026-04-01 23:08:54,713 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-491
+2026-04-01 23:08:54,821 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-492
+2026-04-01 23:08:54,942 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-493
+2026-04-01 23:08:55,066 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-494
+2026-04-01 23:08:55,189 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-495
+2026-04-01 23:08:55,309 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-496
+2026-04-01 23:08:55,432 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-497
+2026-04-01 23:08:55,555 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-498
+2026-04-01 23:08:55,664 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-499
+2026-04-01 23:08:55,787 INFO o.a.j.t.JMeterThread: Thread started: 线程组 1-500
+2026-04-01 23:08:55,983 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:08:56,223 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:00,020 INFO o.a.j.r.Summariser: summary +    836 in 00:00:30 =   27.9/s Avg:  2199 Min:     0 Max: 20016 Err:   533 (63.76%) Active: 500 Started: 500 Finished: 0
+2026-04-01 23:09:00,020 INFO o.a.j.r.Summariser: summary =   1216 in 00:01:04 =   19.0/s Avg:  1918 Min:     0 Max: 20016 Err:   589 (48.44%)
+2026-04-01 23:09:00,217 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:02,350 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:04,745 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:07,051 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:07,157 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:10,993 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:11,224 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:15,218 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:17,362 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:18,086 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:19,751 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:22,066 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:22,172 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:26,004 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:26,234 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:30,001 INFO o.a.j.r.Summariser: summary +    940 in 00:00:30 =   31.4/s Avg:  1093 Min:     0 Max: 20003 Err:   940 (100.00%) Active: 500 Started: 500 Finished: 0
+2026-04-01 23:09:30,001 INFO o.a.j.r.Summariser: summary =   2156 in 00:01:34 =   22.9/s Avg:  1558 Min:     0 Max: 20016 Err:  1529 (70.92%)
+2026-04-01 23:09:30,230 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:32,367 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:33,092 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:34,752 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:37,080 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:37,172 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:41,007 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:41,239 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:45,234 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:47,368 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:48,093 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:49,754 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:52,080 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:52,173 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:56,021 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:09:56,251 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:00,017 INFO o.a.j.r.Summariser: summary +   1000 in 00:00:30 =   33.3/s Avg:     0 Min:     0 Max:     1 Err:  1000 (100.00%) Active: 500 Started: 500 Finished: 0
+2026-04-01 23:10:00,017 INFO o.a.j.r.Summariser: summary =   3156 in 00:02:04 =   25.4/s Avg:  1064 Min:     0 Max: 20016 Err:  2529 (80.13%)
+2026-04-01 23:10:00,249 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:02,372 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:03,108 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:04,764 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:07,092 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:07,185 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:11,030 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:11,262 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:15,255 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:17,380 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:18,118 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:19,779 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:22,094 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:22,186 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:26,040 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:26,271 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:30,035 INFO o.a.j.r.Summariser: summary +   1000 in 00:00:30 =   33.3/s Avg:     0 Min:     0 Max:     1 Err:  1000 (100.00%) Active: 500 Started: 500 Finished: 0
+2026-04-01 23:10:30,035 INFO o.a.j.r.Summariser: summary =   4156 in 00:02:34 =   27.0/s Avg:   808 Min:     0 Max: 20016 Err:  3529 (84.91%)
+2026-04-01 23:10:30,265 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:32,289 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-1
+2026-04-01 23:10:32,289 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-1
+2026-04-01 23:10:32,394 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:32,718 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-4
+2026-04-01 23:10:32,718 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-4
+2026-04-01 23:10:32,732 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-3
+2026-04-01 23:10:32,732 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-3
+2026-04-01 23:10:32,809 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-5
+2026-04-01 23:10:32,809 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-5
+2026-04-01 23:10:32,947 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-7
+2026-04-01 23:10:32,947 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-7
+2026-04-01 23:10:32,962 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-6
+2026-04-01 23:10:32,962 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-6
+2026-04-01 23:10:33,118 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:33,472 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-9
+2026-04-01 23:10:33,472 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-9
+2026-04-01 23:10:33,673 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-12
+2026-04-01 23:10:33,673 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-12
+2026-04-01 23:10:33,673 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-10
+2026-04-01 23:10:33,673 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-10
+2026-04-01 23:10:33,688 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-13
+2026-04-01 23:10:33,688 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-13
+2026-04-01 23:10:33,767 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-14
+2026-04-01 23:10:33,767 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-14
+2026-04-01 23:10:34,138 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-16
+2026-04-01 23:10:34,138 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-17
+2026-04-01 23:10:34,138 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-16
+2026-04-01 23:10:34,138 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-17
+2026-04-01 23:10:34,417 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-19
+2026-04-01 23:10:34,417 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-18
+2026-04-01 23:10:34,417 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-19
+2026-04-01 23:10:34,417 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-18
+2026-04-01 23:10:34,432 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-2
+2026-04-01 23:10:34,432 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-2
+2026-04-01 23:10:34,432 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-11
+2026-04-01 23:10:34,432 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-11
+2026-04-01 23:10:34,478 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-20
+2026-04-01 23:10:34,479 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-20
+2026-04-01 23:10:34,632 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-21
+2026-04-01 23:10:34,632 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-21
+2026-04-01 23:10:34,786 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:35,610 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-15
+2026-04-01 23:10:35,611 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-15
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-27
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-26
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-25
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-23
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-24
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-8
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-26
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-8
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-25
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-27
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-23
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-22
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-22
+2026-04-01 23:10:35,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-24
+2026-04-01 23:10:35,672 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-28
+2026-04-01 23:10:35,672 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-30
+2026-04-01 23:10:35,672 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-28
+2026-04-01 23:10:35,672 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-30
+2026-04-01 23:10:35,889 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-31
+2026-04-01 23:10:35,889 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-31
+2026-04-01 23:10:35,965 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-32
+2026-04-01 23:10:35,965 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-32
+2026-04-01 23:10:36,118 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-33
+2026-04-01 23:10:36,118 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-33
+2026-04-01 23:10:36,256 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-50
+2026-04-01 23:10:36,256 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-50
+2026-04-01 23:10:36,363 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-35
+2026-04-01 23:10:36,363 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-35
+2026-04-01 23:10:36,394 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-36
+2026-04-01 23:10:36,394 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-36
+2026-04-01 23:10:36,441 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-34
+2026-04-01 23:10:36,441 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-34
+2026-04-01 23:10:36,516 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-48
+2026-04-01 23:10:36,516 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-48
+2026-04-01 23:10:36,594 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-29
+2026-04-01 23:10:36,594 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-29
+2026-04-01 23:10:36,608 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-37
+2026-04-01 23:10:36,608 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-37
+2026-04-01 23:10:36,869 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-38
+2026-04-01 23:10:36,869 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-39
+2026-04-01 23:10:36,869 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-38
+2026-04-01 23:10:36,869 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-39
+2026-04-01 23:10:37,100 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:37,193 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:37,316 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-43
+2026-04-01 23:10:37,316 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-43
+2026-04-01 23:10:37,425 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-44
+2026-04-01 23:10:37,425 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-44
+2026-04-01 23:10:37,425 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-45
+2026-04-01 23:10:37,425 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-45
+2026-04-01 23:10:37,578 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-42
+2026-04-01 23:10:37,578 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-42
+2026-04-01 23:10:37,640 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-46
+2026-04-01 23:10:37,640 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-46
+2026-04-01 23:10:37,778 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-47
+2026-04-01 23:10:37,778 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-47
+2026-04-01 23:10:37,868 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-40
+2026-04-01 23:10:37,868 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-40
+2026-04-01 23:10:38,020 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-41
+2026-04-01 23:10:38,020 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-41
+2026-04-01 23:10:38,020 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-49
+2026-04-01 23:10:38,020 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-49
+2026-04-01 23:10:38,933 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-51
+2026-04-01 23:10:38,933 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-51
+2026-04-01 23:10:39,086 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-54
+2026-04-01 23:10:39,086 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-54
+2026-04-01 23:10:39,346 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-56
+2026-04-01 23:10:39,346 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-56
+2026-04-01 23:10:39,377 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-57
+2026-04-01 23:10:39,377 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-57
+2026-04-01 23:10:39,625 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-59
+2026-04-01 23:10:39,625 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-59
+2026-04-01 23:10:39,625 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-58
+2026-04-01 23:10:39,625 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-58
+2026-04-01 23:10:39,839 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-60
+2026-04-01 23:10:39,840 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-60
+2026-04-01 23:10:40,115 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-62
+2026-04-01 23:10:40,115 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-62
+2026-04-01 23:10:40,147 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-63
+2026-04-01 23:10:40,147 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-61
+2026-04-01 23:10:40,147 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-63
+2026-04-01 23:10:40,147 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-61
+2026-04-01 23:10:40,563 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-65
+2026-04-01 23:10:40,563 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-66
+2026-04-01 23:10:40,563 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-65
+2026-04-01 23:10:40,563 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-66
+2026-04-01 23:10:40,578 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-64
+2026-04-01 23:10:40,579 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-64
+2026-04-01 23:10:40,626 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-67
+2026-04-01 23:10:40,626 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-67
+2026-04-01 23:10:40,796 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-68
+2026-04-01 23:10:40,796 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-68
+2026-04-01 23:10:40,872 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-69
+2026-04-01 23:10:40,872 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-69
+2026-04-01 23:10:41,056 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:41,072 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-70
+2026-04-01 23:10:41,072 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-70
+2026-04-01 23:10:41,103 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-71
+2026-04-01 23:10:41,103 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-71
+2026-04-01 23:10:41,242 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-55
+2026-04-01 23:10:41,243 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-55
+2026-04-01 23:10:41,274 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:41,290 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-72
+2026-04-01 23:10:41,290 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-72
+2026-04-01 23:10:41,337 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-73
+2026-04-01 23:10:41,337 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-73
+2026-04-01 23:10:41,584 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-75
+2026-04-01 23:10:41,585 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-75
+2026-04-01 23:10:41,784 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-76
+2026-04-01 23:10:41,784 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-76
+2026-04-01 23:10:41,846 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-77
+2026-04-01 23:10:41,846 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-77
+2026-04-01 23:10:42,062 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-79
+2026-04-01 23:10:42,062 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-79
+2026-04-01 23:10:42,156 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-84
+2026-04-01 23:10:42,157 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-84
+2026-04-01 23:10:42,263 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-78
+2026-04-01 23:10:42,263 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-78
+2026-04-01 23:10:42,278 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-80
+2026-04-01 23:10:42,278 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-80
+2026-04-01 23:10:42,308 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-81
+2026-04-01 23:10:42,308 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-81
+2026-04-01 23:10:42,401 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-86
+2026-04-01 23:10:42,401 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-86
+2026-04-01 23:10:42,463 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-85
+2026-04-01 23:10:42,463 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-85
+2026-04-01 23:10:42,463 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-74
+2026-04-01 23:10:42,463 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-74
+2026-04-01 23:10:42,523 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-83
+2026-04-01 23:10:42,523 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-83
+2026-04-01 23:10:42,600 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-88
+2026-04-01 23:10:42,600 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-88
+2026-04-01 23:10:42,662 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-89
+2026-04-01 23:10:42,662 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-89
+2026-04-01 23:10:42,862 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-90
+2026-04-01 23:10:42,862 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-90
+2026-04-01 23:10:42,878 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-82
+2026-04-01 23:10:42,878 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-82
+2026-04-01 23:10:43,156 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-92
+2026-04-01 23:10:43,156 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-92
+2026-04-01 23:10:43,156 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-91
+2026-04-01 23:10:43,156 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-93
+2026-04-01 23:10:43,156 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-91
+2026-04-01 23:10:43,156 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-93
+2026-04-01 23:10:43,358 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-94
+2026-04-01 23:10:43,358 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-94
+2026-04-01 23:10:43,403 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-95
+2026-04-01 23:10:43,403 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-95
+2026-04-01 23:10:43,649 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-97
+2026-04-01 23:10:43,649 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-97
+2026-04-01 23:10:43,743 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-98
+2026-04-01 23:10:43,743 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-98
+2026-04-01 23:10:43,913 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-99
+2026-04-01 23:10:43,913 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-99
+2026-04-01 23:10:43,976 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-100
+2026-04-01 23:10:43,976 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-100
+2026-04-01 23:10:44,146 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-101
+2026-04-01 23:10:44,146 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-101
+2026-04-01 23:10:44,425 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-103
+2026-04-01 23:10:44,425 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-103
+2026-04-01 23:10:44,563 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-104
+2026-04-01 23:10:44,563 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-104
+2026-04-01 23:10:44,670 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-106
+2026-04-01 23:10:44,670 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-106
+2026-04-01 23:10:44,899 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-107
+2026-04-01 23:10:44,899 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-105
+2026-04-01 23:10:44,900 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-105
+2026-04-01 23:10:44,900 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-107
+2026-04-01 23:10:44,929 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-108
+2026-04-01 23:10:44,929 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-108
+2026-04-01 23:10:45,207 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-110
+2026-04-01 23:10:45,207 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-110
+2026-04-01 23:10:45,268 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:45,299 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-102
+2026-04-01 23:10:45,299 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-102
+2026-04-01 23:10:45,363 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-111
+2026-04-01 23:10:45,363 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-111
+2026-04-01 23:10:45,592 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-96
+2026-04-01 23:10:45,592 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-96
+2026-04-01 23:10:45,672 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-114
+2026-04-01 23:10:45,672 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-114
+2026-04-01 23:10:45,858 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-115
+2026-04-01 23:10:45,858 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-115
+2026-04-01 23:10:46,072 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-109
+2026-04-01 23:10:46,072 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-109
+2026-04-01 23:10:46,134 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-117
+2026-04-01 23:10:46,134 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-118
+2026-04-01 23:10:46,134 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-117
+2026-04-01 23:10:46,134 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-118
+2026-04-01 23:10:46,332 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-119
+2026-04-01 23:10:46,332 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-119
+2026-04-01 23:10:46,380 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-120
+2026-04-01 23:10:46,380 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-120
+2026-04-01 23:10:46,503 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-112
+2026-04-01 23:10:46,503 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-112
+2026-04-01 23:10:46,566 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-113
+2026-04-01 23:10:46,566 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-113
+2026-04-01 23:10:46,798 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-121
+2026-04-01 23:10:46,798 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-121
+2026-04-01 23:10:46,798 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-123
+2026-04-01 23:10:46,798 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-123
+2026-04-01 23:10:46,875 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-124
+2026-04-01 23:10:46,875 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-124
+2026-04-01 23:10:47,123 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-125
+2026-04-01 23:10:47,123 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-125
+2026-04-01 23:10:47,356 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-128
+2026-04-01 23:10:47,356 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-128
+2026-04-01 23:10:47,401 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:47,495 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-126
+2026-04-01 23:10:47,495 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-126
+2026-04-01 23:10:47,509 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-129
+2026-04-01 23:10:47,509 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-129
+2026-04-01 23:10:47,524 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-127
+2026-04-01 23:10:47,524 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-127
+2026-04-01 23:10:47,801 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-131
+2026-04-01 23:10:47,801 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-131
+2026-04-01 23:10:47,832 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-130
+2026-04-01 23:10:47,832 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-132
+2026-04-01 23:10:47,832 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-130
+2026-04-01 23:10:47,832 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-132
+2026-04-01 23:10:47,975 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-116
+2026-04-01 23:10:47,975 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-116
+2026-04-01 23:10:48,066 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-134
+2026-04-01 23:10:48,066 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-134
+2026-04-01 23:10:48,128 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:48,282 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-133
+2026-04-01 23:10:48,282 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-135
+2026-04-01 23:10:48,282 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-133
+2026-04-01 23:10:48,282 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-135
+2026-04-01 23:10:48,343 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-136
+2026-04-01 23:10:48,343 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-136
+2026-04-01 23:10:48,731 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-137
+2026-04-01 23:10:48,731 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-122
+2026-04-01 23:10:48,731 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-137
+2026-04-01 23:10:48,731 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-122
+2026-04-01 23:10:48,762 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-140
+2026-04-01 23:10:48,762 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-140
+2026-04-01 23:10:48,963 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-141
+2026-04-01 23:10:48,963 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-141
+2026-04-01 23:10:49,008 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-142
+2026-04-01 23:10:49,008 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-142
+2026-04-01 23:10:49,394 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-144
+2026-04-01 23:10:49,394 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-144
+2026-04-01 23:10:49,440 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-143
+2026-04-01 23:10:49,440 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-143
+2026-04-01 23:10:49,487 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-145
+2026-04-01 23:10:49,487 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-145
+2026-04-01 23:10:49,794 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:50,595 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-146
+2026-04-01 23:10:50,595 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-146
+2026-04-01 23:10:50,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-147
+2026-04-01 23:10:50,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-153
+2026-04-01 23:10:50,702 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-147
+2026-04-01 23:10:50,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-148
+2026-04-01 23:10:50,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-155
+2026-04-01 23:10:50,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-154
+2026-04-01 23:10:50,703 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-154
+2026-04-01 23:10:50,703 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-148
+2026-04-01 23:10:50,703 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-155
+2026-04-01 23:10:50,703 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-153
+2026-04-01 23:10:50,717 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-152
+2026-04-01 23:10:50,718 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-152
+2026-04-01 23:10:50,749 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-156
+2026-04-01 23:10:50,749 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-156
+2026-04-01 23:10:50,809 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-139
+2026-04-01 23:10:50,809 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-139
+2026-04-01 23:10:50,935 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-157
+2026-04-01 23:10:50,935 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-157
+2026-04-01 23:10:50,965 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-149
+2026-04-01 23:10:50,965 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-149
+2026-04-01 23:10:51,011 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-158
+2026-04-01 23:10:51,011 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-158
+2026-04-01 23:10:51,289 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-176
+2026-04-01 23:10:51,289 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-176
+2026-04-01 23:10:51,321 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-151
+2026-04-01 23:10:51,321 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-151
+2026-04-01 23:10:51,335 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-160
+2026-04-01 23:10:51,335 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-160
+2026-04-01 23:10:51,398 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-161
+2026-04-01 23:10:51,398 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-161
+2026-04-01 23:10:51,413 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-177
+2026-04-01 23:10:51,413 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-177
+2026-04-01 23:10:51,445 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-169
+2026-04-01 23:10:51,445 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-162
+2026-04-01 23:10:51,445 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-169
+2026-04-01 23:10:51,445 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-162
+2026-04-01 23:10:51,613 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-163
+2026-04-01 23:10:51,613 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-163
+2026-04-01 23:10:51,876 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-164
+2026-04-01 23:10:51,876 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-164
+2026-04-01 23:10:51,937 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-166
+2026-04-01 23:10:51,937 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-165
+2026-04-01 23:10:51,937 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-166
+2026-04-01 23:10:51,937 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-165
+2026-04-01 23:10:51,981 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-173
+2026-04-01 23:10:51,981 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-173
+2026-04-01 23:10:52,103 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:52,103 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:10:52,103 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-52
+2026-04-01 23:10:52,103 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-52
+2026-04-01 23:10:52,119 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-167
+2026-04-01 23:10:52,119 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-167
+2026-04-01 23:10:52,149 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-150
+2026-04-01 23:10:52,149 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-150
+2026-04-01 23:10:52,195 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:52,195 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:10:52,196 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-159
+2026-04-01 23:10:52,196 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-53
+2026-04-01 23:10:52,196 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-159
+2026-04-01 23:10:52,196 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-53
+2026-04-01 23:10:52,349 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-168
+2026-04-01 23:10:52,349 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-168
+2026-04-01 23:10:52,427 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-170
+2026-04-01 23:10:52,427 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-170
+2026-04-01 23:10:52,583 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-171
+2026-04-01 23:10:52,583 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-171
+2026-04-01 23:10:52,646 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-172
+2026-04-01 23:10:52,646 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-172
+2026-04-01 23:10:52,862 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-174
+2026-04-01 23:10:52,862 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-174
+2026-04-01 23:10:53,063 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-175
+2026-04-01 23:10:53,063 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-175
+2026-04-01 23:10:53,742 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-180
+2026-04-01 23:10:53,742 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-179
+2026-04-01 23:10:53,742 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-180
+2026-04-01 23:10:53,742 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-179
+2026-04-01 23:10:54,004 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-181
+2026-04-01 23:10:54,004 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-181
+2026-04-01 23:10:54,066 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-183
+2026-04-01 23:10:54,066 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-183
+2026-04-01 23:10:54,251 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-184
+2026-04-01 23:10:54,251 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-182
+2026-04-01 23:10:54,251 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-182
+2026-04-01 23:10:54,251 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-184
+2026-04-01 23:10:54,297 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-185
+2026-04-01 23:10:54,297 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-185
+2026-04-01 23:10:54,482 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-178
+2026-04-01 23:10:54,482 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-178
+2026-04-01 23:10:54,498 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-186
+2026-04-01 23:10:54,498 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-186
+2026-04-01 23:10:54,746 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-187
+2026-04-01 23:10:54,746 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-187
+2026-04-01 23:10:54,823 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-188
+2026-04-01 23:10:54,823 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-188
+2026-04-01 23:10:54,838 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-189
+2026-04-01 23:10:54,838 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-189
+2026-04-01 23:10:55,210 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-190
+2026-04-01 23:10:55,210 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-190
+2026-04-01 23:10:55,287 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-193
+2026-04-01 23:10:55,287 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-193
+2026-04-01 23:10:55,349 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-208
+2026-04-01 23:10:55,349 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-207
+2026-04-01 23:10:55,349 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-208
+2026-04-01 23:10:55,349 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-207
+2026-04-01 23:10:55,424 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-191
+2026-04-01 23:10:55,424 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-191
+2026-04-01 23:10:55,471 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-194
+2026-04-01 23:10:55,471 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-194
+2026-04-01 23:10:55,534 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-195
+2026-04-01 23:10:55,534 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-195
+2026-04-01 23:10:55,687 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-196
+2026-04-01 23:10:55,687 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-196
+2026-04-01 23:10:55,919 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-198
+2026-04-01 23:10:55,919 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-198
+2026-04-01 23:10:55,952 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-197
+2026-04-01 23:10:55,952 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-197
+2026-04-01 23:10:56,058 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:56,122 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-199
+2026-04-01 23:10:56,122 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-199
+2026-04-01 23:10:56,153 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-192
+2026-04-01 23:10:56,153 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-192
+2026-04-01 23:10:56,277 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:10:56,277 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:10:56,277 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-87
+2026-04-01 23:10:56,277 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-87
+2026-04-01 23:10:56,433 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-202
+2026-04-01 23:10:56,433 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-202
+2026-04-01 23:10:56,480 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-203
+2026-04-01 23:10:56,480 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-203
+2026-04-01 23:10:56,694 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-204
+2026-04-01 23:10:56,694 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-204
+2026-04-01 23:10:56,865 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-206
+2026-04-01 23:10:56,865 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-206
+2026-04-01 23:10:56,880 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-201
+2026-04-01 23:10:56,880 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-201
+2026-04-01 23:10:57,713 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-200
+2026-04-01 23:10:57,713 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-200
+2026-04-01 23:10:57,728 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-209
+2026-04-01 23:10:57,728 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-209
+2026-04-01 23:10:57,943 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-211
+2026-04-01 23:10:57,943 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-211
+2026-04-01 23:10:57,990 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-212
+2026-04-01 23:10:57,990 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-212
+2026-04-01 23:10:58,164 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-205
+2026-04-01 23:10:58,164 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-205
+2026-04-01 23:10:58,209 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-214
+2026-04-01 23:10:58,209 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-214
+2026-04-01 23:10:58,425 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-215
+2026-04-01 23:10:58,425 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-215
+2026-04-01 23:10:58,500 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-216
+2026-04-01 23:10:58,500 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-216
+2026-04-01 23:10:58,652 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-217
+2026-04-01 23:10:58,652 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-217
+2026-04-01 23:10:58,668 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-213
+2026-04-01 23:10:58,668 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-213
+2026-04-01 23:10:58,730 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-218
+2026-04-01 23:10:58,730 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-218
+2026-04-01 23:10:58,916 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-219
+2026-04-01 23:10:58,917 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-219
+2026-04-01 23:10:59,224 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-220
+2026-04-01 23:10:59,224 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-220
+2026-04-01 23:10:59,224 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-222
+2026-04-01 23:10:59,224 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-222
+2026-04-01 23:10:59,408 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-223
+2026-04-01 23:10:59,408 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-223
+2026-04-01 23:10:59,610 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-224
+2026-04-01 23:10:59,610 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-224
+2026-04-01 23:10:59,686 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-225
+2026-04-01 23:10:59,686 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-225
+2026-04-01 23:10:59,718 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-226
+2026-04-01 23:10:59,718 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-226
+2026-04-01 23:10:59,883 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-227
+2026-04-01 23:10:59,883 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-227
+2026-04-01 23:11:00,037 INFO o.a.j.r.Summariser: summary +   1121 in 00:00:30 =   37.4/s Avg:     0 Min:     0 Max:     2 Err:  1121 (100.00%) Active: 276 Started: 500 Finished: 224
+2026-04-01 23:11:00,037 INFO o.a.j.r.Summariser: summary =   5277 in 00:03:04 =   28.7/s Avg:   636 Min:     0 Max: 20016 Err:  4650 (88.12%)
+2026-04-01 23:11:00,084 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-229
+2026-04-01 23:11:00,084 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-229
+2026-04-01 23:11:00,099 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-228
+2026-04-01 23:11:00,099 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-228
+2026-04-01 23:11:00,116 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-221
+2026-04-01 23:11:00,116 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-221
+2026-04-01 23:11:00,270 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:00,270 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-231
+2026-04-01 23:11:00,270 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-231
+2026-04-01 23:11:00,426 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-232
+2026-04-01 23:11:00,426 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-232
+2026-04-01 23:11:00,611 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-233
+2026-04-01 23:11:00,611 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-233
+2026-04-01 23:11:00,689 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-234
+2026-04-01 23:11:00,689 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-234
+2026-04-01 23:11:00,720 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-235
+2026-04-01 23:11:00,720 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-235
+2026-04-01 23:11:00,890 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-236
+2026-04-01 23:11:00,890 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-236
+2026-04-01 23:11:01,029 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-241
+2026-04-01 23:11:01,029 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-241
+2026-04-01 23:11:01,107 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-237
+2026-04-01 23:11:01,107 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-242
+2026-04-01 23:11:01,107 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-237
+2026-04-01 23:11:01,107 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-242
+2026-04-01 23:11:01,138 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-238
+2026-04-01 23:11:01,138 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-238
+2026-04-01 23:11:01,153 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-230
+2026-04-01 23:11:01,153 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-230
+2026-04-01 23:11:01,200 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-239
+2026-04-01 23:11:01,200 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-239
+2026-04-01 23:11:01,262 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-243
+2026-04-01 23:11:01,262 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-243
+2026-04-01 23:11:01,325 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-244
+2026-04-01 23:11:01,325 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-244
+2026-04-01 23:11:01,799 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-240
+2026-04-01 23:11:01,799 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-240
+2026-04-01 23:11:01,799 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-248
+2026-04-01 23:11:01,799 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-248
+2026-04-01 23:11:01,861 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-249
+2026-04-01 23:11:01,861 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-249
+2026-04-01 23:11:02,198 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-251
+2026-04-01 23:11:02,198 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-251
+2026-04-01 23:11:02,198 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-250
+2026-04-01 23:11:02,198 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-250
+2026-04-01 23:11:02,352 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-252
+2026-04-01 23:11:02,352 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-252
+2026-04-01 23:11:02,412 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:02,412 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:11:02,412 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-138
+2026-04-01 23:11:02,412 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-138
+2026-04-01 23:11:02,520 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-253
+2026-04-01 23:11:02,520 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-253
+2026-04-01 23:11:02,583 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-254
+2026-04-01 23:11:02,583 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-254
+2026-04-01 23:11:02,613 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-246
+2026-04-01 23:11:02,613 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-246
+2026-04-01 23:11:02,768 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-255
+2026-04-01 23:11:02,768 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-247
+2026-04-01 23:11:02,768 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-255
+2026-04-01 23:11:02,768 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-247
+2026-04-01 23:11:02,845 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-256
+2026-04-01 23:11:02,845 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-256
+2026-04-01 23:11:03,061 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-257
+2026-04-01 23:11:03,061 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-258
+2026-04-01 23:11:03,061 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-257
+2026-04-01 23:11:03,061 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-258
+2026-04-01 23:11:03,138 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:03,265 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-259
+2026-04-01 23:11:03,265 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-259
+2026-04-01 23:11:03,296 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-260
+2026-04-01 23:11:03,296 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-260
+2026-04-01 23:11:03,327 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-261
+2026-04-01 23:11:03,327 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-261
+2026-04-01 23:11:03,496 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-262
+2026-04-01 23:11:03,496 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-262
+2026-04-01 23:11:03,542 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-263
+2026-04-01 23:11:03,542 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-263
+2026-04-01 23:11:03,728 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-264
+2026-04-01 23:11:03,728 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-264
+2026-04-01 23:11:03,760 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-265
+2026-04-01 23:11:03,760 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-265
+2026-04-01 23:11:03,975 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-266
+2026-04-01 23:11:03,975 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-266
+2026-04-01 23:11:04,238 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-268
+2026-04-01 23:11:04,238 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-268
+2026-04-01 23:11:04,269 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-269
+2026-04-01 23:11:04,269 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-267
+2026-04-01 23:11:04,269 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-269
+2026-04-01 23:11:04,269 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-267
+2026-04-01 23:11:04,456 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-270
+2026-04-01 23:11:04,456 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-270
+2026-04-01 23:11:04,502 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-271
+2026-04-01 23:11:04,502 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-271
+2026-04-01 23:11:04,656 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-272
+2026-04-01 23:11:04,656 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-272
+2026-04-01 23:11:04,733 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-273
+2026-04-01 23:11:04,733 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-273
+2026-04-01 23:11:04,796 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:04,920 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-274
+2026-04-01 23:11:04,921 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-274
+2026-04-01 23:11:04,967 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-275
+2026-04-01 23:11:04,967 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-275
+2026-04-01 23:11:05,216 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-276
+2026-04-01 23:11:05,216 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-276
+2026-04-01 23:11:05,462 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-278
+2026-04-01 23:11:05,463 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-278
+2026-04-01 23:11:05,724 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-281
+2026-04-01 23:11:05,724 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-281
+2026-04-01 23:11:05,939 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-282
+2026-04-01 23:11:05,939 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-282
+2026-04-01 23:11:06,136 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-284
+2026-04-01 23:11:06,136 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-284
+2026-04-01 23:11:06,182 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-285
+2026-04-01 23:11:06,182 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-285
+2026-04-01 23:11:06,338 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-277
+2026-04-01 23:11:06,338 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-277
+2026-04-01 23:11:06,384 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-286
+2026-04-01 23:11:06,384 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-286
+2026-04-01 23:11:06,583 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-279
+2026-04-01 23:11:06,583 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-279
+2026-04-01 23:11:06,660 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-288
+2026-04-01 23:11:06,660 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-288
+2026-04-01 23:11:06,690 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-289
+2026-04-01 23:11:06,690 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-287
+2026-04-01 23:11:06,690 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-289
+2026-04-01 23:11:06,690 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-287
+2026-04-01 23:11:06,906 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-290
+2026-04-01 23:11:06,906 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-290
+2026-04-01 23:11:06,952 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-291
+2026-04-01 23:11:06,952 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-291
+2026-04-01 23:11:07,091 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-292
+2026-04-01 23:11:07,091 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-292
+2026-04-01 23:11:07,168 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-293
+2026-04-01 23:11:07,168 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-293
+2026-04-01 23:11:07,350 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-294
+2026-04-01 23:11:07,350 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-294
+2026-04-01 23:11:07,382 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-295
+2026-04-01 23:11:07,382 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-295
+2026-04-01 23:11:07,595 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-296
+2026-04-01 23:11:07,595 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-296
+2026-04-01 23:11:07,642 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-297
+2026-04-01 23:11:07,642 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-297
+2026-04-01 23:11:07,680 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-280
+2026-04-01 23:11:07,680 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-280
+2026-04-01 23:11:07,828 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-298
+2026-04-01 23:11:07,828 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-298
+2026-04-01 23:11:07,859 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-299
+2026-04-01 23:11:07,859 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-299
+2026-04-01 23:11:08,076 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-300
+2026-04-01 23:11:08,076 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-300
+2026-04-01 23:11:08,137 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-301
+2026-04-01 23:11:08,137 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-301
+2026-04-01 23:11:08,340 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-302
+2026-04-01 23:11:08,340 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-302
+2026-04-01 23:11:08,372 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-303
+2026-04-01 23:11:08,372 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-303
+2026-04-01 23:11:08,701 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-305
+2026-04-01 23:11:08,701 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-305
+2026-04-01 23:11:08,821 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-306
+2026-04-01 23:11:08,821 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-306
+2026-04-01 23:11:08,836 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-307
+2026-04-01 23:11:08,836 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-307
+2026-04-01 23:11:08,836 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-304
+2026-04-01 23:11:08,836 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-304
+2026-04-01 23:11:09,036 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-308
+2026-04-01 23:11:09,036 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-308
+2026-04-01 23:11:09,283 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-310
+2026-04-01 23:11:09,283 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-310
+2026-04-01 23:11:09,299 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-309
+2026-04-01 23:11:09,299 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-309
+2026-04-01 23:11:09,563 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-312
+2026-04-01 23:11:09,563 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-312
+2026-04-01 23:11:09,794 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-314
+2026-04-01 23:11:09,794 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-314
+2026-04-01 23:11:09,841 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-315
+2026-04-01 23:11:09,841 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-315
+2026-04-01 23:11:10,041 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-316
+2026-04-01 23:11:10,041 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-316
+2026-04-01 23:11:10,073 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-317
+2026-04-01 23:11:10,073 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-317
+2026-04-01 23:11:10,351 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-332
+2026-04-01 23:11:10,352 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-332
+2026-04-01 23:11:10,490 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-320
+2026-04-01 23:11:10,490 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-320
+2026-04-01 23:11:10,521 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-334
+2026-04-01 23:11:10,521 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-334
+2026-04-01 23:11:10,521 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-335
+2026-04-01 23:11:10,521 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-321
+2026-04-01 23:11:10,521 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-321
+2026-04-01 23:11:10,521 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-335
+2026-04-01 23:11:10,599 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-333
+2026-04-01 23:11:10,599 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-333
+2026-04-01 23:11:10,770 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-322
+2026-04-01 23:11:10,770 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-322
+2026-04-01 23:11:10,986 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-324
+2026-04-01 23:11:10,986 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-324
+2026-04-01 23:11:11,063 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:11,063 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:11:11,063 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-210
+2026-04-01 23:11:11,063 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-210
+2026-04-01 23:11:11,124 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-323
+2026-04-01 23:11:11,124 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-323
+2026-04-01 23:11:11,218 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-326
+2026-04-01 23:11:11,218 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-326
+2026-04-01 23:11:11,234 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-318
+2026-04-01 23:11:11,234 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-318
+2026-04-01 23:11:11,248 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-327
+2026-04-01 23:11:11,248 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-327
+2026-04-01 23:11:11,264 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-319
+2026-04-01 23:11:11,264 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-319
+2026-04-01 23:11:11,280 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-325
+2026-04-01 23:11:11,280 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-325
+2026-04-01 23:11:11,328 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-311
+2026-04-01 23:11:11,328 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-311
+2026-04-01 23:11:11,498 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-328
+2026-04-01 23:11:11,498 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-329
+2026-04-01 23:11:11,498 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-328
+2026-04-01 23:11:11,498 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-329
+2026-04-01 23:11:11,697 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-313
+2026-04-01 23:11:11,697 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-313
+2026-04-01 23:11:11,742 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-330
+2026-04-01 23:11:11,742 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-330
+2026-04-01 23:11:11,758 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-331
+2026-04-01 23:11:11,758 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-331
+2026-04-01 23:11:12,560 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-336
+2026-04-01 23:11:12,561 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-336
+2026-04-01 23:11:12,821 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-339
+2026-04-01 23:11:12,821 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-339
+2026-04-01 23:11:13,052 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-337
+2026-04-01 23:11:13,052 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-340
+2026-04-01 23:11:13,053 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-337
+2026-04-01 23:11:13,053 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-340
+2026-04-01 23:11:13,067 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-341
+2026-04-01 23:11:13,067 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-341
+2026-04-01 23:11:13,128 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-338
+2026-04-01 23:11:13,128 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-338
+2026-04-01 23:11:13,158 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-342
+2026-04-01 23:11:13,158 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-342
+2026-04-01 23:11:13,423 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-344
+2026-04-01 23:11:13,423 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-344
+2026-04-01 23:11:13,530 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-345
+2026-04-01 23:11:13,531 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-345
+2026-04-01 23:11:13,546 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-343
+2026-04-01 23:11:13,546 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-343
+2026-04-01 23:11:14,009 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-349
+2026-04-01 23:11:14,009 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-349
+2026-04-01 23:11:14,055 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-346
+2026-04-01 23:11:14,056 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-346
+2026-04-01 23:11:14,133 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-350
+2026-04-01 23:11:14,133 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-350
+2026-04-01 23:11:14,257 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-348
+2026-04-01 23:11:14,257 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-348
+2026-04-01 23:11:14,272 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-351
+2026-04-01 23:11:14,272 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-351
+2026-04-01 23:11:14,795 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-352
+2026-04-01 23:11:14,795 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-352
+2026-04-01 23:11:14,950 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-355
+2026-04-01 23:11:14,950 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-355
+2026-04-01 23:11:15,073 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-357
+2026-04-01 23:11:15,073 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-357
+2026-04-01 23:11:15,227 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-359
+2026-04-01 23:11:15,227 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-359
+2026-04-01 23:11:15,242 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-358
+2026-04-01 23:11:15,242 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-358
+2026-04-01 23:11:15,274 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:15,274 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-354
+2026-04-01 23:11:15,274 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-354
+2026-04-01 23:11:15,274 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:11:15,274 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-245
+2026-04-01 23:11:15,274 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-245
+2026-04-01 23:11:15,429 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-347
+2026-04-01 23:11:15,429 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-347
+2026-04-01 23:11:15,459 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-356
+2026-04-01 23:11:15,459 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-356
+2026-04-01 23:11:15,611 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-362
+2026-04-01 23:11:15,611 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-362
+2026-04-01 23:11:15,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-361
+2026-04-01 23:11:15,702 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-360
+2026-04-01 23:11:15,702 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-361
+2026-04-01 23:11:15,702 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-360
+2026-04-01 23:11:15,964 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-365
+2026-04-01 23:11:15,964 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-363
+2026-04-01 23:11:15,964 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-365
+2026-04-01 23:11:15,964 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-363
+2026-04-01 23:11:16,215 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-364
+2026-04-01 23:11:16,215 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-366
+2026-04-01 23:11:16,215 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-364
+2026-04-01 23:11:16,215 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-367
+2026-04-01 23:11:16,215 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-367
+2026-04-01 23:11:16,215 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-366
+2026-04-01 23:11:16,524 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-353
+2026-04-01 23:11:16,524 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-353
+2026-04-01 23:11:16,663 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-368
+2026-04-01 23:11:16,663 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-368
+2026-04-01 23:11:16,773 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-372
+2026-04-01 23:11:16,773 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-372
+2026-04-01 23:11:16,788 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-369
+2026-04-01 23:11:16,788 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-369
+2026-04-01 23:11:16,913 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-370
+2026-04-01 23:11:16,913 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-373
+2026-04-01 23:11:16,913 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-370
+2026-04-01 23:11:16,913 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-373
+2026-04-01 23:11:16,942 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-371
+2026-04-01 23:11:16,942 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-371
+2026-04-01 23:11:17,004 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-374
+2026-04-01 23:11:17,004 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-374
+2026-04-01 23:11:17,159 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-375
+2026-04-01 23:11:17,159 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-375
+2026-04-01 23:11:17,269 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-376
+2026-04-01 23:11:17,269 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-376
+2026-04-01 23:11:17,377 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-392
+2026-04-01 23:11:17,377 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-392
+2026-04-01 23:11:17,408 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-377
+2026-04-01 23:11:17,408 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-377
+2026-04-01 23:11:17,641 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-379
+2026-04-01 23:11:17,641 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-379
+2026-04-01 23:11:17,855 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-380
+2026-04-01 23:11:17,855 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-380
+2026-04-01 23:11:17,885 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-381
+2026-04-01 23:11:17,885 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-381
+2026-04-01 23:11:18,009 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-382
+2026-04-01 23:11:18,009 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-382
+2026-04-01 23:11:18,148 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:18,194 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-383
+2026-04-01 23:11:18,194 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-383
+2026-04-01 23:11:18,271 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-384
+2026-04-01 23:11:18,271 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-384
+2026-04-01 23:11:18,381 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-385
+2026-04-01 23:11:18,381 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-385
+2026-04-01 23:11:18,489 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-386
+2026-04-01 23:11:18,489 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-386
+2026-04-01 23:11:18,612 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-378
+2026-04-01 23:11:18,612 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-387
+2026-04-01 23:11:18,612 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-387
+2026-04-01 23:11:18,612 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-378
+2026-04-01 23:11:18,721 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-388
+2026-04-01 23:11:18,721 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-388
+2026-04-01 23:11:19,107 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-391
+2026-04-01 23:11:19,107 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-390
+2026-04-01 23:11:19,107 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-391
+2026-04-01 23:11:19,107 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-390
+2026-04-01 23:11:19,740 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-393
+2026-04-01 23:11:19,740 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-393
+2026-04-01 23:11:19,802 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:19,802 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:11:19,802 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-283
+2026-04-01 23:11:19,802 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-283
+2026-04-01 23:11:20,002 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-395
+2026-04-01 23:11:20,002 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-395
+2026-04-01 23:11:20,234 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-397
+2026-04-01 23:11:20,234 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-397
+2026-04-01 23:11:20,421 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-389
+2026-04-01 23:11:20,421 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-389
+2026-04-01 23:11:20,513 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-398
+2026-04-01 23:11:20,513 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-398
+2026-04-01 23:11:20,621 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-399
+2026-04-01 23:11:20,621 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-399
+2026-04-01 23:11:20,666 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-400
+2026-04-01 23:11:20,666 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-400
+2026-04-01 23:11:20,713 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-401
+2026-04-01 23:11:20,713 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-401
+2026-04-01 23:11:20,930 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-402
+2026-04-01 23:11:20,930 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-402
+2026-04-01 23:11:21,024 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-404
+2026-04-01 23:11:21,024 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-404
+2026-04-01 23:11:21,175 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-396
+2026-04-01 23:11:21,175 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-396
+2026-04-01 23:11:21,237 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-405
+2026-04-01 23:11:21,237 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-405
+2026-04-01 23:11:21,252 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-403
+2026-04-01 23:11:21,252 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-403
+2026-04-01 23:11:21,454 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-406
+2026-04-01 23:11:21,454 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-406
+2026-04-01 23:11:21,485 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-407
+2026-04-01 23:11:21,485 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-407
+2026-04-01 23:11:21,687 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-408
+2026-04-01 23:11:21,687 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-408
+2026-04-01 23:11:21,734 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-409
+2026-04-01 23:11:21,734 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-409
+2026-04-01 23:11:21,844 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-410
+2026-04-01 23:11:21,844 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-410
+2026-04-01 23:11:22,046 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-411
+2026-04-01 23:11:22,046 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-411
+2026-04-01 23:11:22,123 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-413
+2026-04-01 23:11:22,123 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-413
+2026-04-01 23:11:22,403 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-415
+2026-04-01 23:11:22,403 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-415
+2026-04-01 23:11:22,467 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-416
+2026-04-01 23:11:22,467 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-416
+2026-04-01 23:11:22,699 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-418
+2026-04-01 23:11:22,699 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-418
+2026-04-01 23:11:22,855 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-412
+2026-04-01 23:11:22,855 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-412
+2026-04-01 23:11:22,855 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-424
+2026-04-01 23:11:22,855 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-424
+2026-04-01 23:11:22,916 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-419
+2026-04-01 23:11:22,916 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-419
+2026-04-01 23:11:22,932 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-417
+2026-04-01 23:11:22,932 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-417
+2026-04-01 23:11:23,041 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-420
+2026-04-01 23:11:23,041 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-420
+2026-04-01 23:11:23,056 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-425
+2026-04-01 23:11:23,056 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-425
+2026-04-01 23:11:23,102 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-414
+2026-04-01 23:11:23,102 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-414
+2026-04-01 23:11:23,118 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-426
+2026-04-01 23:11:23,118 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-426
+2026-04-01 23:11:23,164 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-421
+2026-04-01 23:11:23,164 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-421
+2026-04-01 23:11:23,195 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-422
+2026-04-01 23:11:23,195 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-422
+2026-04-01 23:11:23,319 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-427
+2026-04-01 23:11:23,319 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-427
+2026-04-01 23:11:23,350 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-428
+2026-04-01 23:11:23,350 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-423
+2026-04-01 23:11:23,350 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-428
+2026-04-01 23:11:23,350 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-423
+2026-04-01 23:11:23,582 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-430
+2026-04-01 23:11:23,582 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-430
+2026-04-01 23:11:24,016 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-433
+2026-04-01 23:11:24,016 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-433
+2026-04-01 23:11:24,079 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-434
+2026-04-01 23:11:24,079 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-434
+2026-04-01 23:11:24,310 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-436
+2026-04-01 23:11:24,310 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-436
+2026-04-01 23:11:24,539 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-437
+2026-04-01 23:11:24,539 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-437
+2026-04-01 23:11:24,570 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-432
+2026-04-01 23:11:24,570 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-432
+2026-04-01 23:11:24,584 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-438
+2026-04-01 23:11:24,584 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-429
+2026-04-01 23:11:24,584 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-438
+2026-04-01 23:11:24,585 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-429
+2026-04-01 23:11:24,768 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-439
+2026-04-01 23:11:24,768 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-439
+2026-04-01 23:11:24,830 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-440
+2026-04-01 23:11:24,830 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-440
+2026-04-01 23:11:25,183 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-441
+2026-04-01 23:11:25,183 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-441
+2026-04-01 23:11:25,230 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-443
+2026-04-01 23:11:25,230 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-443
+2026-04-01 23:11:25,262 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-435
+2026-04-01 23:11:25,262 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-435
+2026-04-01 23:11:25,740 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-445
+2026-04-01 23:11:25,740 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-445
+2026-04-01 23:11:25,879 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-442
+2026-04-01 23:11:25,879 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-442
+2026-04-01 23:11:25,971 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-431
+2026-04-01 23:11:25,971 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-447
+2026-04-01 23:11:25,971 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-447
+2026-04-01 23:11:25,971 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-431
+2026-04-01 23:11:25,987 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-448
+2026-04-01 23:11:25,987 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-448
+2026-04-01 23:11:26,124 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-450
+2026-04-01 23:11:26,124 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-450
+2026-04-01 23:11:26,188 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-451
+2026-04-01 23:11:26,188 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-451
+2026-04-01 23:11:26,403 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-444
+2026-04-01 23:11:26,403 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-444
+2026-04-01 23:11:26,480 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-453
+2026-04-01 23:11:26,480 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-453
+2026-04-01 23:11:26,633 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-446
+2026-04-01 23:11:26,633 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-446
+2026-04-01 23:11:26,756 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-456
+2026-04-01 23:11:26,756 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-456
+2026-04-01 23:11:26,910 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-457
+2026-04-01 23:11:26,910 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-457
+2026-04-01 23:11:26,925 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-449
+2026-04-01 23:11:26,926 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-449
+2026-04-01 23:11:26,926 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-458
+2026-04-01 23:11:26,926 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-458
+2026-04-01 23:11:27,141 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-459
+2026-04-01 23:11:27,141 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-459
+2026-04-01 23:11:27,186 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-460
+2026-04-01 23:11:27,186 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-460
+2026-04-01 23:11:27,569 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-461
+2026-04-01 23:11:27,569 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-454
+2026-04-01 23:11:27,569 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-461
+2026-04-01 23:11:27,569 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-454
+2026-04-01 23:11:27,647 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-463
+2026-04-01 23:11:27,647 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-463
+2026-04-01 23:11:27,801 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-464
+2026-04-01 23:11:27,801 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-464
+2026-04-01 23:11:27,879 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-465
+2026-04-01 23:11:27,879 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-465
+2026-04-01 23:11:27,924 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-466
+2026-04-01 23:11:27,924 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-466
+2026-04-01 23:11:28,112 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-467
+2026-04-01 23:11:28,112 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-467
+2026-04-01 23:11:28,142 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-468
+2026-04-01 23:11:28,142 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-468
+2026-04-01 23:11:28,313 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-452
+2026-04-01 23:11:28,313 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-452
+2026-04-01 23:11:28,436 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-470
+2026-04-01 23:11:28,436 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-470
+2026-04-01 23:11:28,546 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-462
+2026-04-01 23:11:28,546 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-462
+2026-04-01 23:11:28,576 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-471
+2026-04-01 23:11:28,577 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-471
+2026-04-01 23:11:28,746 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-472
+2026-04-01 23:11:28,746 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-472
+2026-04-01 23:11:28,837 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-455
+2026-04-01 23:11:28,837 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-455
+2026-04-01 23:11:29,361 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-469
+2026-04-01 23:11:29,361 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-469
+2026-04-01 23:11:29,392 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-478
+2026-04-01 23:11:29,392 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-478
+2026-04-01 23:11:29,408 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-476
+2026-04-01 23:11:29,408 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-476
+2026-04-01 23:11:29,563 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-479
+2026-04-01 23:11:29,563 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-479
+2026-04-01 23:11:29,594 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-477
+2026-04-01 23:11:29,594 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-477
+2026-04-01 23:11:29,609 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-480
+2026-04-01 23:11:29,609 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-480
+2026-04-01 23:11:29,870 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-473
+2026-04-01 23:11:29,870 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-473
+2026-04-01 23:11:29,870 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-481
+2026-04-01 23:11:29,870 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-481
+2026-04-01 23:11:30,055 INFO o.a.j.r.Summariser: summary +    680 in 00:00:30 =   22.7/s Avg:     0 Min:     0 Max:     2 Err:   680 (100.00%) Active: 22 Started: 500 Finished: 478
+2026-04-01 23:11:30,055 INFO o.a.j.r.Summariser: summary =   5957 in 00:03:34 =   27.8/s Avg:   564 Min:     0 Max: 20016 Err:  5330 (89.47%)
+2026-04-01 23:11:30,055 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-475
+2026-04-01 23:11:30,055 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-475
+2026-04-01 23:11:30,072 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-483
+2026-04-01 23:11:30,072 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-483
+2026-04-01 23:11:30,302 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-485
+2026-04-01 23:11:30,303 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-485
+2026-04-01 23:11:30,442 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-486
+2026-04-01 23:11:30,442 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-486
+2026-04-01 23:11:30,442 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-474
+2026-04-01 23:11:30,442 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-484
+2026-04-01 23:11:30,442 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-474
+2026-04-01 23:11:30,442 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-484
+2026-04-01 23:11:30,537 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-487
+2026-04-01 23:11:30,537 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-488
+2026-04-01 23:11:30,538 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-488
+2026-04-01 23:11:30,537 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-487
+2026-04-01 23:11:30,908 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-490
+2026-04-01 23:11:30,908 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-490
+2026-04-01 23:11:31,000 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-491
+2026-04-01 23:11:31,000 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-491
+2026-04-01 23:11:31,016 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-492
+2026-04-01 23:11:31,016 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-489
+2026-04-01 23:11:31,016 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-492
+2026-04-01 23:11:31,016 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-489
+2026-04-01 23:11:31,275 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-494
+2026-04-01 23:11:31,275 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-493
+2026-04-01 23:11:31,275 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-494
+2026-04-01 23:11:31,275 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-493
+2026-04-01 23:11:31,413 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-482
+2026-04-01 23:11:31,413 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-482
+2026-04-01 23:11:31,475 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-495
+2026-04-01 23:11:31,475 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-495
+2026-04-01 23:11:31,521 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-496
+2026-04-01 23:11:31,521 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-496
+2026-04-01 23:11:31,721 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-497
+2026-04-01 23:11:31,721 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-497
+2026-04-01 23:11:31,967 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-499
+2026-04-01 23:11:31,967 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-500
+2026-04-01 23:11:31,967 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-499
+2026-04-01 23:11:31,967 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-500
+2026-04-01 23:11:32,862 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-498
+2026-04-01 23:11:32,862 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-498
+2026-04-01 23:11:33,159 ERROR e.l.j.w.RequestResponseWebSocketSampler: Sampler 'WebSocket request-response Sampler': there is no connection to re-use
+2026-04-01 23:11:33,159 WARN e.l.j.w.CloseWebSocketSampler: Sampler 'WebSocket Close': there is no connection; nothing to close.
+2026-04-01 23:11:33,159 INFO o.a.j.t.JMeterThread: Thread is done: 线程组 1-394
+2026-04-01 23:11:33,159 INFO o.a.j.t.JMeterThread: Thread finished: 线程组 1-394
+2026-04-01 23:11:33,159 INFO o.a.j.e.StandardJMeterEngine: Notifying test listeners of end of test
+2026-04-01 23:11:33,159 INFO o.a.j.r.Summariser: summary +     43 in 00:00:03 =   13.9/s Avg:     0 Min:     0 Max:     1 Err:    43 (100.00%) Active: 0 Started: 500 Finished: 500
+2026-04-01 23:11:33,159 INFO o.a.j.r.Summariser: summary =   6000 in 00:03:37 =   27.6/s Avg:   560 Min:     0 Max: 20016 Err:  5373 (89.55%)
+2026-04-01 23:11:33,160 INFO o.a.j.JMeter: Generating Dashboard
+2026-04-01 23:11:33,160 INFO o.a.j.r.d.ReportGenerator: Flushing result collector before report Generation
+2026-04-01 23:11:33,172 INFO o.a.j.r.p.NormalizerSampleConsumer: Using format, 'ms', to parse timeStamp field
+2026-04-01 23:11:33,363 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.AggregateConsumer#stopProducing(): beginDate produced 0 samples
+2026-04-01 23:11:33,363 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.AggregateConsumer#stopProducing(): endDate produced 0 samples
+2026-04-01 23:11:33,365 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.ApdexSummaryConsumer#stopProducing(): apdexSummary produced 0 samples
+2026-04-01 23:11:33,365 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.RequestsSummaryConsumer#stopProducing(): requestsSummary produced 0 samples
+2026-04-01 23:11:33,370 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.StatisticsSummaryConsumer#stopProducing(): statisticsSummary produced 0 samples
+2026-04-01 23:11:33,372 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.Top5ErrorsBySamplerConsumer#stopProducing(): top5ErrorsBySampler produced 0 samples
+2026-04-01 23:11:33,372 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.ErrorsSummaryConsumer#stopProducing(): errorsSummary produced 0 samples
+2026-04-01 23:11:33,372 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.HitsPerSecondGraphConsumer#stopProducing(): hitsPerSecond produced 0 samples
+2026-04-01 23:11:33,422 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.LatencyVSRequestGraphConsumer#stopProducing(): latencyVsRequest produced 0 samples
+2026-04-01 23:11:33,423 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.SyntheticResponseTimeDistributionGraphConsumer#stopProducing(): syntheticResponseTimeDistribution produced 0 samples
+2026-04-01 23:11:33,423 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.BytesThroughputGraphConsumer#stopProducing(): bytesThroughputOverTime produced 0 samples
+2026-04-01 23:11:33,423 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.CodesPerSecondGraphConsumer#stopProducing(): codesPerSecond produced 0 samples
+2026-04-01 23:11:33,451 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimeVSRequestGraphConsumer#stopProducing(): responseTimeVsRequest produced 0 samples
+2026-04-01 23:11:33,452 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.FilterConsumer#stopProducing(): startIntervalControlerFilter produced 42000 samples
+2026-04-01 23:11:33,452 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.TotalTPSGraphConsumer#stopProducing(): totalTPS produced 0 samples
+2026-04-01 23:11:33,452 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ActiveThreadsGraphConsumer#stopProducing(): activeThreadsOverTime produced 0 samples
+2026-04-01 23:11:33,452 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.TimeVSThreadGraphConsumer#stopProducing(): timeVsThreads produced 0 samples
+2026-04-01 23:11:33,453 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimeDistributionGraphConsumer#stopProducing(): responseTimeDistribution produced 0 samples
+2026-04-01 23:11:33,453 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.TransactionsPerSecondGraphConsumer#stopProducing(): transactionsPerSecond produced 0 samples
+2026-04-01 23:11:33,453 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimePercentilesGraphConsumer#stopProducing(): responseTimePercentiles produced 0 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimePercentilesOverTimeGraphConsumer#stopProducing(): responseTimePercentilesOverTime produced 0 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ResponseTimeOverTimeGraphConsumer#stopProducing(): responseTimesOverTime produced 0 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.ConnectTimeOverTimeGraphConsumer#stopProducing(): connectTimeOverTime produced 0 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.graph.impl.LatencyOverTimeGraphConsumer#stopProducing(): latenciesOverTime produced 0 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.FilterConsumer#stopProducing(): nameFilter produced 90000 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.FilterConsumer#stopProducing(): dateRangeFilter produced 18000 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.AbstractSampleConsumer: class org.apache.jmeter.report.processor.NormalizerSampleConsumer#stopProducing(): normalizer produced 6000 samples
+2026-04-01 23:11:33,455 INFO o.a.j.r.p.CsvFileSampleSource: produce(): 6000 samples produced in 271ms on channel 0
+2026-04-01 23:11:33,456 INFO o.a.j.r.d.ReportGenerator: Exporting data using exporter:'json' of className:'org.apache.jmeter.report.dashboard.JsonExporter'
+2026-04-01 23:11:33,494 INFO o.a.j.r.d.JsonExporter: Found data for consumer statisticsSummary in context
+2026-04-01 23:11:33,494 INFO o.a.j.r.d.JsonExporter: Creating statistics for overall
+2026-04-01 23:11:33,494 INFO o.a.j.r.d.JsonExporter: Creating statistics for other transactions
+2026-04-01 23:11:33,495 INFO o.a.j.r.d.JsonExporter: Checking output folder
+2026-04-01 23:11:33,495 INFO o.a.j.r.d.JsonExporter: Writing statistics JSON to D:\biliibli\jmeter\runs\20260401-230754\report\statistics.json
+2026-04-01 23:11:33,516 INFO o.a.j.r.d.ReportGenerator: Exporting data using exporter:'html' of className:'org.apache.jmeter.report.dashboard.HtmlTemplateExporter'
+2026-04-01 23:11:33,518 INFO o.a.j.r.d.HtmlTemplateExporter: Will generate dashboard in folder: D:\biliibli\jmeter\runs\20260401-230754\report
+2026-04-01 23:11:33,572 INFO o.a.j.r.d.HtmlTemplateExporter: Report will be generated in: D:\biliibli\jmeter\runs\20260401-230754\report, creating folder structure
+2026-04-01 23:11:33,573 INFO o.a.j.r.d.TemplateVisitor: Copying folder from 'D:\apache-jmeter-5.6.3\bin\report-template' to 'D:\biliibli\jmeter\runs\20260401-230754\report', got message: D:\biliibli\jmeter\runs\20260401-230754\report, found non empty folder with following content [D:\biliibli\jmeter\runs\20260401-230754\report\statistics.json], will be ignored
+2026-04-01 23:11:33,818 INFO o.a.j.JMeter: Dashboard generated
