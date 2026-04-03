@@ -1,7 +1,7 @@
 package com.bilibili.im.websocket.metrics.impl;
 
+import com.bilibili.im.websocket.connection.ImConnectionRegistry;
 import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
-import com.bilibili.im.websocket.session.ImWebSocketSessionRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -32,7 +32,7 @@ public class MicrometerImWebSocketMetricsRecorder implements ImWebSocketMetricsR
     private final MeterRegistry meterRegistry;
 
     public MicrometerImWebSocketMetricsRecorder(MeterRegistry meterRegistry,
-                                                ImWebSocketSessionRegistry sessionRegistry) {
+                                                ImConnectionRegistry connectionRegistry) {
         this.meterRegistry = meterRegistry;
         this.handshakeAttempts = Counter.builder("im.ws.handshake.attempts")
                 .description("Total websocket handshake attempts")
@@ -74,10 +74,10 @@ public class MicrometerImWebSocketMetricsRecorder implements ImWebSocketMetricsR
                 .description("Expired websocket sessions removed by cleanup")
                 .register(meterRegistry);
 
-        Gauge.builder("im.ws.sessions.active", sessionRegistry, ImWebSocketSessionRegistry::countOpenSessions)
+        Gauge.builder("im.ws.sessions.active", connectionRegistry, ImConnectionRegistry::countOpenConnections)
                 .description("Current active websocket sessions")
                 .register(meterRegistry);
-        Gauge.builder("im.ws.users.online", sessionRegistry, ImWebSocketSessionRegistry::countOnlineUsers)
+        Gauge.builder("im.ws.users.online", connectionRegistry, ImConnectionRegistry::countOnlineUsers)
                 .description("Current online websocket users")
                 .register(meterRegistry);
     }

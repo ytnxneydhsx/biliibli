@@ -1,16 +1,15 @@
 package com.bilibili.im.websocket.handler;
 
-import com.bilibili.im.app.ImApplicationService;
 import com.bilibili.im.websocket.ImWebSocketAttributes;
+import com.bilibili.im.websocket.connection.ImConnectionRegistry;
+import com.bilibili.im.websocket.connection.impl.SpringSessionConnection;
 import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
-import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
 import com.bilibili.im.websocket.model.dto.ImWebSocketInboundMessageDTO;
 import com.bilibili.im.websocket.model.dto.ImWebSocketOutboundMessageDTO;
-import com.bilibili.im.websocket.service.ImRealtimePushIdempotencyService;
-import com.bilibili.im.websocket.session.ImWebSocketSessionRegistry;
-import com.bilibili.im.message.model.command.SendMessageCommand;
-import com.bilibili.im.message.model.vo.SendMessageVO;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
+import com.bilibili.im.websocket.protocol.ImProtocolCodec;
+import com.bilibili.im.websocket.protocol.ImProtocolDispatcher;
+import com.bilibili.im.websocket.protocol.ImProtocolResponseFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -20,21 +19,21 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 public class ImWebSocketHandler extends TextWebSocketHandler {
 
-    private final ImWebSocketSessionRegistry sessionRegistry;
-    private final ImApplicationService imApplicationService;
-    private final ImRealtimePushIdempotencyService realtimePushIdempotencyService;
-    private final ObjectMapper objectMapper;
+    private final ImConnectionRegistry connectionRegistry;
+    private final ImProtocolCodec protocolCodec;
+    private final ImProtocolDispatcher protocolDispatcher;
+    private final ImProtocolResponseFactory responseFactory;
     private final ImWebSocketMetricsRecorder metricsRecorder;
 
-    public ImWebSocketHandler(ImWebSocketSessionRegistry sessionRegistry,
-                              ImApplicationService imApplicationService,
-                              ImRealtimePushIdempotencyService realtimePushIdempotencyService,
-                              ObjectMapper objectMapper,
+    public ImWebSocketHandler(ImConnectionRegistry connectionRegistry,
+                              ImProtocolCodec protocolCodec,
+                              ImProtocolDispatcher protocolDispatcher,
+                              ImProtocolResponseFactory responseFactory,
                               ImWebSocketMetricsRecorder metricsRecorder) {
-        this.sessionRegistry = sessionRegistry;
-        this.imApplicationService = imApplicationService;
-        this.realtimePushIdempotencyService = realtimePushIdempotencyService;
-        this.objectMapper = objectMapper;
+        this.connectionRegistry = connectionRegistry;
+        this.protocolCodec = protocolCodec;
+        this.protocolDispatcher = protocolDispatcher;
+        this.responseFactory = responseFactory;
         this.metricsRecorder = metricsRecorder;
     }
 
@@ -44,7 +43,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("websocket userId is invalid");
         }
-        sessionRegistry.register(userId, session);
+        connectionRegistry.register(new SpringSessionConnection(userId, session));
         metricsRecorder.recordConnectionOpened();
     }
 
@@ -56,7 +55,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         }
         String clientIp = resolveClientIp(session);
 
-        sessionRegistry.touch(userId, session.getId());
+        connectionRegistry.touch(userId, session.getId());
         if (message == null || message.getPayload() == null) {
             return;
         }
@@ -68,72 +67,28 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
         ImWebSocketInboundMessageDTO inboundMessage;
         try {
-            inboundMessage = objectMapper.readValue(payload, ImWebSocketInboundMessageDTO.class);
+            inboundMessage = protocolCodec.decodeInbound(payload);
         } catch (Exception ex) {
             metricsRecorder.recordInboundPayloadInvalid();
-            sendError(session, userId, "websocket message payload is invalid");
+            sendOutboundMessage(session, userId, responseFactory.error("websocket message payload is invalid"));
             return;
         }
 
         if (inboundMessage == null || inboundMessage.getType() == null || inboundMessage.getType().isBlank()) {
             metricsRecorder.recordInboundTypeInvalid();
-            sendError(session, userId, "websocket message type is invalid");
+            sendOutboundMessage(session, userId, responseFactory.error("websocket message type is invalid"));
             return;
         }
 
-        if (ImWebSocketMessageType.matches(inboundMessage.getType(), ImWebSocketMessageType.HEARTBEAT)) {
-            metricsRecorder.recordHeartbeatReceived();
-            try {
-                sendSimpleMessage(session, userId, ImWebSocketMessageType.HEARTBEAT_ACK, "OK");
-                metricsRecorder.recordHeartbeatAckSent();
-            } catch (Exception ex) {
-                metricsRecorder.recordHeartbeatAckFailed();
-                throw ex;
-            }
-            return;
-        }
-
-        if (ImWebSocketMessageType.matches(inboundMessage.getType(), ImWebSocketMessageType.SEND_MESSAGE)) {
-            try {
-                boolean acquired = realtimePushIdempotencyService.tryAcquire(
-                        userId,
-                        inboundMessage.getClientMessageId()
-                );
-                if (!acquired) {
-                    sendError(session, userId, "websocket message is duplicated");
-                    return;
-                }
-
-                if (clientIp != null && !clientIp.isBlank()) {
-                    session.getAttributes().put(ImWebSocketAttributes.CLIENT_IP, clientIp);
-                }
-
-                SendMessageVO sendMessageVO = imApplicationService.acceptMessage(
-                        userId,
-                        clientIp,
-                        toSendMessageCommand(inboundMessage)
-                );
-                ImWebSocketOutboundMessageDTO outboundMessage = new ImWebSocketOutboundMessageDTO();
-                outboundMessage.setType(ImWebSocketMessageType.SEND_MESSAGE_ACCEPTED.getCode());
-                outboundMessage.setCode(0);
-                outboundMessage.setMessage("OK");
-                outboundMessage.setData(sendMessageVO);
-                sendJsonMessage(session, outboundMessage, userId);
-            } catch (Exception ex) {
-                sendError(session, userId, ex.getMessage());
-            }
-            return;
-        }
-
-        metricsRecorder.recordInboundTypeUnsupported();
-        sendError(session, userId, "websocket message type is unsupported");
+        ImWebSocketOutboundMessageDTO outboundMessage = protocolDispatcher.dispatch(userId, clientIp, inboundMessage);
+        sendOutboundMessage(session, userId, outboundMessage);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Long userId = resolveUserId(session);
         if (userId != null && userId > 0) {
-            sessionRegistry.unregister(userId, session.getId());
+            connectionRegistry.unregister(userId, session.getId());
         }
         metricsRecorder.recordConnectionClosed(status == null ? "unknown" : "code_" + status.getCode());
     }
@@ -163,50 +118,18 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         return null;
     }
 
-    private SendMessageCommand toSendMessageCommand(ImWebSocketInboundMessageDTO inboundMessage) {
-        SendMessageCommand command = new SendMessageCommand();
-        command.setReceiverId(inboundMessage.getReceiverId());
-        command.setClientMessageId(inboundMessage.getClientMessageId());
-        command.setMessageType(inboundMessage.getMessageType());
-        command.setContent(inboundMessage.getContent());
-        return command;
-    }
-
-    private void sendError(WebSocketSession session, Long userId, String message) {
-        sendSimpleMessage(session, userId, ImWebSocketMessageType.ERROR,
-                message == null || message.isBlank() ? "websocket message handling failed" : message, 1, null);
-    }
-
-    private void sendSimpleMessage(WebSocketSession session,
-                                   Long userId,
-                                   ImWebSocketMessageType type,
-                                   String message) {
-        sendSimpleMessage(session, userId, type, message, 0, null);
-    }
-
-    private void sendSimpleMessage(WebSocketSession session,
-                                   Long userId,
-                                   ImWebSocketMessageType type,
-                                   String message,
-                                   Integer code,
-                                   Object data) {
-        ImWebSocketOutboundMessageDTO outboundMessage = new ImWebSocketOutboundMessageDTO();
-        outboundMessage.setType(type.getCode());
-        outboundMessage.setCode(code);
-        outboundMessage.setMessage(message);
-        outboundMessage.setData(data);
-        sendJsonMessage(session, outboundMessage, userId);
-    }
-
-    private void sendJsonMessage(WebSocketSession session, Object payload, Long userId) {
+    private void sendOutboundMessage(WebSocketSession session, Long userId, ImWebSocketOutboundMessageDTO payload) {
         if (session == null || !session.isOpen()) {
-            sessionRegistry.unregister(userId, session == null ? null : session.getId());
+            connectionRegistry.unregister(userId, session == null ? null : session.getId());
             return;
         }
         try {
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(payload)));
+            session.sendMessage(new TextMessage(protocolCodec.encodeOutbound(payload)));
         } catch (Exception ex) {
-            sessionRegistry.unregister(userId, session.getId());
+            if ("heartbeat_ack".equals(payload.getType())) {
+                metricsRecorder.recordHeartbeatAckFailed();
+            }
+            connectionRegistry.unregister(userId, session.getId());
             throw new IllegalStateException("send websocket json message failed", ex);
         }
     }

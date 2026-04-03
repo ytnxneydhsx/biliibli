@@ -1,13 +1,12 @@
 package com.bilibili.im.websocket.task;
 
 import com.bilibili.config.properties.ImWebSocketProperties;
+import com.bilibili.im.websocket.connection.ImConnectionRegistry;
+import com.bilibili.im.websocket.connection.ImSessionConnection;
 import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
-import com.bilibili.im.websocket.session.ImWebSocketSessionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
 
@@ -16,30 +15,30 @@ import java.util.List;
 public class ImWebSocketHeartbeatCleanupTask {
 
     private final ImWebSocketProperties properties;
-    private final ImWebSocketSessionRegistry sessionRegistry;
+    private final ImConnectionRegistry connectionRegistry;
     private final ImWebSocketMetricsRecorder metricsRecorder;
 
     public ImWebSocketHeartbeatCleanupTask(ImWebSocketProperties properties,
-                                           ImWebSocketSessionRegistry sessionRegistry,
+                                           ImConnectionRegistry connectionRegistry,
                                            ImWebSocketMetricsRecorder metricsRecorder) {
         this.properties = properties;
-        this.sessionRegistry = sessionRegistry;
+        this.connectionRegistry = connectionRegistry;
         this.metricsRecorder = metricsRecorder;
     }
 
     @Scheduled(fixedDelayString = "#{@imWebSocketProperties.getHeartbeatCleanupIntervalMillis()}")
     public void cleanupExpiredSessions() {
         long expireBeforeEpochMillis = System.currentTimeMillis() - properties.getHeartbeatTimeoutMillis();
-        List<WebSocketSession> expiredSessions = sessionRegistry.removeExpiredSessions(expireBeforeEpochMillis);
-        metricsRecorder.recordExpiredSessionCleanup(expiredSessions.size());
-        for (WebSocketSession expiredSession : expiredSessions) {
-            if (expiredSession == null || !expiredSession.isOpen()) {
+        List<ImSessionConnection> expiredConnections = connectionRegistry.removeExpiredConnections(expireBeforeEpochMillis);
+        metricsRecorder.recordExpiredSessionCleanup(expiredConnections.size());
+        for (ImSessionConnection expiredConnection : expiredConnections) {
+            if (expiredConnection == null || !expiredConnection.isOpen()) {
                 continue;
             }
             try {
-                expiredSession.close(CloseStatus.SESSION_NOT_RELIABLE);
+                expiredConnection.close("heartbeat_timeout");
             } catch (Exception ignored) {
-                // Session has already been removed from the registry.
+                // Connection has already been removed from the registry.
             }
         }
     }

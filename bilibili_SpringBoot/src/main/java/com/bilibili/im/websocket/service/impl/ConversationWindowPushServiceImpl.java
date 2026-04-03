@@ -1,26 +1,25 @@
 package com.bilibili.im.websocket.service.impl;
 
+import com.bilibili.im.websocket.connection.ImConnectionRegistry;
+import com.bilibili.im.websocket.connection.ImSessionConnection;
 import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
 import com.bilibili.im.websocket.model.dto.ConversationWindowUpdateDTO;
 import com.bilibili.im.websocket.model.dto.ImWebSocketOutboundMessageDTO;
 import com.bilibili.im.websocket.service.ConversationWindowPushService;
-import com.bilibili.im.websocket.session.ImWebSocketSessionRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
 
 @Service
 public class ConversationWindowPushServiceImpl implements ConversationWindowPushService {
 
-    private final ImWebSocketSessionRegistry sessionRegistry;
+    private final ImConnectionRegistry connectionRegistry;
     private final ObjectMapper objectMapper;
 
-    public ConversationWindowPushServiceImpl(ImWebSocketSessionRegistry sessionRegistry,
+    public ConversationWindowPushServiceImpl(ImConnectionRegistry connectionRegistry,
                                              ObjectMapper objectMapper) {
-        this.sessionRegistry = sessionRegistry;
+        this.connectionRegistry = connectionRegistry;
         this.objectMapper = objectMapper;
     }
 
@@ -33,8 +32,8 @@ public class ConversationWindowPushServiceImpl implements ConversationWindowPush
             return;
         }
 
-        List<WebSocketSession> sessions = sessionRegistry.getSessions(ownerUserId);
-        if (sessions.isEmpty()) {
+        List<ImSessionConnection> connections = connectionRegistry.getConnections(ownerUserId);
+        if (connections.isEmpty()) {
             return;
         }
 
@@ -43,15 +42,21 @@ public class ConversationWindowPushServiceImpl implements ConversationWindowPush
         outboundMessage.setCode(0);
         outboundMessage.setMessage("OK");
         outboundMessage.setData(update);
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(outboundMessage);
+        } catch (Exception ex) {
+            throw new IllegalStateException("serialize websocket outbound message failed", ex);
+        }
 
-        for (WebSocketSession session : sessions) {
-            if (session == null || !session.isOpen()) {
+        for (ImSessionConnection connection : connections) {
+            if (connection == null || !connection.isOpen()) {
                 continue;
             }
             try {
-                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(outboundMessage)));
+                connection.sendText(payload);
             } catch (Exception ex) {
-                sessionRegistry.unregister(ownerUserId, session.getId());
+                connectionRegistry.unregister(ownerUserId, connection.getId());
             }
         }
     }
