@@ -4,6 +4,7 @@ import com.bilibili.im.app.GroupApplicationService;
 import com.bilibili.im.conversation.service.ChatGroupConversationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
 import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
+import com.bilibili.im.group.model.dto.UpdateChatGroupNameDTO;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
 import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
 import com.bilibili.im.group.model.enums.ChatGroupMemberRole;
@@ -74,6 +75,21 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
         userService.validateUserExists(dto.getTargetUserId());
         chatGroupService.inviteMember(groupId, dto.getTargetUserId());
         chatGroupConversationService.initializeGroupConversation(dto.getTargetUserId(), groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String updateGroupName(Long currentUserId, Long groupId, UpdateChatGroupNameDTO dto) {
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (dto == null) {
+            throw new IllegalArgumentException("dto is invalid");
+        }
+        return chatGroupService.updateGroupName(groupId, currentUserId, dto.getGroupName());
     }
 
     @Override

@@ -229,6 +229,73 @@ public class ChatGroupServiceImpl implements ChatGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String updateGroupName(Long groupId, Long operatorUserId, String groupName) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (operatorUserId == null || operatorUserId <= 0) {
+            throw new IllegalArgumentException("operatorUserId is invalid");
+        }
+        String normalizedGroupName = groupName == null ? null : groupName.trim();
+        if (normalizedGroupName == null || normalizedGroupName.isEmpty()) {
+            throw new IllegalArgumentException("groupName is invalid");
+        }
+
+        ChatGroupDO group = getGroup(groupId);
+        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
+            throw new IllegalArgumentException("group status is invalid");
+        }
+
+        ChatGroupMemberDO operatorMembership = getMembership(groupId, operatorUserId);
+        if (operatorMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(operatorMembership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+        if (!canManageGroupProfile(operatorMembership.getRole())) {
+            throw new IllegalArgumentException("no permission to update group name");
+        }
+
+        int rows = chatGroupMapper.updateGroupName(groupId, normalizedGroupName);
+        if (rows <= 0) {
+            throw new RuntimeException("update group name failed");
+        }
+        return normalizedGroupName;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String updateGroupAvatar(Long groupId, Long operatorUserId, String groupAvatar) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (operatorUserId == null || operatorUserId <= 0) {
+            throw new IllegalArgumentException("operatorUserId is invalid");
+        }
+        if (groupAvatar == null || groupAvatar.isBlank()) {
+            throw new IllegalArgumentException("groupAvatar is invalid");
+        }
+
+        ChatGroupDO group = getGroup(groupId);
+        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
+            throw new IllegalArgumentException("group status is invalid");
+        }
+
+        ChatGroupMemberDO operatorMembership = getMembership(groupId, operatorUserId);
+        if (operatorMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(operatorMembership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+        if (!canManageGroupProfile(operatorMembership.getRole())) {
+            throw new IllegalArgumentException("no permission to update group avatar");
+        }
+
+        int rows = chatGroupMapper.updateGroupAvatar(groupId, groupAvatar);
+        if (rows <= 0) {
+            throw new RuntimeException("update group avatar failed");
+        }
+        return group.getGroupAvatar();
+    }
+
+    @Override
     public ChatGroupMemberDO getMembership(Long groupId, Long userId) {
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");
@@ -289,5 +356,10 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         }
 
         throw new IllegalArgumentException("operator role is invalid");
+    }
+
+    private boolean canManageGroupProfile(Integer role) {
+        return Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(role)
+                || Integer.valueOf(ChatGroupMemberRole.ADMIN.getCode()).equals(role);
     }
 }

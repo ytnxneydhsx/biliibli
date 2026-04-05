@@ -27,6 +27,9 @@ public class MinioProperties {
     @Value("${minio.avatarPrefix:avatar}")
     private String avatarPrefix;
 
+    @Value("${minio.groupAvatarPrefix:group-avatar}")
+    private String groupAvatarPrefix;
+
     @Value("${minio.coverPrefix:cover}")
     private String coverPrefix;
 
@@ -71,6 +74,10 @@ public class MinioProperties {
 
     public String getAvatarPrefix() {
         return avatarPrefix;
+    }
+
+    public String getGroupAvatarPrefix() {
+        return groupAvatarPrefix;
     }
 
     public String getCoverPrefix() {

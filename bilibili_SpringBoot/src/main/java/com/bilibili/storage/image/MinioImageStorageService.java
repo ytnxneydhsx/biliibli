@@ -125,6 +125,7 @@ public class MinioImageStorageService implements ImageStorageService {
     private long resolveImageMaxSize(ImageStorageType imageStorageType) {
         return switch (imageStorageType) {
             case AVATAR -> storageProperties.getAvatarMaxSize();
+            case GROUP_AVATAR -> storageProperties.getAvatarMaxSize();
             case VIDEO_COVER -> storageProperties.getCoverMaxSize();
             case IM_MESSAGE -> storageProperties.getImImageMaxSize();
         };
@@ -133,6 +134,7 @@ public class MinioImageStorageService implements ImageStorageService {
     private String resolveImagePrefix(ImageStorageType imageStorageType) {
         return switch (imageStorageType) {
             case AVATAR -> minioProperties.getAvatarPrefix();
+            case GROUP_AVATAR -> minioProperties.getGroupAvatarPrefix();
             case VIDEO_COVER -> minioProperties.getCoverPrefix();
             case IM_MESSAGE -> minioProperties.getImImagePrefix();
         };

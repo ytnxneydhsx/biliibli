@@ -5,6 +5,7 @@ import com.bilibili.common.result.Result;
 import com.bilibili.im.app.GroupApplicationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
 import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
+import com.bilibili.im.group.model.dto.UpdateChatGroupNameDTO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,6 +64,17 @@ public class ImGroupController {
             @Valid @RequestBody InviteGroupMemberDTO dto) {
         groupApplicationService.inviteGroupMember(currentUser.getUid(), groupId, dto);
         return Result.success(null);
+    }
+
+    @PutMapping("/groups/{groupId}/name")
+    @Operation(summary = "Update current group name")
+    public Result<String> updateGroupName(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId,
+            @Valid @RequestBody UpdateChatGroupNameDTO dto) {
+        return Result.success(groupApplicationService.updateGroupName(currentUser.getUid(), groupId, dto));
     }
 
     @PostMapping("/groups/{groupId}/leave")

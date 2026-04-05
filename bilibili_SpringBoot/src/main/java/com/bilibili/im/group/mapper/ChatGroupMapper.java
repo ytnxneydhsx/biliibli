@@ -77,4 +77,22 @@ public interface ChatGroupMapper {
     int updateGroupStatusAndMemberCount(@Param("groupId") Long groupId,
                                         @Param("status") Integer status,
                                         @Param("memberCount") Integer memberCount);
+
+    @Update("""
+            UPDATE chat_group
+            SET group_avatar = #{groupAvatar},
+                update_time = CURRENT_TIMESTAMP
+            WHERE id = #{groupId}
+            """)
+    int updateGroupAvatar(@Param("groupId") Long groupId,
+                          @Param("groupAvatar") String groupAvatar);
+
+    @Update("""
+            UPDATE chat_group
+            SET group_name = #{groupName},
+                update_time = CURRENT_TIMESTAMP
+            WHERE id = #{groupId}
+            """)
+    int updateGroupName(@Param("groupId") Long groupId,
+                        @Param("groupName") String groupName);
 }

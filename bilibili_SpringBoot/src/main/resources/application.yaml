@@ -71,6 +71,7 @@ minio:
   region: ${MINIO_REGION:us-east-1}
   bucket: ${MINIO_BUCKET:bilibili-media}
   avatarPrefix: ${MINIO_AVATAR_PREFIX:avatar}
+  groupAvatarPrefix: ${MINIO_GROUP_AVATAR_PREFIX:group-avatar}
   coverPrefix: ${MINIO_COVER_PREFIX:cover}
   videoPrefix: ${MINIO_VIDEO_PREFIX:video}
   partUrlExpireSeconds: ${MINIO_PART_URL_EXPIRE_SECONDS:1800}
