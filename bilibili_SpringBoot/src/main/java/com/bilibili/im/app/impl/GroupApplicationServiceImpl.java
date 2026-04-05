@@ -8,10 +8,10 @@ import com.bilibili.im.group.model.dto.UpdateChatGroupNameDTO;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
 import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
 import com.bilibili.im.group.model.enums.ChatGroupMemberRole;
-import com.bilibili.im.group.model.enums.ChatGroupMemberStatus;
 import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberVO;
 import com.bilibili.im.group.model.vo.ChatGroupVO;
+import com.bilibili.im.group.permission.GroupPermissionService;
 import com.bilibili.im.group.service.ChatGroupService;
 import com.bilibili.user.service.UserService;
 import org.springframework.stereotype.Service;
@@ -24,13 +24,16 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
 
     private final ChatGroupConversationService chatGroupConversationService;
     private final ChatGroupService chatGroupService;
+    private final GroupPermissionService groupPermissionService;
     private final UserService userService;
 
     public GroupApplicationServiceImpl(ChatGroupConversationService chatGroupConversationService,
                                        ChatGroupService chatGroupService,
+                                       GroupPermissionService groupPermissionService,
                                        UserService userService) {
         this.chatGroupConversationService = chatGroupConversationService;
         this.chatGroupService = chatGroupService;
+        this.groupPermissionService = groupPermissionService;
         this.userService = userService;
     }
 
@@ -67,10 +70,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
             throw new IllegalArgumentException("targetUserId is invalid");
         }
 
-        ChatGroupMemberDO inviterMembership = chatGroupService.getMembership(groupId, currentUserId);
-        if (inviterMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(inviterMembership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
+        groupPermissionService.requireActiveMembership(groupId, currentUserId);
 
         userService.validateUserExists(dto.getTargetUserId());
         chatGroupService.inviteMember(groupId, dto.getTargetUserId());
@@ -102,10 +102,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
             throw new IllegalArgumentException("groupId is invalid");
         }
 
-        ChatGroupMemberDO membership = chatGroupService.getMembership(groupId, currentUserId);
-        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
+        ChatGroupMemberDO membership = groupPermissionService.requireActiveMembership(groupId, currentUserId);
 
         if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(membership.getRole())) {
             chatGroupService.dismissGroup(groupId, currentUserId);
@@ -143,10 +140,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
             throw new IllegalArgumentException("groupId is invalid");
         }
 
-        ChatGroupMemberDO membership = chatGroupService.getMembership(groupId, currentUserId);
-        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
+        groupPermissionService.requireActiveMembership(groupId, currentUserId);
 
         List<ChatGroupMemberVO> records = chatGroupService.listActiveMembers(groupId)
                 .stream()

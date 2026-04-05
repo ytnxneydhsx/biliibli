@@ -8,6 +8,7 @@ import com.bilibili.im.group.model.enums.ChatGroupMemberRole;
 import com.bilibili.im.group.model.enums.ChatGroupMemberStatus;
 import com.bilibili.im.group.model.enums.ChatGroupMuteStatus;
 import com.bilibili.im.group.model.enums.ChatGroupStatus;
+import com.bilibili.im.group.permission.GroupPermissionService;
 import com.bilibili.im.group.service.ChatGroupService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,14 @@ public class ChatGroupServiceImpl implements ChatGroupService {
 
     private final ChatGroupMapper chatGroupMapper;
     private final ChatGroupMemberMapper chatGroupMemberMapper;
+    private final GroupPermissionService groupPermissionService;
 
     public ChatGroupServiceImpl(ChatGroupMapper chatGroupMapper,
-                                ChatGroupMemberMapper chatGroupMemberMapper) {
+                                ChatGroupMemberMapper chatGroupMemberMapper,
+                                GroupPermissionService groupPermissionService) {
         this.chatGroupMapper = chatGroupMapper;
         this.chatGroupMemberMapper = chatGroupMemberMapper;
+        this.groupPermissionService = groupPermissionService;
     }
 
     @Override
@@ -86,7 +90,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("targetUserId is invalid");
         }
 
-        ChatGroupDO group = getGroup(groupId);
+        ChatGroupDO group = groupPermissionService.requireActiveGroup(groupId);
         ChatGroupMemberDO existedMember = chatGroupMemberMapper.selectByGroupIdAndUserId(groupId, targetUserId);
         if (existedMember != null && Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(existedMember.getStatus())) {
             throw new IllegalArgumentException("target user is already in group");
@@ -117,10 +121,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("currentUserId is invalid");
         }
 
-        ChatGroupMemberDO membership = getMembership(groupId, currentUserId);
-        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
+        ChatGroupMemberDO membership = groupPermissionService.requireActiveMembership(groupId, currentUserId);
 
         if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(membership.getRole())) {
             throw new IllegalArgumentException("owner should dismiss group instead of regular leave");
@@ -148,21 +149,9 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("ownerUserId is invalid");
         }
 
-        ChatGroupDO group = getGroup(groupId);
-        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
-            throw new IllegalArgumentException("group status is invalid");
-        }
-        if (!ownerUserId.equals(group.getOwnerUserId())) {
-            throw new IllegalArgumentException("only group owner can dismiss group");
-        }
-
-        ChatGroupMemberDO membership = getMembership(groupId, ownerUserId);
-        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
-        if (!Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(membership.getRole())) {
-            throw new IllegalArgumentException("only group owner can dismiss group");
-        }
+        ChatGroupDO group = groupPermissionService.requireActiveGroup(groupId);
+        ChatGroupMemberDO membership = groupPermissionService.requireActiveMembership(groupId, ownerUserId);
+        groupPermissionService.requireCanDismissGroup(group, membership, ownerUserId);
 
         int groupRows = chatGroupMapper.updateGroupStatusAndMemberCount(
                 groupId,
@@ -195,26 +184,10 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         if (targetUserId == null || targetUserId <= 0) {
             throw new IllegalArgumentException("targetUserId is invalid");
         }
-        if (operatorUserId.equals(targetUserId)) {
-            throw new IllegalArgumentException("cannot kick self");
-        }
-
-        ChatGroupDO group = getGroup(groupId);
-        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
-            throw new IllegalArgumentException("group status is invalid");
-        }
-
-        ChatGroupMemberDO operatorMembership = getMembership(groupId, operatorUserId);
-        if (operatorMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(operatorMembership.getStatus())) {
-            throw new IllegalArgumentException("operator membership is invalid");
-        }
-
-        ChatGroupMemberDO targetMembership = getMembership(groupId, targetUserId);
-        if (targetMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(targetMembership.getStatus())) {
-            throw new IllegalArgumentException("target membership is invalid");
-        }
-
-        validateKickPermission(operatorMembership, targetMembership);
+        groupPermissionService.requireActiveGroup(groupId);
+        ChatGroupMemberDO operatorMembership = groupPermissionService.requireActiveMembership(groupId, operatorUserId);
+        ChatGroupMemberDO targetMembership = groupPermissionService.requireActiveMembership(groupId, targetUserId);
+        groupPermissionService.requireCanKickMember(operatorMembership, targetMembership, operatorUserId, targetUserId);
 
         int rows = chatGroupMemberMapper.updateMemberStatus(
                 groupId,
@@ -242,18 +215,9 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("groupName is invalid");
         }
 
-        ChatGroupDO group = getGroup(groupId);
-        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
-            throw new IllegalArgumentException("group status is invalid");
-        }
-
-        ChatGroupMemberDO operatorMembership = getMembership(groupId, operatorUserId);
-        if (operatorMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(operatorMembership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
-        if (!canManageGroupProfile(operatorMembership.getRole())) {
-            throw new IllegalArgumentException("no permission to update group name");
-        }
+        groupPermissionService.requireActiveGroup(groupId);
+        ChatGroupMemberDO operatorMembership = groupPermissionService.requireActiveMembership(groupId, operatorUserId);
+        groupPermissionService.requireCanManageProfile(operatorMembership);
 
         int rows = chatGroupMapper.updateGroupName(groupId, normalizedGroupName);
         if (rows <= 0) {
@@ -275,18 +239,9 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("groupAvatar is invalid");
         }
 
-        ChatGroupDO group = getGroup(groupId);
-        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
-            throw new IllegalArgumentException("group status is invalid");
-        }
-
-        ChatGroupMemberDO operatorMembership = getMembership(groupId, operatorUserId);
-        if (operatorMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(operatorMembership.getStatus())) {
-            throw new IllegalArgumentException("group membership is invalid");
-        }
-        if (!canManageGroupProfile(operatorMembership.getRole())) {
-            throw new IllegalArgumentException("no permission to update group avatar");
-        }
+        ChatGroupDO group = groupPermissionService.requireActiveGroup(groupId);
+        ChatGroupMemberDO operatorMembership = groupPermissionService.requireActiveMembership(groupId, operatorUserId);
+        groupPermissionService.requireCanManageProfile(operatorMembership);
 
         int rows = chatGroupMapper.updateGroupAvatar(groupId, groupAvatar);
         if (rows <= 0) {
@@ -330,36 +285,5 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             return 0L;
         }
         return group.getLastMessageSeq();
-    }
-
-    private void validateKickPermission(ChatGroupMemberDO operatorMembership,
-                                        ChatGroupMemberDO targetMembership) {
-        Integer operatorRole = operatorMembership.getRole();
-        Integer targetRole = targetMembership.getRole();
-
-        if (Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(operatorRole)) {
-            throw new IllegalArgumentException("member cannot kick others");
-        }
-
-        if (Integer.valueOf(ChatGroupMemberRole.ADMIN.getCode()).equals(operatorRole)) {
-            if (!Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(targetRole)) {
-                throw new IllegalArgumentException("admin can only kick normal members");
-            }
-            return;
-        }
-
-        if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(operatorRole)) {
-            if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(targetRole)) {
-                throw new IllegalArgumentException("owner cannot kick owner");
-            }
-            return;
-        }
-
-        throw new IllegalArgumentException("operator role is invalid");
-    }
-
-    private boolean canManageGroupProfile(Integer role) {
-        return Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(role)
-                || Integer.valueOf(ChatGroupMemberRole.ADMIN.getCode()).equals(role);
     }
 }
