@@ -1,10 +1,13 @@
 package com.bilibili.im.conversation.mapper;
 
 import com.bilibili.im.conversation.model.entity.ChatGroupConversationDO;
+import com.bilibili.im.conversation.model.vo.GroupConversationWindowVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.List;
 
 public interface ChatGroupConversationMapper {
 
@@ -66,4 +69,29 @@ public interface ChatGroupConversationMapper {
             """)
     int batchUpdateConversationStatusByGroupId(@Param("groupId") Long groupId,
                                                @Param("status") Integer status);
+
+    @Select("""
+            SELECT
+                gc.conversation_id AS conversationId,
+                gc.group_id AS groupId,
+                g.group_name AS groupName,
+                g.group_avatar AS groupAvatar,
+                g.status AS status,
+                g.member_count AS memberCount,
+                g.is_all_muted AS isAllMuted,
+                g.last_message AS lastMessage,
+                g.last_message_time AS lastMessageTime,
+                g.last_server_message_id AS lastServerMessageId,
+                g.last_message_seq AS lastMessageSeq,
+                gc.is_muted AS isMuted
+            FROM chat_group_conversation gc
+            INNER JOIN chat_group g ON g.id = gc.group_id
+            WHERE gc.owner_user_id = #{ownerUserId}
+              AND gc.status = #{conversationStatus}
+              AND g.status = #{groupStatus}
+            ORDER BY COALESCE(g.last_message_time, gc.update_time) DESC, gc.id DESC
+            """)
+    List<GroupConversationWindowVO> selectVisibleGroupWindowsByOwnerUserId(@Param("ownerUserId") Long ownerUserId,
+                                                                           @Param("conversationStatus") Integer conversationStatus,
+                                                                           @Param("groupStatus") Integer groupStatus);
 }

@@ -3,9 +3,13 @@ package com.bilibili.im.conversation.service.impl;
 import com.bilibili.im.conversation.mapper.ChatGroupConversationMapper;
 import com.bilibili.im.conversation.model.entity.ChatGroupConversationDO;
 import com.bilibili.im.conversation.model.enums.ChatGroupConversationStatus;
+import com.bilibili.im.conversation.model.vo.GroupConversationWindowVO;
 import com.bilibili.im.conversation.service.ChatGroupConversationService;
 import com.bilibili.im.group.model.enums.ChatGroupMuteStatus;
+import com.bilibili.im.group.model.enums.ChatGroupStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ChatGroupConversationServiceImpl implements ChatGroupConversationService {
@@ -77,5 +81,17 @@ public class ChatGroupConversationServiceImpl implements ChatGroupConversationSe
         if (rows <= 0) {
             throw new RuntimeException("hide all group conversations failed");
         }
+    }
+
+    @Override
+    public List<GroupConversationWindowVO> listVisibleGroupConversations(Long ownerUserId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        return chatGroupConversationMapper.selectVisibleGroupWindowsByOwnerUserId(
+                ownerUserId,
+                ChatGroupConversationStatus.ACTIVE.getCode(),
+                ChatGroupStatus.ACTIVE.getCode()
+        );
     }
 }

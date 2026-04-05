@@ -4,6 +4,7 @@ import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.im.app.ConversationWindowApplicationService;
 import com.bilibili.im.conversation.model.vo.ConversationWindowListVO;
+import com.bilibili.im.conversation.model.vo.GroupConversationWindowListVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,6 +37,15 @@ public class ImConversationController {
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
         return Result.success(
                 conversationWindowApplicationService.listRecentConversations(currentUser.getUid())
+        );
+    }
+
+    @GetMapping("/groups")
+    @Operation(summary = "List visible group conversation windows for current user")
+    public Result<GroupConversationWindowListVO> listRecentGroupConversations(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        return Result.success(
+                conversationWindowApplicationService.listRecentGroupConversations(currentUser.getUid())
         );
     }
 
