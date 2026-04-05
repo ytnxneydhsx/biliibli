@@ -13,6 +13,10 @@ public interface ChatGroupService {
 
     void inviteMember(Long groupId, Long targetUserId);
 
+    void leaveGroup(Long groupId, Long currentUserId);
+
+    void dismissGroup(Long groupId, Long ownerUserId);
+
     ChatGroupMemberDO getMembership(Long groupId, Long userId);
 
     List<ChatGroupMemberDO> listActiveMembers(Long groupId);

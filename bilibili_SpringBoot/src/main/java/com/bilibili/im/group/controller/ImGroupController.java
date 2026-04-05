@@ -63,6 +63,17 @@ public class ImGroupController {
         return Result.success(null);
     }
 
+    @PostMapping("/groups/{groupId}/leave")
+    @Operation(summary = "Leave current group")
+    public Result<Void> leaveGroup(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId) {
+        groupApplicationService.leaveGroup(currentUser.getUid(), groupId);
+        return Result.success(null);
+    }
+
     @GetMapping("/groups/{groupId}/members")
     @Operation(summary = "List active group members")
     public Result<ChatGroupMemberListVO> listGroupMembers(

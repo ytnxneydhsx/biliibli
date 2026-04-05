@@ -4,6 +4,7 @@ import com.bilibili.im.conversation.model.entity.ChatGroupConversationDO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 public interface ChatGroupConversationMapper {
 
@@ -45,4 +46,24 @@ public interface ChatGroupConversationMapper {
             """)
     ChatGroupConversationDO selectByOwnerUserIdAndGroupId(@Param("ownerUserId") Long ownerUserId,
                                                           @Param("groupId") Long groupId);
+
+    @Update("""
+            UPDATE chat_group_conversation
+            SET status = #{status},
+                update_time = CURRENT_TIMESTAMP
+            WHERE owner_user_id = #{ownerUserId}
+              AND group_id = #{groupId}
+            """)
+    int updateConversationStatus(@Param("ownerUserId") Long ownerUserId,
+                                 @Param("groupId") Long groupId,
+                                 @Param("status") Integer status);
+
+    @Update("""
+            UPDATE chat_group_conversation
+            SET status = #{status},
+                update_time = CURRENT_TIMESTAMP
+            WHERE group_id = #{groupId}
+            """)
+    int batchUpdateConversationStatusByGroupId(@Param("groupId") Long groupId,
+                                               @Param("status") Integer status);
 }

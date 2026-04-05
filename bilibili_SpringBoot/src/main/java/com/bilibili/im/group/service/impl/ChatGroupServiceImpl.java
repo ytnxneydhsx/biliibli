@@ -108,6 +108,82 @@ public class ChatGroupServiceImpl implements ChatGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void leaveGroup(Long groupId, Long currentUserId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+
+        ChatGroupMemberDO membership = getMembership(groupId, currentUserId);
+        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+
+        if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(membership.getRole())) {
+            throw new IllegalArgumentException("owner should dismiss group instead of regular leave");
+        }
+
+        int rows = chatGroupMemberMapper.updateMemberStatus(
+                groupId,
+                currentUserId,
+                ChatGroupMemberStatus.LEFT.getCode()
+        );
+        if (rows <= 0) {
+            throw new RuntimeException("leave group failed");
+        }
+
+        syncMemberCount(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void dismissGroup(Long groupId, Long ownerUserId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+
+        ChatGroupDO group = getGroup(groupId);
+        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
+            throw new IllegalArgumentException("group status is invalid");
+        }
+        if (!ownerUserId.equals(group.getOwnerUserId())) {
+            throw new IllegalArgumentException("only group owner can dismiss group");
+        }
+
+        ChatGroupMemberDO membership = getMembership(groupId, ownerUserId);
+        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+        if (!Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(membership.getRole())) {
+            throw new IllegalArgumentException("only group owner can dismiss group");
+        }
+
+        int groupRows = chatGroupMapper.updateGroupStatusAndMemberCount(
+                groupId,
+                ChatGroupStatus.DISMISSED.getCode(),
+                0
+        );
+        if (groupRows <= 0) {
+            throw new RuntimeException("dismiss group failed");
+        }
+
+        int memberRows = chatGroupMemberMapper.batchUpdateMemberStatusByGroupId(
+                groupId,
+                ChatGroupMemberStatus.ACTIVE.getCode(),
+                ChatGroupMemberStatus.REMOVED.getCode()
+        );
+        if (memberRows <= 0) {
+            throw new RuntimeException("dismiss group members failed");
+        }
+    }
+
+    @Override
     public ChatGroupMemberDO getMembership(Long groupId, Long userId) {
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");

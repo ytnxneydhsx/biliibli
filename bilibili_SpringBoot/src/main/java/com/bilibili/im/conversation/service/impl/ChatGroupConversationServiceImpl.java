@@ -44,4 +44,38 @@ public class ChatGroupConversationServiceImpl implements ChatGroupConversationSe
             throw new RuntimeException("initialize group conversation failed");
         }
     }
+
+    @Override
+    public void hideGroupConversation(Long ownerUserId, Long groupId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+
+        int rows = chatGroupConversationMapper.updateConversationStatus(
+                ownerUserId,
+                groupId,
+                ChatGroupConversationStatus.HIDDEN_AFTER_EXIT.getCode()
+        );
+        if (rows <= 0) {
+            throw new RuntimeException("hide group conversation failed");
+        }
+    }
+
+    @Override
+    public void hideAllGroupConversations(Long groupId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+
+        int rows = chatGroupConversationMapper.batchUpdateConversationStatusByGroupId(
+                groupId,
+                ChatGroupConversationStatus.HIDDEN_AFTER_EXIT.getCode()
+        );
+        if (rows <= 0) {
+            throw new RuntimeException("hide all group conversations failed");
+        }
+    }
 }

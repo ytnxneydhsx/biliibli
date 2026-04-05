@@ -6,6 +6,7 @@ import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
 import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
 import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
+import com.bilibili.im.group.model.enums.ChatGroupMemberRole;
 import com.bilibili.im.group.model.enums.ChatGroupMemberStatus;
 import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberVO;
@@ -73,6 +74,31 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
         userService.validateUserExists(dto.getTargetUserId());
         chatGroupService.inviteMember(groupId, dto.getTargetUserId());
         chatGroupConversationService.initializeGroupConversation(dto.getTargetUserId(), groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void leaveGroup(Long currentUserId, Long groupId) {
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+
+        ChatGroupMemberDO membership = chatGroupService.getMembership(groupId, currentUserId);
+        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+
+        if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(membership.getRole())) {
+            chatGroupService.dismissGroup(groupId, currentUserId);
+            chatGroupConversationService.hideAllGroupConversations(groupId);
+            return;
+        }
+
+        chatGroupService.leaveGroup(groupId, currentUserId);
+        chatGroupConversationService.hideGroupConversation(currentUserId, groupId);
     }
 
     @Override

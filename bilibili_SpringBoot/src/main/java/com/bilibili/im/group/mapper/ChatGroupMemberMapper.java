@@ -4,6 +4,7 @@ import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -81,4 +82,26 @@ public interface ChatGroupMemberMapper {
             """)
     int countByGroupIdAndStatus(@Param("groupId") Long groupId,
                                 @Param("status") Integer status);
+
+    @Update("""
+            UPDATE chat_group_member
+            SET status = #{status},
+                update_time = CURRENT_TIMESTAMP
+            WHERE group_id = #{groupId}
+              AND user_id = #{userId}
+            """)
+    int updateMemberStatus(@Param("groupId") Long groupId,
+                           @Param("userId") Long userId,
+                           @Param("status") Integer status);
+
+    @Update("""
+            UPDATE chat_group_member
+            SET status = #{status},
+                update_time = CURRENT_TIMESTAMP
+            WHERE group_id = #{groupId}
+              AND status = #{fromStatus}
+            """)
+    int batchUpdateMemberStatusByGroupId(@Param("groupId") Long groupId,
+                                         @Param("fromStatus") Integer fromStatus,
+                                         @Param("status") Integer status);
 }

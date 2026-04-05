@@ -13,5 +13,7 @@ public interface GroupApplicationService {
 
     void inviteGroupMember(Long currentUserId, Long groupId, InviteGroupMemberDTO dto);
 
+    void leaveGroup(Long currentUserId, Long groupId);
+
     ChatGroupMemberListVO listGroupMembers(Long currentUserId, Long groupId);
 }
