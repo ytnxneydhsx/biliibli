@@ -9,6 +9,10 @@ public interface ChatConversationService {
 
     String resolveSingleConversationId(Long ownerUserId, Long peerUserId);
 
+    String resolveGroupConversationId(Long groupId);
+
+    void initializeGroupConversation(Long ownerUserId, Long groupId);
+
     List<ChatConversationDO> listRecentSingleConversations(Long ownerUserId);
 
     ChatConversationDO getSingleConversation(Long ownerUserId, Long peerUserId);

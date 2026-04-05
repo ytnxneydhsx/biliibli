@@ -49,6 +49,32 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     }
 
     @Override
+    public String resolveGroupConversationId(Long groupId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        return "g_" + groupId;
+    }
+
+    @Override
+    public void initializeGroupConversation(Long ownerUserId, Long groupId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        chatConversationMapper.insertIgnoreConversation(
+                resolveGroupConversationId(groupId),
+                ownerUserId,
+                groupId,
+                ConversationType.GROUP.getCode(),
+                0,
+                0
+        );
+    }
+
+    @Override
     public List<ChatConversationDO> listRecentSingleConversations(Long ownerUserId) {
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");

@@ -1,0 +1,107 @@
+package com.bilibili.im.app.impl;
+
+import com.bilibili.access.service.UserAccessService;
+import com.bilibili.im.app.GroupApplicationService;
+import com.bilibili.im.conversation.service.ChatConversationService;
+import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
+import com.bilibili.im.group.model.entity.ChatGroupDO;
+import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
+import com.bilibili.im.group.model.enums.ChatGroupMemberStatus;
+import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
+import com.bilibili.im.group.model.vo.ChatGroupMemberVO;
+import com.bilibili.im.group.model.vo.ChatGroupVO;
+import com.bilibili.im.group.service.ChatGroupService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class GroupApplicationServiceImpl implements GroupApplicationService {
+
+    private final UserAccessService userAccessService;
+    private final ChatConversationService chatConversationService;
+    private final ChatGroupService chatGroupService;
+
+    public GroupApplicationServiceImpl(UserAccessService userAccessService,
+                                       ChatConversationService chatConversationService,
+                                       ChatGroupService chatGroupService) {
+        this.userAccessService = userAccessService;
+        this.chatConversationService = chatConversationService;
+        this.chatGroupService = chatGroupService;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ChatGroupVO createGroup(Long currentUserId, CreateChatGroupDTO dto) {
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+        if (dto == null) {
+            throw new IllegalArgumentException("dto is invalid");
+        }
+
+        userAccessService.validateCanSendImMessage(currentUserId);
+        ChatGroupDO group = chatGroupService.createGroup(currentUserId, dto.getGroupName());
+        chatConversationService.initializeGroupConversation(currentUserId, group.getId());
+        return toGroupVO(group);
+    }
+
+    @Override
+    public ChatGroupVO getGroup(Long groupId) {
+        return toGroupVO(chatGroupService.getGroup(groupId));
+    }
+
+    @Override
+    public ChatGroupMemberListVO listGroupMembers(Long currentUserId, Long groupId) {
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+
+        ChatGroupMemberDO membership = chatGroupService.getMembership(groupId, currentUserId);
+        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+
+        List<ChatGroupMemberVO> records = chatGroupService.listActiveMembers(groupId)
+                .stream()
+                .map(this::toGroupMemberVO)
+                .toList();
+
+        ChatGroupMemberListVO result = new ChatGroupMemberListVO();
+        result.setGroupId(groupId);
+        result.setSize(records.size());
+        result.setRecords(records);
+        return result;
+    }
+
+    private ChatGroupVO toGroupVO(ChatGroupDO group) {
+        ChatGroupVO vo = new ChatGroupVO();
+        vo.setGroupId(group.getId());
+        vo.setConversationId(chatConversationService.resolveGroupConversationId(group.getId()));
+        vo.setGroupName(group.getGroupName());
+        vo.setOwnerUserId(group.getOwnerUserId());
+        vo.setGroupAvatar(group.getGroupAvatar());
+        vo.setStatus(group.getStatus());
+        vo.setMemberCount(group.getMemberCount());
+        vo.setIsAllMuted(group.getIsAllMuted());
+        vo.setLastMessage(group.getLastMessage());
+        vo.setLastMessageTime(group.getLastMessageTime());
+        vo.setLastServerMessageId(group.getLastServerMessageId());
+        vo.setLastMessageSeq(group.getLastMessageSeq());
+        return vo;
+    }
+
+    private ChatGroupMemberVO toGroupMemberVO(ChatGroupMemberDO member) {
+        ChatGroupMemberVO vo = new ChatGroupMemberVO();
+        vo.setUserId(member.getUserId());
+        vo.setRole(member.getRole());
+        vo.setStatus(member.getStatus());
+        vo.setIsMuted(member.getIsMuted());
+        vo.setLastReadSeq(member.getLastReadSeq());
+        return vo;
+    }
+}
