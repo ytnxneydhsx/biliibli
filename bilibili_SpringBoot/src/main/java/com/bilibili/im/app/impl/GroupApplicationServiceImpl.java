@@ -1,7 +1,7 @@
 package com.bilibili.im.app.impl;
 
 import com.bilibili.im.app.GroupApplicationService;
-import com.bilibili.im.conversation.service.ChatConversationService;
+import com.bilibili.im.conversation.service.ChatGroupConversationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
 import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
@@ -20,14 +20,14 @@ import java.util.List;
 @Service
 public class GroupApplicationServiceImpl implements GroupApplicationService {
 
-    private final ChatConversationService chatConversationService;
+    private final ChatGroupConversationService chatGroupConversationService;
     private final ChatGroupService chatGroupService;
     private final UserService userService;
 
-    public GroupApplicationServiceImpl(ChatConversationService chatConversationService,
+    public GroupApplicationServiceImpl(ChatGroupConversationService chatGroupConversationService,
                                        ChatGroupService chatGroupService,
                                        UserService userService) {
-        this.chatConversationService = chatConversationService;
+        this.chatGroupConversationService = chatGroupConversationService;
         this.chatGroupService = chatGroupService;
         this.userService = userService;
     }
@@ -43,7 +43,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
         }
 
         ChatGroupDO group = chatGroupService.createGroup(currentUserId, dto.getGroupName());
-        chatConversationService.initializeGroupConversation(currentUserId, group.getId());
+        chatGroupConversationService.initializeGroupConversation(currentUserId, group.getId());
         return toGroupVO(group);
     }
 
@@ -72,7 +72,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
 
         userService.validateUserExists(dto.getTargetUserId());
         chatGroupService.inviteMember(groupId, dto.getTargetUserId());
-        chatConversationService.initializeGroupConversation(dto.getTargetUserId(), groupId);
+        chatGroupConversationService.initializeGroupConversation(dto.getTargetUserId(), groupId);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
     private ChatGroupVO toGroupVO(ChatGroupDO group) {
         ChatGroupVO vo = new ChatGroupVO();
         vo.setGroupId(group.getId());
-        vo.setConversationId(chatConversationService.resolveGroupConversationId(group.getId()));
+        vo.setConversationId(chatGroupConversationService.resolveGroupConversationId(group.getId()));
         vo.setGroupName(group.getGroupName());
         vo.setOwnerUserId(group.getOwnerUserId());
         vo.setGroupAvatar(group.getGroupAvatar());
