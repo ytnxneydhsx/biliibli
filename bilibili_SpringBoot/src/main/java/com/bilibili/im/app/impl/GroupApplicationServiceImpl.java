@@ -102,6 +102,23 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void kickGroupMember(Long currentUserId, Long groupId, Long targetUserId) {
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (targetUserId == null || targetUserId <= 0) {
+            throw new IllegalArgumentException("targetUserId is invalid");
+        }
+
+        chatGroupService.kickGroupMember(groupId, currentUserId, targetUserId);
+        chatGroupConversationService.hideGroupConversation(targetUserId, groupId);
+    }
+
+    @Override
     public ChatGroupMemberListVO listGroupMembers(Long currentUserId, Long groupId) {
         if (currentUserId == null || currentUserId <= 0) {
             throw new IllegalArgumentException("currentUserId is invalid");

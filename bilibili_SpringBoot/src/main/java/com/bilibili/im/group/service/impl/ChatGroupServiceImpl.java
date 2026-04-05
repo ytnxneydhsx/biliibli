@@ -184,6 +184,51 @@ public class ChatGroupServiceImpl implements ChatGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void kickGroupMember(Long groupId, Long operatorUserId, Long targetUserId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (operatorUserId == null || operatorUserId <= 0) {
+            throw new IllegalArgumentException("operatorUserId is invalid");
+        }
+        if (targetUserId == null || targetUserId <= 0) {
+            throw new IllegalArgumentException("targetUserId is invalid");
+        }
+        if (operatorUserId.equals(targetUserId)) {
+            throw new IllegalArgumentException("cannot kick self");
+        }
+
+        ChatGroupDO group = getGroup(groupId);
+        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
+            throw new IllegalArgumentException("group status is invalid");
+        }
+
+        ChatGroupMemberDO operatorMembership = getMembership(groupId, operatorUserId);
+        if (operatorMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(operatorMembership.getStatus())) {
+            throw new IllegalArgumentException("operator membership is invalid");
+        }
+
+        ChatGroupMemberDO targetMembership = getMembership(groupId, targetUserId);
+        if (targetMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(targetMembership.getStatus())) {
+            throw new IllegalArgumentException("target membership is invalid");
+        }
+
+        validateKickPermission(operatorMembership, targetMembership);
+
+        int rows = chatGroupMemberMapper.updateMemberStatus(
+                groupId,
+                targetUserId,
+                ChatGroupMemberStatus.REMOVED.getCode()
+        );
+        if (rows <= 0) {
+            throw new RuntimeException("kick group member failed");
+        }
+
+        syncMemberCount(groupId);
+    }
+
+    @Override
     public ChatGroupMemberDO getMembership(Long groupId, Long userId) {
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");
@@ -218,5 +263,31 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             return 0L;
         }
         return group.getLastMessageSeq();
+    }
+
+    private void validateKickPermission(ChatGroupMemberDO operatorMembership,
+                                        ChatGroupMemberDO targetMembership) {
+        Integer operatorRole = operatorMembership.getRole();
+        Integer targetRole = targetMembership.getRole();
+
+        if (Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(operatorRole)) {
+            throw new IllegalArgumentException("member cannot kick others");
+        }
+
+        if (Integer.valueOf(ChatGroupMemberRole.ADMIN.getCode()).equals(operatorRole)) {
+            if (!Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(targetRole)) {
+                throw new IllegalArgumentException("admin can only kick normal members");
+            }
+            return;
+        }
+
+        if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(operatorRole)) {
+            if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(targetRole)) {
+                throw new IllegalArgumentException("owner cannot kick owner");
+            }
+            return;
+        }
+
+        throw new IllegalArgumentException("operator role is invalid");
     }
 }

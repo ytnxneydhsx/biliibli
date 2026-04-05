@@ -15,5 +15,7 @@ public interface GroupApplicationService {
 
     void leaveGroup(Long currentUserId, Long groupId);
 
+    void kickGroupMember(Long currentUserId, Long groupId, Long targetUserId);
+
     ChatGroupMemberListVO listGroupMembers(Long currentUserId, Long groupId);
 }

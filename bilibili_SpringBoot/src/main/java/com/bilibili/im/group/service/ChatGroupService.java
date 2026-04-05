@@ -17,6 +17,8 @@ public interface ChatGroupService {
 
     void dismissGroup(Long groupId, Long ownerUserId);
 
+    void kickGroupMember(Long groupId, Long operatorUserId, Long targetUserId);
+
     ChatGroupMemberDO getMembership(Long groupId, Long userId);
 
     List<ChatGroupMemberDO> listActiveMembers(Long groupId);

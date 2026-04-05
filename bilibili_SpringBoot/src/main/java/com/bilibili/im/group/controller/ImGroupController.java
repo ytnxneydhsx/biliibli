@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,6 +72,20 @@ public class ImGroupController {
             @NotNull(message = "groupId cannot be null")
             @Positive(message = "groupId must be positive") Long groupId) {
         groupApplicationService.leaveGroup(currentUser.getUid(), groupId);
+        return Result.success(null);
+    }
+
+    @DeleteMapping("/groups/{groupId}/members/{targetUserId}")
+    @Operation(summary = "Kick a member from current group")
+    public Result<Void> kickGroupMember(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId,
+            @PathVariable("targetUserId")
+            @NotNull(message = "targetUserId cannot be null")
+            @Positive(message = "targetUserId must be positive") Long targetUserId) {
+        groupApplicationService.kickGroupMember(currentUser.getUid(), groupId, targetUserId);
         return Result.success(null);
     }
 
