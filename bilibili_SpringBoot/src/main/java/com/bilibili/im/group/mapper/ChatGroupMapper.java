@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 public interface ChatGroupMapper {
 
@@ -56,4 +57,13 @@ public interface ChatGroupMapper {
             LIMIT 1
             """)
     ChatGroupDO selectById(@Param("groupId") Long groupId);
+
+    @Update("""
+            UPDATE chat_group
+            SET member_count = #{memberCount},
+                update_time = CURRENT_TIMESTAMP
+            WHERE id = #{groupId}
+            """)
+    int updateMemberCount(@Param("groupId") Long groupId,
+                          @Param("memberCount") Integer memberCount);
 }

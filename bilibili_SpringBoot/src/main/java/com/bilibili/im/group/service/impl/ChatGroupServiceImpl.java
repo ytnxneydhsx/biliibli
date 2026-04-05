@@ -77,6 +77,37 @@ public class ChatGroupServiceImpl implements ChatGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void inviteMember(Long groupId, Long targetUserId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (targetUserId == null || targetUserId <= 0) {
+            throw new IllegalArgumentException("targetUserId is invalid");
+        }
+
+        ChatGroupDO group = getGroup(groupId);
+        ChatGroupMemberDO existedMember = chatGroupMemberMapper.selectByGroupIdAndUserId(groupId, targetUserId);
+        if (existedMember != null && Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(existedMember.getStatus())) {
+            throw new IllegalArgumentException("target user is already in group");
+        }
+
+        ChatGroupMemberDO member = new ChatGroupMemberDO();
+        member.setGroupId(groupId);
+        member.setUserId(targetUserId);
+        member.setRole(ChatGroupMemberRole.MEMBER.getCode());
+        member.setStatus(ChatGroupMemberStatus.ACTIVE.getCode());
+        member.setIsMuted(ChatGroupMuteStatus.UNMUTED.getCode());
+        member.setLastReadSeq(resolveLatestReadSeq(group));
+        int rows = chatGroupMemberMapper.createOrReactivateMember(member);
+        if (rows <= 0) {
+            throw new RuntimeException("invite group member failed");
+        }
+
+        syncMemberCount(groupId);
+    }
+
+    @Override
     public ChatGroupMemberDO getMembership(Long groupId, Long userId) {
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");
@@ -93,6 +124,17 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("groupId is invalid");
         }
         return chatGroupMemberMapper.selectByGroupIdAndStatus(groupId, ChatGroupMemberStatus.ACTIVE.getCode());
+    }
+
+    private void syncMemberCount(Long groupId) {
+        int activeMemberCount = chatGroupMemberMapper.countByGroupIdAndStatus(
+                groupId,
+                ChatGroupMemberStatus.ACTIVE.getCode()
+        );
+        int rows = chatGroupMapper.updateMemberCount(groupId, activeMemberCount);
+        if (rows <= 0) {
+            throw new RuntimeException("update group member count failed");
+        }
     }
 
     private Long resolveLatestReadSeq(ChatGroupDO group) {

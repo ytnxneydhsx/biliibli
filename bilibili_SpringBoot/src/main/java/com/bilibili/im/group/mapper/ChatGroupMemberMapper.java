@@ -72,4 +72,13 @@ public interface ChatGroupMemberMapper {
             """)
     List<ChatGroupMemberDO> selectByGroupIdAndStatus(@Param("groupId") Long groupId,
                                                      @Param("status") Integer status);
+
+    @Select("""
+            SELECT COUNT(1)
+            FROM chat_group_member
+            WHERE group_id = #{groupId}
+              AND status = #{status}
+            """)
+    int countByGroupIdAndStatus(@Param("groupId") Long groupId,
+                                @Param("status") Integer status);
 }

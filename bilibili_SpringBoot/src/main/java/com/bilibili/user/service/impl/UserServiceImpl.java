@@ -106,10 +106,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileVO getPublicProfile(Long uid) {
+    public void validateUserExists(Long uid) {
         if (uid == null || uid <= 0) {
             throw new IllegalArgumentException("uid is invalid");
         }
+
+        LambdaQueryWrapper<UserDO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserDO::getId, uid);
+        UserDO user = userMapper.selectOne(queryWrapper);
+        if (user == null) {
+            throw new IllegalArgumentException("user not found");
+        }
+    }
+
+    @Override
+    public UserProfileVO getPublicProfile(Long uid) {
+        validateUserExists(uid);
 
         UserInfoDO userInfo = getUserInfoByUid(uid);
 

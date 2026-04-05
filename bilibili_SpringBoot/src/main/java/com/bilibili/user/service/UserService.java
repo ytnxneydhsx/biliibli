@@ -12,6 +12,8 @@ public interface UserService {
 
     UserLoginVO login(UserLoginDTO dto);
 
+    void validateUserExists(Long uid);
+
     UserProfileVO getPublicProfile(Long uid);
 
     void updatePublicProfile(Long uid, UserProfileUpdateDTO dto);

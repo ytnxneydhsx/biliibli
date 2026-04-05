@@ -11,6 +11,8 @@ public interface ChatGroupService {
 
     ChatGroupDO getGroup(Long groupId);
 
+    void inviteMember(Long groupId, Long targetUserId);
+
     ChatGroupMemberDO getMembership(Long groupId, Long userId);
 
     List<ChatGroupMemberDO> listActiveMembers(Long groupId);

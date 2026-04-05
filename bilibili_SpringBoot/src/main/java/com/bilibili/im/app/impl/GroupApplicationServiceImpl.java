@@ -1,9 +1,9 @@
 package com.bilibili.im.app.impl;
 
-import com.bilibili.access.service.UserAccessService;
 import com.bilibili.im.app.GroupApplicationService;
 import com.bilibili.im.conversation.service.ChatConversationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
+import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
 import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
 import com.bilibili.im.group.model.enums.ChatGroupMemberStatus;
@@ -11,6 +11,7 @@ import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberVO;
 import com.bilibili.im.group.model.vo.ChatGroupVO;
 import com.bilibili.im.group.service.ChatGroupService;
+import com.bilibili.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,16 +20,16 @@ import java.util.List;
 @Service
 public class GroupApplicationServiceImpl implements GroupApplicationService {
 
-    private final UserAccessService userAccessService;
     private final ChatConversationService chatConversationService;
     private final ChatGroupService chatGroupService;
+    private final UserService userService;
 
-    public GroupApplicationServiceImpl(UserAccessService userAccessService,
-                                       ChatConversationService chatConversationService,
-                                       ChatGroupService chatGroupService) {
-        this.userAccessService = userAccessService;
+    public GroupApplicationServiceImpl(ChatConversationService chatConversationService,
+                                       ChatGroupService chatGroupService,
+                                       UserService userService) {
         this.chatConversationService = chatConversationService;
         this.chatGroupService = chatGroupService;
+        this.userService = userService;
     }
 
     @Override
@@ -41,7 +42,6 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
             throw new IllegalArgumentException("dto is invalid");
         }
 
-        userAccessService.validateCanSendImMessage(currentUserId);
         ChatGroupDO group = chatGroupService.createGroup(currentUserId, dto.getGroupName());
         chatConversationService.initializeGroupConversation(currentUserId, group.getId());
         return toGroupVO(group);
@@ -50,6 +50,29 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
     @Override
     public ChatGroupVO getGroup(Long groupId) {
         return toGroupVO(chatGroupService.getGroup(groupId));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void inviteGroupMember(Long currentUserId, Long groupId, InviteGroupMemberDTO dto) {
+        if (currentUserId == null || currentUserId <= 0) {
+            throw new IllegalArgumentException("currentUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (dto == null || dto.getTargetUserId() == null || dto.getTargetUserId() <= 0) {
+            throw new IllegalArgumentException("targetUserId is invalid");
+        }
+
+        ChatGroupMemberDO inviterMembership = chatGroupService.getMembership(groupId, currentUserId);
+        if (inviterMembership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(inviterMembership.getStatus())) {
+            throw new IllegalArgumentException("group membership is invalid");
+        }
+
+        userService.validateUserExists(dto.getTargetUserId());
+        chatGroupService.inviteMember(groupId, dto.getTargetUserId());
+        chatConversationService.initializeGroupConversation(dto.getTargetUserId(), groupId);
     }
 
     @Override

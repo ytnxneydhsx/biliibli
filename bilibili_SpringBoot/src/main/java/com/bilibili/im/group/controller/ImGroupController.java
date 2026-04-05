@@ -4,6 +4,7 @@ import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
 import com.bilibili.im.app.GroupApplicationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
+import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +35,6 @@ public class ImGroupController {
     }
 
     @PostMapping("/create-group")
-    @PreAuthorize("@accessAuthz.canSendImMessage(authentication)")
     @Operation(summary = "Create a group conversation")
     public Result<ChatGroupVO> createGroup(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
@@ -51,8 +51,19 @@ public class ImGroupController {
         return Result.success(groupApplicationService.getGroup(groupId));
     }
 
+    @PostMapping("/groups/{groupId}/members")
+    @Operation(summary = "Invite a member into group")
+    public Result<Void> inviteGroupMember(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId,
+            @Valid @RequestBody InviteGroupMemberDTO dto) {
+        groupApplicationService.inviteGroupMember(currentUser.getUid(), groupId, dto);
+        return Result.success(null);
+    }
+
     @GetMapping("/groups/{groupId}/members")
-    @PreAuthorize("@accessAuthz.canSendImMessage(authentication)")
     @Operation(summary = "List active group members")
     public Result<ChatGroupMemberListVO> listGroupMembers(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
