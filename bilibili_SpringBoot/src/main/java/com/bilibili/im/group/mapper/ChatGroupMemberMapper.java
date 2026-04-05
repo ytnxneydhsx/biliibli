@@ -96,6 +96,17 @@ public interface ChatGroupMemberMapper {
 
     @Update("""
             UPDATE chat_group_member
+            SET role = #{role},
+                update_time = CURRENT_TIMESTAMP
+            WHERE group_id = #{groupId}
+              AND user_id = #{userId}
+            """)
+    int updateMemberRole(@Param("groupId") Long groupId,
+                         @Param("userId") Long userId,
+                         @Param("role") Integer role);
+
+    @Update("""
+            UPDATE chat_group_member
             SET status = #{status},
                 update_time = CURRENT_TIMESTAMP
             WHERE group_id = #{groupId}

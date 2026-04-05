@@ -203,6 +203,37 @@ public class ChatGroupServiceImpl implements ChatGroupService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void updateGroupMemberRole(Long groupId, Long operatorUserId, Long targetUserId, Integer targetRole) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (operatorUserId == null || operatorUserId <= 0) {
+            throw new IllegalArgumentException("operatorUserId is invalid");
+        }
+        if (targetUserId == null || targetUserId <= 0) {
+            throw new IllegalArgumentException("targetUserId is invalid");
+        }
+        if (targetRole == null) {
+            throw new IllegalArgumentException("targetRole is invalid");
+        }
+
+        groupPermissionService.requireActiveGroup(groupId);
+        ChatGroupMemberDO operatorMembership = groupPermissionService.requireActiveMembership(groupId, operatorUserId);
+        ChatGroupMemberDO targetMembership = groupPermissionService.requireActiveMembership(groupId, targetUserId);
+        groupPermissionService.requireCanChangeMemberRole(
+                operatorMembership,
+                targetMembership,
+                targetRole
+        );
+
+        int rows = chatGroupMemberMapper.updateMemberRole(groupId, targetUserId, targetRole);
+        if (rows <= 0) {
+            throw new RuntimeException("update group member role failed");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public String updateGroupName(Long groupId, Long operatorUserId, String groupName) {
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");

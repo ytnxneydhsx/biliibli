@@ -17,4 +17,8 @@ public interface GroupPermissionService {
                               ChatGroupMemberDO targetMembership,
                               Long operatorUserId,
                               Long targetUserId);
+
+    void requireCanChangeMemberRole(ChatGroupMemberDO operatorMembership,
+                                    ChatGroupMemberDO targetMembership,
+                                    Integer targetRole);
 }

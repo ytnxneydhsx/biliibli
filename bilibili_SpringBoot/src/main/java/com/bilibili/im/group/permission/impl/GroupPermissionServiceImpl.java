@@ -127,4 +127,33 @@ public class GroupPermissionServiceImpl implements GroupPermissionService {
 
         throw new IllegalArgumentException("operator role is invalid");
     }
+
+    @Override
+    public void requireCanChangeMemberRole(ChatGroupMemberDO operatorMembership,
+                                           ChatGroupMemberDO targetMembership,
+                                           Integer targetRole) {
+        if (targetRole == null) {
+            throw new IllegalArgumentException("targetRole is invalid");
+        }
+        if (operatorMembership == null) {
+            throw new IllegalArgumentException("operator membership is invalid");
+        }
+        if (targetMembership == null) {
+            throw new IllegalArgumentException("target membership is invalid");
+        }
+        if (operatorMembership.getUserId() != null
+                && operatorMembership.getUserId().equals(targetMembership.getUserId())) {
+            throw new IllegalArgumentException("cannot update self role");
+        }
+        if (!Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(operatorMembership.getRole())) {
+            throw new IllegalArgumentException("only group owner can update member role");
+        }
+        if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(targetMembership.getRole())) {
+            throw new IllegalArgumentException("cannot update owner role");
+        }
+        if (!Integer.valueOf(ChatGroupMemberRole.ADMIN.getCode()).equals(targetRole)
+                && !Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(targetRole)) {
+            throw new IllegalArgumentException("target role is invalid");
+        }
+    }
 }

@@ -19,6 +19,8 @@ public interface ChatGroupService {
 
     void kickGroupMember(Long groupId, Long operatorUserId, Long targetUserId);
 
+    void updateGroupMemberRole(Long groupId, Long operatorUserId, Long targetUserId, Integer targetRole);
+
     String updateGroupName(Long groupId, Long operatorUserId, String groupName);
 
     String updateGroupAvatar(Long groupId, Long operatorUserId, String groupAvatar);

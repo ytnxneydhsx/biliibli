@@ -5,9 +5,11 @@ import com.bilibili.common.result.Result;
 import com.bilibili.im.app.GroupApplicationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
 import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
+import com.bilibili.im.group.model.dto.UpdateChatGroupMemberRoleDTO;
 import com.bilibili.im.group.model.dto.UpdateChatGroupNameDTO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupVO;
+import com.bilibili.im.group.service.ChatGroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,9 +34,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImGroupController {
 
     private final GroupApplicationService groupApplicationService;
+    private final ChatGroupService chatGroupService;
 
-    public ImGroupController(GroupApplicationService groupApplicationService) {
+    public ImGroupController(GroupApplicationService groupApplicationService,
+                             ChatGroupService chatGroupService) {
         this.groupApplicationService = groupApplicationService;
+        this.chatGroupService = chatGroupService;
     }
 
     @PostMapping("/create-group")
@@ -99,6 +104,21 @@ public class ImGroupController {
             @NotNull(message = "targetUserId cannot be null")
             @Positive(message = "targetUserId must be positive") Long targetUserId) {
         groupApplicationService.kickGroupMember(currentUser.getUid(), groupId, targetUserId);
+        return Result.success(null);
+    }
+
+    @PutMapping("/groups/{groupId}/members/{targetUserId}/role")
+    @Operation(summary = "Update current group member role")
+    public Result<Void> updateGroupMemberRole(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId,
+            @PathVariable("targetUserId")
+            @NotNull(message = "targetUserId cannot be null")
+            @Positive(message = "targetUserId must be positive") Long targetUserId,
+            @Valid @RequestBody UpdateChatGroupMemberRoleDTO dto) {
+        chatGroupService.updateGroupMemberRole(groupId, currentUser.getUid(), targetUserId, dto.getRole());
         return Result.success(null);
     }
 
