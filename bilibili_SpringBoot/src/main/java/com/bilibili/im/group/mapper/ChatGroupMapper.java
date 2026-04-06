@@ -95,4 +95,13 @@ public interface ChatGroupMapper {
             """)
     int updateGroupName(@Param("groupId") Long groupId,
                         @Param("groupName") String groupName);
+
+    @Update("""
+            UPDATE chat_group
+            SET is_all_muted = #{isMuted},
+                update_time = CURRENT_TIMESTAMP
+            WHERE id = #{groupId}
+            """)
+    int updateGroupMuteStatus(@Param("groupId") Long groupId,
+                              @Param("isMuted") Integer isMuted);
 }

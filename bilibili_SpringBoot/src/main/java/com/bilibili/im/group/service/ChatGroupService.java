@@ -21,6 +21,10 @@ public interface ChatGroupService {
 
     void updateGroupMemberRole(Long groupId, Long operatorUserId, Long targetUserId, Integer targetRole);
 
+    void updateGroupMuteStatus(Long groupId, Long operatorUserId, Integer isMuted);
+
+    void updateGroupMemberMuteStatus(Long groupId, Long operatorUserId, Long targetUserId, Integer isMuted);
+
     String updateGroupName(Long groupId, Long operatorUserId, String groupName);
 
     String updateGroupAvatar(Long groupId, Long operatorUserId, String groupAvatar);

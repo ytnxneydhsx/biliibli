@@ -6,6 +6,7 @@ import com.bilibili.im.app.GroupApplicationService;
 import com.bilibili.im.group.model.dto.CreateChatGroupDTO;
 import com.bilibili.im.group.model.dto.InviteGroupMemberDTO;
 import com.bilibili.im.group.model.dto.UpdateChatGroupMemberRoleDTO;
+import com.bilibili.im.group.model.dto.UpdateChatGroupMuteStatusDTO;
 import com.bilibili.im.group.model.dto.UpdateChatGroupNameDTO;
 import com.bilibili.im.group.model.vo.ChatGroupMemberListVO;
 import com.bilibili.im.group.model.vo.ChatGroupVO;
@@ -82,6 +83,18 @@ public class ImGroupController {
         return Result.success(groupApplicationService.updateGroupName(currentUser.getUid(), groupId, dto));
     }
 
+    @PutMapping("/groups/{groupId}/mute")
+    @Operation(summary = "Update current group all mute status")
+    public Result<Void> updateGroupMuteStatus(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId,
+            @Valid @RequestBody UpdateChatGroupMuteStatusDTO dto) {
+        chatGroupService.updateGroupMuteStatus(groupId, currentUser.getUid(), dto.getIsMuted());
+        return Result.success(null);
+    }
+
     @PostMapping("/groups/{groupId}/leave")
     @Operation(summary = "Leave current group")
     public Result<Void> leaveGroup(
@@ -119,6 +132,21 @@ public class ImGroupController {
             @Positive(message = "targetUserId must be positive") Long targetUserId,
             @Valid @RequestBody UpdateChatGroupMemberRoleDTO dto) {
         chatGroupService.updateGroupMemberRole(groupId, currentUser.getUid(), targetUserId, dto.getRole());
+        return Result.success(null);
+    }
+
+    @PutMapping("/groups/{groupId}/members/{targetUserId}/mute")
+    @Operation(summary = "Update current group member mute status")
+    public Result<Void> updateGroupMemberMuteStatus(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @PathVariable("groupId")
+            @NotNull(message = "groupId cannot be null")
+            @Positive(message = "groupId must be positive") Long groupId,
+            @PathVariable("targetUserId")
+            @NotNull(message = "targetUserId cannot be null")
+            @Positive(message = "targetUserId must be positive") Long targetUserId,
+            @Valid @RequestBody UpdateChatGroupMuteStatusDTO dto) {
+        chatGroupService.updateGroupMemberMuteStatus(groupId, currentUser.getUid(), targetUserId, dto.getIsMuted());
         return Result.success(null);
     }
 

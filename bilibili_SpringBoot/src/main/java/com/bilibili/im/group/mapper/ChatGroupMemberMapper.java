@@ -107,6 +107,17 @@ public interface ChatGroupMemberMapper {
 
     @Update("""
             UPDATE chat_group_member
+            SET is_muted = #{isMuted},
+                update_time = CURRENT_TIMESTAMP
+            WHERE group_id = #{groupId}
+              AND user_id = #{userId}
+            """)
+    int updateMemberMuteStatus(@Param("groupId") Long groupId,
+                               @Param("userId") Long userId,
+                               @Param("isMuted") Integer isMuted);
+
+    @Update("""
+            UPDATE chat_group_member
             SET status = #{status},
                 update_time = CURRENT_TIMESTAMP
             WHERE group_id = #{groupId}

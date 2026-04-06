@@ -21,4 +21,11 @@ public interface GroupPermissionService {
     void requireCanChangeMemberRole(ChatGroupMemberDO operatorMembership,
                                     ChatGroupMemberDO targetMembership,
                                     Integer targetRole);
+
+    void requireCanUpdateGroupMuteStatus(ChatGroupMemberDO operatorMembership,
+                                         Integer isMuted);
+
+    void requireCanUpdateMemberMuteStatus(ChatGroupMemberDO operatorMembership,
+                                          ChatGroupMemberDO targetMembership,
+                                          Integer isMuted);
 }

@@ -6,6 +6,7 @@ import com.bilibili.im.group.model.entity.ChatGroupDO;
 import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
 import com.bilibili.im.group.model.enums.ChatGroupMemberRole;
 import com.bilibili.im.group.model.enums.ChatGroupMemberStatus;
+import com.bilibili.im.group.model.enums.ChatGroupMuteStatus;
 import com.bilibili.im.group.model.enums.ChatGroupStatus;
 import com.bilibili.im.group.permission.GroupPermissionService;
 import org.springframework.stereotype.Service;
@@ -155,5 +156,64 @@ public class GroupPermissionServiceImpl implements GroupPermissionService {
                 && !Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(targetRole)) {
             throw new IllegalArgumentException("target role is invalid");
         }
+    }
+
+    @Override
+    public void requireCanUpdateGroupMuteStatus(ChatGroupMemberDO operatorMembership,
+                                                Integer isMuted) {
+        if (isMuted == null) {
+            throw new IllegalArgumentException("isMuted is invalid");
+        }
+        if (!Integer.valueOf(ChatGroupMuteStatus.UNMUTED.getCode()).equals(isMuted)
+                && !Integer.valueOf(ChatGroupMuteStatus.MUTED.getCode()).equals(isMuted)) {
+            throw new IllegalArgumentException("isMuted is invalid");
+        }
+        requireCanManageProfile(operatorMembership);
+    }
+
+    @Override
+    public void requireCanUpdateMemberMuteStatus(ChatGroupMemberDO operatorMembership,
+                                                 ChatGroupMemberDO targetMembership,
+                                                 Integer isMuted) {
+        if (isMuted == null) {
+            throw new IllegalArgumentException("isMuted is invalid");
+        }
+        if (!Integer.valueOf(ChatGroupMuteStatus.UNMUTED.getCode()).equals(isMuted)
+                && !Integer.valueOf(ChatGroupMuteStatus.MUTED.getCode()).equals(isMuted)) {
+            throw new IllegalArgumentException("isMuted is invalid");
+        }
+        if (operatorMembership == null) {
+            throw new IllegalArgumentException("operator membership is invalid");
+        }
+        if (targetMembership == null) {
+            throw new IllegalArgumentException("target membership is invalid");
+        }
+        if (operatorMembership.getUserId() != null
+                && operatorMembership.getUserId().equals(targetMembership.getUserId())) {
+            throw new IllegalArgumentException("cannot update self mute status");
+        }
+
+        Integer operatorRole = operatorMembership.getRole();
+        Integer targetRole = targetMembership.getRole();
+
+        if (Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(operatorRole)) {
+            throw new IllegalArgumentException("member cannot mute others");
+        }
+
+        if (Integer.valueOf(ChatGroupMemberRole.ADMIN.getCode()).equals(operatorRole)) {
+            if (!Integer.valueOf(ChatGroupMemberRole.MEMBER.getCode()).equals(targetRole)) {
+                throw new IllegalArgumentException("admin can only mute normal members");
+            }
+            return;
+        }
+
+        if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(operatorRole)) {
+            if (Integer.valueOf(ChatGroupMemberRole.OWNER.getCode()).equals(targetRole)) {
+                throw new IllegalArgumentException("owner cannot mute owner");
+            }
+            return;
+        }
+
+        throw new IllegalArgumentException("operator role is invalid");
     }
 }
