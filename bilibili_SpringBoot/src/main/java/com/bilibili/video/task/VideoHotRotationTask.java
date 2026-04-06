@@ -13,7 +13,11 @@ public class VideoHotRotationTask {
         this.videoHotRotationService = videoHotRotationService;
     }
 
-    @Scheduled(fixedDelayString = "#{@videoHotProperties.switchIntervalMillis}")
+    // Delay the first rotation so startup bootstrap can hydrate the active slot first.
+    @Scheduled(
+            fixedDelayString = "#{@videoHotProperties.switchIntervalMillis}",
+            initialDelayString = "#{@videoHotProperties.switchIntervalMillis}"
+    )
     public void rotate() {
         videoHotRotationService.rotateSlots();
     }
