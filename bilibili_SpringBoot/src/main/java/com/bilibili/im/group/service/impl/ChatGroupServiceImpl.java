@@ -59,7 +59,6 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         ownerMember.setRole(ChatGroupMemberRole.OWNER.getCode());
         ownerMember.setStatus(ChatGroupMemberStatus.ACTIVE.getCode());
         ownerMember.setIsMuted(ChatGroupMuteStatus.UNMUTED.getCode());
-        ownerMember.setLastReadSeq(resolveLatestReadSeq(group));
         int memberRows = chatGroupMemberMapper.createOrReactivateMember(ownerMember);
         if (memberRows <= 0) {
             throw new RuntimeException("create chat group owner membership failed");
@@ -102,7 +101,6 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         member.setRole(ChatGroupMemberRole.MEMBER.getCode());
         member.setStatus(ChatGroupMemberStatus.ACTIVE.getCode());
         member.setIsMuted(ChatGroupMuteStatus.UNMUTED.getCode());
-        member.setLastReadSeq(resolveLatestReadSeq(group));
         int rows = chatGroupMemberMapper.createOrReactivateMember(member);
         if (rows <= 0) {
             throw new RuntimeException("invite group member failed");
@@ -359,12 +357,5 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         if (rows <= 0) {
             throw new RuntimeException("update group member count failed");
         }
-    }
-
-    private Long resolveLatestReadSeq(ChatGroupDO group) {
-        if (group == null || group.getLastMessageSeq() == null || group.getLastMessageSeq() < 0) {
-            return 0L;
-        }
-        return group.getLastMessageSeq();
     }
 }

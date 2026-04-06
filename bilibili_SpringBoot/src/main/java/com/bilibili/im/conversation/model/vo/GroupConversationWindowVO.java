@@ -18,5 +18,7 @@ public class GroupConversationWindowVO {
     private LocalDateTime lastMessageTime;
     private Long lastServerMessageId;
     private Long lastMessageSeq;
+    private Long lastReadSeq;
+    private Integer unreadCount;
     private Integer isMuted;
 }

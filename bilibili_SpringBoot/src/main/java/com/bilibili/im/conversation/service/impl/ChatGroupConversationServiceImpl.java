@@ -29,12 +29,15 @@ public class ChatGroupConversationServiceImpl implements ChatGroupConversationSe
     }
 
     @Override
-    public void initializeGroupConversation(Long ownerUserId, Long groupId) {
+    public void initializeGroupConversation(Long ownerUserId, Long groupId, Long lastReadSeq) {
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");
         }
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");
+        }
+        if (lastReadSeq == null || lastReadSeq < 0) {
+            throw new IllegalArgumentException("lastReadSeq is invalid");
         }
 
         ChatGroupConversationDO conversation = new ChatGroupConversationDO();
@@ -43,6 +46,7 @@ public class ChatGroupConversationServiceImpl implements ChatGroupConversationSe
         conversation.setGroupId(groupId);
         conversation.setStatus(ChatGroupConversationStatus.ACTIVE.getCode());
         conversation.setIsMuted(ChatGroupMuteStatus.UNMUTED.getCode());
+        conversation.setLastReadSeq(lastReadSeq);
         int rows = chatGroupConversationMapper.createOrShowConversation(conversation);
         if (rows <= 0) {
             throw new RuntimeException("initialize group conversation failed");

@@ -1,7 +1,6 @@
-package com.bilibili.im.mq.consumer;
+package com.bilibili.im.mq.consumer.single;
 
-import com.bilibili.im.conversation.model.enums.ConversationType;
-import com.bilibili.im.message.cache.group.GroupRecentMessageCacheService;
+import com.bilibili.im.message.cache.RecentMessageCacheService;
 import com.bilibili.im.message.model.vo.MessageVO;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -10,23 +9,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
-public class GroupRecentMessageCacheProjectionConsumer {
+public class RecentMessageCacheProjectionConsumer {
 
-    private final GroupRecentMessageCacheService groupRecentMessageCacheService;
+    private final RecentMessageCacheService recentMessageCacheService;
 
-    public GroupRecentMessageCacheProjectionConsumer(GroupRecentMessageCacheService groupRecentMessageCacheService) {
-        this.groupRecentMessageCacheService = groupRecentMessageCacheService;
+    public RecentMessageCacheProjectionConsumer(RecentMessageCacheService recentMessageCacheService) {
+        this.recentMessageCacheService = recentMessageCacheService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.groupRecentMessageCacheProjectionQueue}")
+    @RabbitListener(queues = "#{@imMqProperties.recentMessageCacheProjectionQueue}")
     public void consume(ImMessageDispatchEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
-        if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
-            return;
-        }
-        groupRecentMessageCacheService.appendMessageIfInitialized(
+        recentMessageCacheService.appendMessageIfInitialized(
                 event.getConversationId(),
                 toMessageVO(event)
         );

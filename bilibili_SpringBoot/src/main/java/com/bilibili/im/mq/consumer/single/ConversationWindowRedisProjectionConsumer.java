@@ -1,4 +1,4 @@
-package com.bilibili.im.mq.consumer;
+package com.bilibili.im.mq.consumer.single;
 
 import com.bilibili.im.app.ConversationWindowApplicationService;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
@@ -6,28 +6,26 @@ import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
-public class ConversationWindowPersistConsumer {
+public class ConversationWindowRedisProjectionConsumer {
 
     private final ConversationWindowApplicationService conversationWindowApplicationService;
 
-    public ConversationWindowPersistConsumer(ConversationWindowApplicationService conversationWindowApplicationService) {
+    public ConversationWindowRedisProjectionConsumer(ConversationWindowApplicationService conversationWindowApplicationService) {
         this.conversationWindowApplicationService = conversationWindowApplicationService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.conversationPersistQueue}")
-    @Transactional(rollbackFor = Exception.class)
+    @RabbitListener(queues = "#{@imMqProperties.conversationRedisProjectionQueue}")
     public void consume(ImMessageDispatchEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
-        conversationWindowApplicationService.projectSingleMessageToConversationWindows(
+        conversationWindowApplicationService.projectSingleMessageToRedisConversationWindows(
                 event.getConversationId(),
                 event.getSenderId(),
                 event.getReceiverId(),

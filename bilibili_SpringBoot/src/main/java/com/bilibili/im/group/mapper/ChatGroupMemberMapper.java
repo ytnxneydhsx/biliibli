@@ -16,22 +16,19 @@ public interface ChatGroupMemberMapper {
                 user_id,
                 role,
                 status,
-                is_muted,
-                last_read_seq
+                is_muted
             ) VALUES (
                 #{groupId},
                 #{userId},
                 #{role},
                 #{status},
-                #{isMuted},
-                #{lastReadSeq}
+                #{isMuted}
             )
             ON DUPLICATE KEY UPDATE
                 create_time = CURRENT_TIMESTAMP,
                 role = VALUES(role),
                 status = VALUES(status),
                 is_muted = VALUES(is_muted),
-                last_read_seq = VALUES(last_read_seq),
                 update_time = CURRENT_TIMESTAMP
             """)
     int createOrReactivateMember(ChatGroupMemberDO member);
@@ -44,7 +41,6 @@ public interface ChatGroupMemberMapper {
                 role,
                 status,
                 is_muted AS isMuted,
-                last_read_seq AS lastReadSeq,
                 create_time AS createTime,
                 update_time AS updateTime
             FROM chat_group_member
@@ -63,7 +59,6 @@ public interface ChatGroupMemberMapper {
                 role,
                 status,
                 is_muted AS isMuted,
-                last_read_seq AS lastReadSeq,
                 create_time AS createTime,
                 update_time AS updateTime
             FROM chat_group_member

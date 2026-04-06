@@ -17,17 +17,20 @@ public interface ChatGroupConversationMapper {
                 owner_user_id,
                 group_id,
                 status,
-                is_muted
+                is_muted,
+                last_read_seq
             ) VALUES (
                 #{conversationId},
                 #{ownerUserId},
                 #{groupId},
                 #{status},
-                #{isMuted}
+                #{isMuted},
+                #{lastReadSeq}
             )
             ON DUPLICATE KEY UPDATE
                 conversation_id = VALUES(conversation_id),
                 status = VALUES(status),
+                last_read_seq = VALUES(last_read_seq),
                 update_time = CURRENT_TIMESTAMP
             """)
     int createOrShowConversation(ChatGroupConversationDO conversation);
@@ -40,6 +43,7 @@ public interface ChatGroupConversationMapper {
                 group_id AS groupId,
                 status,
                 is_muted AS isMuted,
+                last_read_seq AS lastReadSeq,
                 create_time AS createTime,
                 update_time AS updateTime
             FROM chat_group_conversation
@@ -83,6 +87,8 @@ public interface ChatGroupConversationMapper {
                 g.last_message_time AS lastMessageTime,
                 g.last_server_message_id AS lastServerMessageId,
                 g.last_message_seq AS lastMessageSeq,
+                gc.last_read_seq AS lastReadSeq,
+                GREATEST(g.last_message_seq - gc.last_read_seq, 0) AS unreadCount,
                 gc.is_muted AS isMuted
             FROM chat_group_conversation gc
             INNER JOIN chat_group g ON g.id = gc.group_id

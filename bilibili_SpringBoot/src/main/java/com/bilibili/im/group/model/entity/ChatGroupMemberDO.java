@@ -16,7 +16,6 @@ public class ChatGroupMemberDO implements Serializable {
     private Integer role;
     private Integer status;
     private Integer isMuted;
-    private Long lastReadSeq;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

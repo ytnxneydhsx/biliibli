@@ -13,5 +13,4 @@ public class ChatGroupMemberVO implements Serializable {
     private Integer role;
     private Integer status;
     private Integer isMuted;
-    private Long lastReadSeq;
 }

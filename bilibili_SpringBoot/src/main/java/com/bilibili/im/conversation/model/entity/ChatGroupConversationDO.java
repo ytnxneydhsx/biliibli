@@ -16,6 +16,7 @@ public class ChatGroupConversationDO implements Serializable {
     private Long groupId;
     private Integer status;
     private Integer isMuted;
+    private Long lastReadSeq;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

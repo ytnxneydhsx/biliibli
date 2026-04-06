@@ -8,7 +8,7 @@ public interface ChatGroupConversationService {
 
     String resolveGroupConversationId(Long groupId);
 
-    void initializeGroupConversation(Long ownerUserId, Long groupId);
+    void initializeGroupConversation(Long ownerUserId, Long groupId, Long lastReadSeq);
 
     void hideGroupConversation(Long ownerUserId, Long groupId);
 

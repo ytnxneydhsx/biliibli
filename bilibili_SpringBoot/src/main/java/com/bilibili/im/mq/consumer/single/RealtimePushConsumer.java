@@ -1,4 +1,4 @@
-package com.bilibili.im.mq.consumer;
+package com.bilibili.im.mq.consumer.single;
 
 import com.bilibili.im.app.MessagePushApplicationService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;

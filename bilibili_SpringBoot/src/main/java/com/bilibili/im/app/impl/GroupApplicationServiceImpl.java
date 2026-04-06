@@ -48,7 +48,7 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
         }
 
         ChatGroupDO group = chatGroupService.createGroup(currentUserId, dto.getGroupName());
-        chatGroupConversationService.initializeGroupConversation(currentUserId, group.getId());
+        chatGroupConversationService.initializeGroupConversation(currentUserId, group.getId(), resolveInitialLastReadSeq(group));
         return toGroupVO(group);
     }
 
@@ -74,7 +74,11 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
 
         userService.validateUserExists(dto.getTargetUserId());
         chatGroupService.inviteMember(groupId, dto.getTargetUserId());
-        chatGroupConversationService.initializeGroupConversation(dto.getTargetUserId(), groupId);
+        chatGroupConversationService.initializeGroupConversation(
+                dto.getTargetUserId(),
+                groupId,
+                resolveInitialLastReadSeq(chatGroupService.getGroup(groupId))
+        );
     }
 
     @Override
@@ -177,7 +181,13 @@ public class GroupApplicationServiceImpl implements GroupApplicationService {
         vo.setRole(member.getRole());
         vo.setStatus(member.getStatus());
         vo.setIsMuted(member.getIsMuted());
-        vo.setLastReadSeq(member.getLastReadSeq());
         return vo;
+    }
+
+    private Long resolveInitialLastReadSeq(ChatGroupDO group) {
+        if (group == null || group.getLastMessageSeq() == null || group.getLastMessageSeq() < 0) {
+            return 0L;
+        }
+        return group.getLastMessageSeq();
     }
 }

@@ -1,8 +1,8 @@
-package com.bilibili.im.mq.consumer;
+package com.bilibili.im.mq.consumer.group;
 
-import com.bilibili.im.contact.service.ContactRelationCommandService;
+import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.message.model.command.PersistMessageCommand;
-import com.bilibili.im.message.service.ChatMessageService;
+import com.bilibili.im.message.service.GroupMessagePersistService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -11,25 +11,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
-public class ChatMessagePersistConsumer {
+public class GroupMessagePersistConsumer {
 
-    private final ChatMessageService chatMessageService;
-    private final ContactRelationCommandService contactRelationCommandService;
+    private final GroupMessagePersistService groupMessagePersistService;
 
-    public ChatMessagePersistConsumer(ChatMessageService chatMessageService,
-                                      ContactRelationCommandService contactRelationCommandService) {
-        this.chatMessageService = chatMessageService;
-        this.contactRelationCommandService = contactRelationCommandService;
+    public GroupMessagePersistConsumer(GroupMessagePersistService groupMessagePersistService) {
+        this.groupMessagePersistService = groupMessagePersistService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.messagePersistQueue}")
+    @RabbitListener(queues = "#{@imMqProperties.groupMessagePersistQueue}")
     @Transactional(rollbackFor = Exception.class)
     public void consume(ImMessageDispatchEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
-        chatMessageService.persistMessage(buildPersistMessageCommand(event));
-        contactRelationCommandService.markDmContact(event.getSenderId(), event.getReceiverId());
+        if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
+            throw new IllegalArgumentException("conversationType is invalid");
+        }
+        groupMessagePersistService.persistGroupMessage(event.getReceiverId(), buildPersistMessageCommand(event));
     }
 
     private static PersistMessageCommand buildPersistMessageCommand(ImMessageDispatchEvent event) {
