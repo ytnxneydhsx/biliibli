@@ -8,7 +8,7 @@ import com.bilibili.im.message.model.dto.QueryMessageHistoryDTO;
 import com.bilibili.im.message.model.dto.SendMessageDTO;
 import com.bilibili.im.message.model.vo.MessageHistoryVO;
 import com.bilibili.im.message.model.vo.SendMessageVO;
-import com.bilibili.im.message.service.ChatMessageService;
+import com.bilibili.im.message.service.SingleMessageQueryService;
 import com.bilibili.security.resolver.ClientIpResolver;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,14 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImMessageController {
 
     private final ImApplicationService imApplicationService;
-    private final ChatMessageService chatMessageService;
+    private final SingleMessageQueryService singleMessageQueryService;
     private final ClientIpResolver clientIpResolver;
 
     public ImMessageController(ImApplicationService imApplicationService,
-                               ChatMessageService chatMessageService,
+                               SingleMessageQueryService singleMessageQueryService,
                                ClientIpResolver clientIpResolver) {
         this.imApplicationService = imApplicationService;
-        this.chatMessageService = chatMessageService;
+        this.singleMessageQueryService = singleMessageQueryService;
         this.clientIpResolver = clientIpResolver;
     }
 
@@ -61,7 +61,7 @@ public class ImMessageController {
     public Result<MessageHistoryVO> queryMessageHistory(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
             @Valid QueryMessageHistoryDTO dto) {
-        return Result.success(chatMessageService.querySingleMessageHistory(
+        return Result.success(singleMessageQueryService.querySingleMessageHistory(
                 currentUser.getUid(),
                 dto.getPeerUid(),
                 dto.getBeforeServerMessageId()
