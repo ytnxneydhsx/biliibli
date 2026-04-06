@@ -93,4 +93,35 @@ public interface ChatMessageMapper {
     List<ChatMessageDO> selectHistoryByConversationId(@Param("conversationId") String conversationId,
                                                       @Param("beforeServerMessageId") Long beforeServerMessageId,
                                                       @Param("limit") Integer limit);
+
+    @Select("""
+            <script>
+            SELECT
+                m.id,
+                m.server_message_id AS serverMessageId,
+                m.conversation_id AS conversationId,
+                m.conversation_type AS conversationType,
+                m.sender_id AS senderId,
+                m.receiver_id AS receiverId,
+                m.client_message_id AS clientMessageId,
+                m.sender_location AS senderLocation,
+                m.message_type AS messageType,
+                m.content,
+                m.send_time AS sendTime,
+                m.status,
+                m.create_time AS createTime,
+                m.update_time AS updateTime
+            FROM chat_group_message gm
+            INNER JOIN chat_message m ON m.id = gm.message_id
+            WHERE gm.group_id = #{groupId}
+            <if test="beforeServerMessageId != null">
+              AND m.server_message_id &lt; #{beforeServerMessageId}
+            </if>
+            ORDER BY gm.group_message_seq DESC
+            LIMIT #{limit}
+            </script>
+            """)
+    List<ChatMessageDO> selectGroupHistoryByGroupId(@Param("groupId") Long groupId,
+                                                    @Param("beforeServerMessageId") Long beforeServerMessageId,
+                                                    @Param("limit") Integer limit);
 }
