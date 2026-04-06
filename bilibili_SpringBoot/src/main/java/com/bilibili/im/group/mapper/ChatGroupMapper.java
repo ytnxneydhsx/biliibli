@@ -58,6 +58,28 @@ public interface ChatGroupMapper {
             """)
     ChatGroupDO selectById(@Param("groupId") Long groupId);
 
+    @Select("""
+            SELECT
+                id,
+                group_name AS groupName,
+                owner_user_id AS ownerUserId,
+                group_avatar AS groupAvatar,
+                status,
+                member_count AS memberCount,
+                is_all_muted AS isAllMuted,
+                last_message AS lastMessage,
+                last_message_time AS lastMessageTime,
+                last_server_message_id AS lastServerMessageId,
+                last_message_seq AS lastMessageSeq,
+                create_time AS createTime,
+                update_time AS updateTime
+            FROM chat_group
+            WHERE id = #{groupId}
+            LIMIT 1
+            FOR UPDATE
+            """)
+    ChatGroupDO selectByIdForUpdate(@Param("groupId") Long groupId);
+
     @Update("""
             UPDATE chat_group
             SET member_count = #{memberCount},
@@ -104,4 +126,19 @@ public interface ChatGroupMapper {
             """)
     int updateGroupMuteStatus(@Param("groupId") Long groupId,
                               @Param("isMuted") Integer isMuted);
+
+    @Update("""
+            UPDATE chat_group
+            SET last_message = #{lastMessage},
+                last_message_time = #{lastMessageTime},
+                last_server_message_id = #{lastServerMessageId},
+                last_message_seq = #{lastMessageSeq},
+                update_time = CURRENT_TIMESTAMP
+            WHERE id = #{groupId}
+            """)
+    int updateLatestMessage(@Param("groupId") Long groupId,
+                            @Param("lastMessage") String lastMessage,
+                            @Param("lastMessageTime") java.time.LocalDateTime lastMessageTime,
+                            @Param("lastServerMessageId") Long lastServerMessageId,
+                            @Param("lastMessageSeq") Long lastMessageSeq);
 }

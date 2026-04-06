@@ -12,7 +12,7 @@ public class ChatGroupMessageDO implements Serializable {
 
     private Long id;
     private Long groupId;
-    private Long serverMessageId;
+    private Long messageId;
     private Long groupMessageSeq;
     private LocalDateTime createTime;
 }

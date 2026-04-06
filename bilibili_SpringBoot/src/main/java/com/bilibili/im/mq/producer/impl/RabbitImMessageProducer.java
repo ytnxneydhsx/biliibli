@@ -1,6 +1,7 @@
 package com.bilibili.im.mq.producer.impl;
 
 import com.bilibili.config.properties.ImMqProperties;
+import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -24,10 +25,22 @@ public class RabbitImMessageProducer implements ImMessageProducer {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
+        String routingKey = resolveRoutingKey(event);
         rabbitTemplate.convertAndSend(
                 imMqProperties.getExchange(),
-                imMqProperties.getRoutingKey(),
+                routingKey,
                 event
         );
+    }
+
+    private String resolveRoutingKey(ImMessageDispatchEvent event) {
+        Integer conversationType = event.getConversationType();
+        if (Integer.valueOf(ConversationType.SINGLE.getCode()).equals(conversationType)) {
+            return imMqProperties.getSingleRoutingKey();
+        }
+        if (Integer.valueOf(ConversationType.GROUP.getCode()).equals(conversationType)) {
+            return imMqProperties.getGroupRoutingKey();
+        }
+        throw new IllegalArgumentException("conversationType is invalid");
     }
 }

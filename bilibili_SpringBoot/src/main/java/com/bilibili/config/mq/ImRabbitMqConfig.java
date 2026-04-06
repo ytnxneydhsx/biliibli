@@ -51,12 +51,37 @@ public class ImRabbitMqConfig {
     }
 
     @Bean
+    public Queue groupRealtimePushQueue(ImMqProperties properties) {
+        return new Queue(properties.getGroupRealtimePushQueue(), true);
+    }
+
+    @Bean
+    public Queue groupMessagePersistQueue(ImMqProperties properties) {
+        return new Queue(properties.getGroupMessagePersistQueue(), true);
+    }
+
+    @Bean
+    public Queue groupConversationPersistQueue(ImMqProperties properties) {
+        return new Queue(properties.getGroupConversationPersistQueue(), true);
+    }
+
+    @Bean
+    public Queue groupConversationRedisProjectionQueue(ImMqProperties properties) {
+        return new Queue(properties.getGroupConversationRedisProjectionQueue(), true);
+    }
+
+    @Bean
+    public Queue groupRecentMessageCacheProjectionQueue(ImMqProperties properties) {
+        return new Queue(properties.getGroupRecentMessageCacheProjectionQueue(), true);
+    }
+
+    @Bean
     public Binding realtimePushBinding(@Qualifier("realtimePushQueue") Queue realtimePushQueue,
                                        TopicExchange imEventExchange,
                                        ImMqProperties properties) {
         return BindingBuilder.bind(realtimePushQueue)
                 .to(imEventExchange)
-                .with(properties.getRoutingKey());
+                .with(properties.getSingleRoutingKey());
     }
 
     @Bean
@@ -65,7 +90,7 @@ public class ImRabbitMqConfig {
                                          ImMqProperties properties) {
         return BindingBuilder.bind(messagePersistQueue)
                 .to(imEventExchange)
-                .with(properties.getRoutingKey());
+                .with(properties.getSingleRoutingKey());
     }
 
     @Bean
@@ -74,7 +99,7 @@ public class ImRabbitMqConfig {
                                               ImMqProperties properties) {
         return BindingBuilder.bind(conversationPersistQueue)
                 .to(imEventExchange)
-                .with(properties.getRoutingKey());
+                .with(properties.getSingleRoutingKey());
     }
 
     @Bean
@@ -83,7 +108,7 @@ public class ImRabbitMqConfig {
                                                       ImMqProperties properties) {
         return BindingBuilder.bind(conversationRedisProjectionQueue)
                 .to(imEventExchange)
-                .with(properties.getRoutingKey());
+                .with(properties.getSingleRoutingKey());
     }
 
     @Bean
@@ -92,6 +117,51 @@ public class ImRabbitMqConfig {
                                                        ImMqProperties properties) {
         return BindingBuilder.bind(recentMessageCacheProjectionQueue)
                 .to(imEventExchange)
-                .with(properties.getRoutingKey());
+                .with(properties.getSingleRoutingKey());
+    }
+
+    @Bean
+    public Binding groupRealtimePushBinding(@Qualifier("groupRealtimePushQueue") Queue groupRealtimePushQueue,
+                                            TopicExchange imEventExchange,
+                                            ImMqProperties properties) {
+        return BindingBuilder.bind(groupRealtimePushQueue)
+                .to(imEventExchange)
+                .with(properties.getGroupRoutingKey());
+    }
+
+    @Bean
+    public Binding groupMessagePersistBinding(@Qualifier("groupMessagePersistQueue") Queue groupMessagePersistQueue,
+                                              TopicExchange imEventExchange,
+                                              ImMqProperties properties) {
+        return BindingBuilder.bind(groupMessagePersistQueue)
+                .to(imEventExchange)
+                .with(properties.getGroupRoutingKey());
+    }
+
+    @Bean
+    public Binding groupConversationPersistBinding(@Qualifier("groupConversationPersistQueue") Queue groupConversationPersistQueue,
+                                                   TopicExchange imEventExchange,
+                                                   ImMqProperties properties) {
+        return BindingBuilder.bind(groupConversationPersistQueue)
+                .to(imEventExchange)
+                .with(properties.getGroupRoutingKey());
+    }
+
+    @Bean
+    public Binding groupConversationRedisProjectionBinding(@Qualifier("groupConversationRedisProjectionQueue") Queue groupConversationRedisProjectionQueue,
+                                                           TopicExchange imEventExchange,
+                                                           ImMqProperties properties) {
+        return BindingBuilder.bind(groupConversationRedisProjectionQueue)
+                .to(imEventExchange)
+                .with(properties.getGroupRoutingKey());
+    }
+
+    @Bean
+    public Binding groupRecentMessageCacheProjectionBinding(@Qualifier("groupRecentMessageCacheProjectionQueue") Queue groupRecentMessageCacheProjectionQueue,
+                                                            TopicExchange imEventExchange,
+                                                            ImMqProperties properties) {
+        return BindingBuilder.bind(groupRecentMessageCacheProjectionQueue)
+                .to(imEventExchange)
+                .with(properties.getGroupRoutingKey());
     }
 }
