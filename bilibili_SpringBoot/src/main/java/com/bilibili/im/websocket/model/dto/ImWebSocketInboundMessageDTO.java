@@ -8,6 +8,8 @@ public class ImWebSocketInboundMessageDTO {
 
     private String type;
 
+    private Integer conversationType;
+
     private Long receiverId;
 
     private Long clientMessageId;

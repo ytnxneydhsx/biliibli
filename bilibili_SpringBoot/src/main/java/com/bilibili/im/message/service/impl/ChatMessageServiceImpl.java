@@ -10,6 +10,7 @@ import com.bilibili.im.message.model.enums.MessageStatus;
 import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.MessageHistoryVO;
 import com.bilibili.im.message.model.vo.MessageVO;
+import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.message.service.ChatMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +48,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         if (command.getConversationId() == null || command.getConversationId().isBlank()) {
             throw new IllegalArgumentException("conversationId is invalid");
         }
+        if (!Integer.valueOf(ConversationType.SINGLE.getCode()).equals(command.getConversationType())
+                && !Integer.valueOf(ConversationType.GROUP.getCode()).equals(command.getConversationType())) {
+            throw new IllegalArgumentException("conversationType is invalid");
+        }
         if (command.getSenderId() == null || command.getSenderId() <= 0) {
             throw new IllegalArgumentException("senderId is invalid");
         }
@@ -69,6 +74,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         ChatMessageDO message = new ChatMessageDO();
         message.setServerMessageId(command.getServerMessageId());
         message.setConversationId(command.getConversationId());
+        message.setConversationType(command.getConversationType());
         message.setSenderId(command.getSenderId());
         message.setReceiverId(command.getReceiverId());
         message.setClientMessageId(command.getClientMessageId());

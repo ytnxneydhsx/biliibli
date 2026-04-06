@@ -36,6 +36,7 @@ public class ChatMessagePersistConsumer {
         PersistMessageCommand command = new PersistMessageCommand();
         command.setServerMessageId(event.getServerMessageId());
         command.setConversationId(event.getConversationId());
+        command.setConversationType(event.getConversationType());
         command.setSenderId(event.getSenderId());
         command.setReceiverId(event.getReceiverId());
         command.setClientMessageId(event.getClientMessageId());

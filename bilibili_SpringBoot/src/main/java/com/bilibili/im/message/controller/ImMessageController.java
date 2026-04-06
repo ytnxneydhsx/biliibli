@@ -70,6 +70,7 @@ public class ImMessageController {
 
     private SendMessageCommand toCommand(SendMessageDTO dto) {
         SendMessageCommand command = new SendMessageCommand();
+        command.setConversationType(dto.getConversationType());
         command.setReceiverId(dto.getReceiverId());
         command.setClientMessageId(dto.getClientMessageId());
         command.setMessageType(dto.getMessageType());

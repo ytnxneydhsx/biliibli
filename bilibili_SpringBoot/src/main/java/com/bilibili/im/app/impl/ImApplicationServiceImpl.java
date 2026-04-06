@@ -4,6 +4,7 @@ import com.bilibili.access.service.UserAccessService;
 import com.bilibili.im.app.ImApplicationService;
 import com.bilibili.im.common.id.MessageIdGenerator;
 import com.bilibili.im.common.time.ImTimeService;
+import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.conversation.service.ChatConversationService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
 import com.bilibili.im.message.model.command.SendMessageCommand;
@@ -57,6 +58,11 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         if (command == null) {
             throw new IllegalArgumentException("command is invalid");
         }
+        Integer conversationType = normalizeConversationType(command.getConversationType());
+        command.setConversationType(conversationType);
+        if (!Integer.valueOf(ConversationType.SINGLE.getCode()).equals(conversationType)) {
+            throw new IllegalArgumentException("group message send is not implemented yet");
+        }
         userAccessService.validateCanSendImMessage(senderId);
         messagePermissionDomainService.validateCanSendMessage(senderId, command.getReceiverId());
         validateMessageContent(command.getMessageType(), command.getContent());
@@ -94,6 +100,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         ImMessageDispatchEvent dispatchEvent = new ImMessageDispatchEvent();
         dispatchEvent.setServerMessageId(serverMessageId);
         dispatchEvent.setConversationId(conversationId);
+        dispatchEvent.setConversationType(command.getConversationType());
         dispatchEvent.setSenderId(senderId);
         dispatchEvent.setReceiverId(command.getReceiverId());
         dispatchEvent.setMessageType(command.getMessageType());
@@ -102,6 +109,17 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         dispatchEvent.setClientMessageId(command.getClientMessageId());
         dispatchEvent.setSenderLocation(senderLocation);
         return dispatchEvent;
+    }
+
+    private Integer normalizeConversationType(Integer rawConversationType) {
+        if (rawConversationType == null) {
+            return ConversationType.SINGLE.getCode();
+        }
+        if (Integer.valueOf(ConversationType.SINGLE.getCode()).equals(rawConversationType)
+                || Integer.valueOf(ConversationType.GROUP.getCode()).equals(rawConversationType)) {
+            return rawConversationType;
+        }
+        throw new IllegalArgumentException("conversationType is invalid");
     }
 
     private void validateMessageContent(Integer messageType, MessageContentDTO content) {

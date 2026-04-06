@@ -15,6 +15,7 @@ public interface ChatMessageMapper {
                 id,
                 server_message_id AS serverMessageId,
                 conversation_id AS conversationId,
+                conversation_type AS conversationType,
                 sender_id AS senderId,
                 receiver_id AS receiverId,
                 client_message_id AS clientMessageId,
@@ -37,6 +38,7 @@ public interface ChatMessageMapper {
             INSERT INTO chat_message (
                 server_message_id,
                 conversation_id,
+                conversation_type,
                 sender_id,
                 receiver_id,
                 client_message_id,
@@ -48,6 +50,7 @@ public interface ChatMessageMapper {
             ) VALUES (
                 #{serverMessageId},
                 #{conversationId},
+                #{conversationType},
                 #{senderId},
                 #{receiverId},
                 #{clientMessageId},
@@ -67,6 +70,7 @@ public interface ChatMessageMapper {
                 id,
                 server_message_id AS serverMessageId,
                 conversation_id AS conversationId,
+                conversation_type AS conversationType,
                 sender_id AS senderId,
                 receiver_id AS receiverId,
                 client_message_id AS clientMessageId,

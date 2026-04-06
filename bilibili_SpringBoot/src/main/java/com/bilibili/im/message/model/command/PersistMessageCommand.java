@@ -10,6 +10,7 @@ public class PersistMessageCommand {
 
     private Long serverMessageId;
     private String conversationId;
+    private Integer conversationType;
     private Long senderId;
     private Long receiverId;
     private Long clientMessageId;

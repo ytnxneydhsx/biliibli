@@ -10,6 +10,7 @@ public class ImMessageDispatchEvent {
 
     private Long serverMessageId;
     private String conversationId;
+    private Integer conversationType;
     private Long senderId;
     private Long receiverId;
     private Integer messageType;

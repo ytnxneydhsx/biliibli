@@ -64,6 +64,7 @@ public class ImProtocolDispatcher {
 
     private SendMessageCommand toSendMessageCommand(ImWebSocketInboundMessageDTO inboundMessage) {
         SendMessageCommand command = new SendMessageCommand();
+        command.setConversationType(inboundMessage.getConversationType());
         command.setReceiverId(inboundMessage.getReceiverId());
         command.setClientMessageId(inboundMessage.getClientMessageId());
         command.setMessageType(inboundMessage.getMessageType());

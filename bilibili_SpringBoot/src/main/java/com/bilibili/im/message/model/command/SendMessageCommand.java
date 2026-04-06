@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 public class SendMessageCommand {
 
+    private Integer conversationType;
+
     private Long receiverId;
 
     private Long clientMessageId;
