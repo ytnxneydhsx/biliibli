@@ -26,10 +26,12 @@ In scope:
 - group read advancement trigger on recent-history load
 - main panel title/subtitle rendering for group mode
 - shared message stream rendering for both modes
+- unified sidebar list that mixes:
+  - single conversation windows
+  - group conversation windows
 
 Out of scope:
 
-- merging group windows into the existing sidebar list
 - group member list UI
 - group-specific composer permissions or mute-state UX
 - complete pagination redesign for group windows
@@ -50,6 +52,8 @@ The frontend is currently single-chat only:
 The backend now additionally supports:
 
 - group history: `GET /me/im/groups/{groupId}/messages/history`
+- group windows: `GET /me/im/conversations/groups`
+- group profile: `GET /me/im/groups/{groupId}`
 - group recent-message cache
 - group realtime push via `message_received`
 - group conversation change websocket event:
@@ -78,9 +82,14 @@ Alternative approaches considered:
 - simpler local implementation
 - but duplicates message-page structure and diverges UX
 
-2. Fully merge sidebar into mixed single/group windows now
-- more complete
-- but much larger refactor and riskier for the existing single-chat flow
+2. Keep sidebar split into separate single/group sections
+- smaller change than a unified list
+- but visually fragments the message inbox and diverges from the target UX
+
+3. Fully merge sidebar into mixed single/group windows now
+- recommended now that main-panel group mode is already in place
+- keeps one inbox mental model for the user
+- requires a normalized sidebar item model instead of peer-only rows
 
 ## Route Design
 
@@ -114,6 +123,22 @@ Message stream state should be keyed by a normalized stream key:
 
 This avoids collisions and lets the same message-stream logic be reused.
 
+Sidebar list should also use a normalized item model:
+
+- `type = 'single' | 'group'`
+- `id`
+  - single uses `peerUid`
+  - group uses `groupId`
+- `conversationId`
+- `title`
+- `avatar`
+- `lastMessage`
+- `lastMessageTime`
+- `lastMessageEpoch`
+- `unreadCount`
+
+This keeps `MessagesSidebar` presentation-only and moves single/group mapping logic into the composable.
+
 ## Data Loading
 
 ### Single Mode
@@ -135,6 +160,22 @@ When activating a group:
 4. render the shared message stream with group messages
 
 Older history continues to use the same group history endpoint with `beforeServerMessageId`.
+
+### Sidebar Loading
+
+When the page boots with a valid token:
+
+1. load single windows from:
+   - `GET /me/im/conversations`
+2. load group windows from:
+   - `GET /me/im/conversations/groups`
+3. resolve titles and avatars:
+   - single rows use user profile lookup
+   - group rows use window payload first, then group profile cache if needed
+4. normalize both sources into one sidebar item array
+5. sort the combined list by `lastMessageEpoch` descending
+
+The sidebar remains one list, not tabs and not grouped sections.
 
 ## WebSocket Handling
 
@@ -175,6 +216,16 @@ Group mode:
 - title shows group name
 - subtitle shows a simple group description such as member count or fallback text
 
+Sidebar behavior:
+
+- single rows and group rows are visually consistent
+- single rows still show peer avatar/name
+- group rows show group avatar/name
+- clicking a row updates route query:
+  - single row -> `?peerUid=...`
+  - group row -> `?groupId=...`
+- active highlighting is based on both target type and target id
+
 Composer remains shared.
 
 For this iteration we assume:
@@ -196,7 +247,9 @@ Manual verification targets:
 2. opening a route with `groupId` loads group history
 3. group websocket `message_received` appends to the active group stream
 4. group websocket `group_conversation_updated` is parsed without breaking the page
-5. switching between single and group routes does not leak old message state
+5. sidebar shows mixed single/group rows sorted by latest activity
+6. clicking a group row switches route and opens the group in the main panel
+7. switching between single and group routes does not leak old message state
 
 ## Implementation Slices
 
@@ -206,6 +259,7 @@ Recommended implementation order:
 2. add group history querying to the composable
 3. generalize message-stream storage to support single and group keys
 4. add websocket dispatch for group messages and group conversation updates
-5. adapt main-panel header and empty-state for group mode
-6. verify existing single-chat behavior still holds
-
+5. normalize sidebar item model and load group windows
+6. adapt `MessagesSidebar` to render mixed single/group rows
+7. adapt main-panel header and empty-state for group mode
+8. verify existing single-chat behavior still holds
