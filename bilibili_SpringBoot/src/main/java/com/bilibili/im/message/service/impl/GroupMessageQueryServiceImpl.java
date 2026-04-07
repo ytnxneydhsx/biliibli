@@ -1,5 +1,6 @@
 package com.bilibili.im.message.service.impl;
 
+import com.bilibili.im.conversation.service.ChatGroupConversationService;
 import com.bilibili.im.group.permission.GroupPermissionService;
 import com.bilibili.im.message.cache.MessageCacheTuning;
 import com.bilibili.im.message.cache.group.GroupRecentMessageCacheService;
@@ -21,15 +22,18 @@ public class GroupMessageQueryServiceImpl implements GroupMessageQueryService {
     private final ChatMessageMapper chatMessageMapper;
     private final GroupRecentMessageCacheService groupRecentMessageCacheService;
     private final GroupPermissionService groupPermissionService;
+    private final ChatGroupConversationService chatGroupConversationService;
     private final MessageQuerySupport messageQuerySupport;
 
     public GroupMessageQueryServiceImpl(ChatMessageMapper chatMessageMapper,
                                         GroupRecentMessageCacheService groupRecentMessageCacheService,
                                         GroupPermissionService groupPermissionService,
+                                        ChatGroupConversationService chatGroupConversationService,
                                         MessageQuerySupport messageQuerySupport) {
         this.chatMessageMapper = chatMessageMapper;
         this.groupRecentMessageCacheService = groupRecentMessageCacheService;
         this.groupPermissionService = groupPermissionService;
+        this.chatGroupConversationService = chatGroupConversationService;
         this.messageQuerySupport = messageQuerySupport;
     }
 
@@ -50,6 +54,7 @@ public class GroupMessageQueryServiceImpl implements GroupMessageQueryService {
 
         String conversationId = messageQuerySupport.buildGroupConversationId(groupId);
         if (beforeServerMessageId == null) {
+            advanceGroupReadSeqToLatest(ownerUserId, groupId);
             return queryRecentGroupMessageHistoryWithCache(groupId, conversationId);
         }
 
@@ -92,5 +97,9 @@ public class GroupMessageQueryServiceImpl implements GroupMessageQueryService {
                 pageSize + 1
         );
         return messageQuerySupport.buildPagedHistory(queried, pageSize);
+    }
+
+    private void advanceGroupReadSeqToLatest(Long ownerUserId, Long groupId) {
+        chatGroupConversationService.advanceLastReadSeq(ownerUserId, groupId);
     }
 }

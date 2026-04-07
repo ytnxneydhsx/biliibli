@@ -15,6 +15,8 @@ public interface ChatGroupConversationService {
 
     void hideAllGroupConversations(Long groupId);
 
+    void advanceLastReadSeq(Long ownerUserId, Long groupId);
+
     List<GroupConversationWindowVO> listVisibleGroupConversations(Long ownerUserId);
 
     List<ChatGroupConversationDO> listVisibleGroupConversationStates(Long ownerUserId);

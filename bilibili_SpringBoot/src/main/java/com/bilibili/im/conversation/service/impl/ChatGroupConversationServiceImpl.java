@@ -88,6 +88,21 @@ public class ChatGroupConversationServiceImpl implements ChatGroupConversationSe
     }
 
     @Override
+    public void advanceLastReadSeq(Long ownerUserId, Long groupId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+
+        int rows = chatGroupConversationMapper.advanceLastReadSeq(ownerUserId, groupId);
+        if (rows <= 0) {
+            throw new RuntimeException("advance group conversation lastReadSeq failed");
+        }
+    }
+
+    @Override
     public List<GroupConversationWindowVO> listVisibleGroupConversations(Long ownerUserId) {
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");

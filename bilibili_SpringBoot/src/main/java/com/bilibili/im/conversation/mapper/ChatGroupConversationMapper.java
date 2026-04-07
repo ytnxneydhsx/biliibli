@@ -67,6 +67,19 @@ public interface ChatGroupConversationMapper {
 
     @Update("""
             UPDATE chat_group_conversation
+            SET last_read_seq = GREATEST(
+                    COALESCE(last_read_seq, 0),
+                    COALESCE((SELECT g.last_message_seq FROM chat_group g WHERE g.id = #{groupId}), 0)
+                ),
+                update_time = CURRENT_TIMESTAMP
+            WHERE owner_user_id = #{ownerUserId}
+              AND group_id = #{groupId}
+            """)
+    int advanceLastReadSeq(@Param("ownerUserId") Long ownerUserId,
+                           @Param("groupId") Long groupId);
+
+    @Update("""
+            UPDATE chat_group_conversation
             SET status = #{status},
                 update_time = CURRENT_TIMESTAMP
             WHERE group_id = #{groupId}
