@@ -2,7 +2,8 @@ package com.bilibili.im.conversation.controller;
 
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
-import com.bilibili.im.app.ConversationWindowApplicationService;
+import com.bilibili.im.app.GroupConversationWindowApplicationService;
+import com.bilibili.im.app.SingleConversationWindowApplicationService;
 import com.bilibili.im.conversation.model.vo.ConversationWindowListVO;
 import com.bilibili.im.conversation.model.vo.GroupConversationWindowListVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,10 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "IM Conversation", description = "Current user IM conversation APIs")
 public class ImConversationController {
 
-    private final ConversationWindowApplicationService conversationWindowApplicationService;
+    private final SingleConversationWindowApplicationService singleConversationWindowApplicationService;
+    private final GroupConversationWindowApplicationService groupConversationWindowApplicationService;
 
-    public ImConversationController(ConversationWindowApplicationService conversationWindowApplicationService) {
-        this.conversationWindowApplicationService = conversationWindowApplicationService;
+    public ImConversationController(SingleConversationWindowApplicationService singleConversationWindowApplicationService,
+                                    GroupConversationWindowApplicationService groupConversationWindowApplicationService) {
+        this.singleConversationWindowApplicationService = singleConversationWindowApplicationService;
+        this.groupConversationWindowApplicationService = groupConversationWindowApplicationService;
     }
 
     @GetMapping
@@ -36,7 +40,7 @@ public class ImConversationController {
     public Result<ConversationWindowListVO> listRecentConversations(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
         return Result.success(
-                conversationWindowApplicationService.listRecentConversations(currentUser.getUid())
+                singleConversationWindowApplicationService.listRecentConversations(currentUser.getUid())
         );
     }
 
@@ -45,7 +49,7 @@ public class ImConversationController {
     public Result<GroupConversationWindowListVO> listRecentGroupConversations(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser) {
         return Result.success(
-                conversationWindowApplicationService.listRecentGroupConversations(currentUser.getUid())
+                groupConversationWindowApplicationService.listRecentGroupConversations(currentUser.getUid())
         );
     }
 
@@ -56,7 +60,7 @@ public class ImConversationController {
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
             @RequestParam("targetId") @NotNull(message = "targetId cannot be null")
             @Positive(message = "targetId must be positive") Long targetId) {
-        conversationWindowApplicationService.clearSingleConversationUnread(currentUser.getUid(), targetId);
+        singleConversationWindowApplicationService.clearSingleConversationUnread(currentUser.getUid(), targetId);
         return Result.success(null);
     }
 }

@@ -1,15 +1,12 @@
 package com.bilibili.im.app;
 
 import com.bilibili.im.conversation.model.vo.ConversationWindowListVO;
-import com.bilibili.im.conversation.model.vo.GroupConversationWindowListVO;
 
 import java.time.LocalDateTime;
 
-public interface ConversationWindowApplicationService {
+public interface SingleConversationWindowApplicationService {
 
     ConversationWindowListVO listRecentConversations(Long ownerUserId);
-
-    GroupConversationWindowListVO listRecentGroupConversations(Long ownerUserId);
 
     void projectSingleMessageToConversationWindows(String conversationId,
                                                    Long senderId,

@@ -1,6 +1,6 @@
 package com.bilibili.im.mq.consumer.single;
 
-import com.bilibili.im.app.ConversationWindowApplicationService;
+import com.bilibili.im.app.SingleConversationWindowApplicationService;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -14,10 +14,10 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
 public class ConversationWindowRedisProjectionConsumer {
 
-    private final ConversationWindowApplicationService conversationWindowApplicationService;
+    private final SingleConversationWindowApplicationService singleConversationWindowApplicationService;
 
-    public ConversationWindowRedisProjectionConsumer(ConversationWindowApplicationService conversationWindowApplicationService) {
-        this.conversationWindowApplicationService = conversationWindowApplicationService;
+    public ConversationWindowRedisProjectionConsumer(SingleConversationWindowApplicationService singleConversationWindowApplicationService) {
+        this.singleConversationWindowApplicationService = singleConversationWindowApplicationService;
     }
 
     @RabbitListener(queues = "#{@imMqProperties.conversationRedisProjectionQueue}")
@@ -25,7 +25,7 @@ public class ConversationWindowRedisProjectionConsumer {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
-        conversationWindowApplicationService.projectSingleMessageToRedisConversationWindows(
+        singleConversationWindowApplicationService.projectSingleMessageToRedisConversationWindows(
                 event.getConversationId(),
                 event.getSenderId(),
                 event.getReceiverId(),

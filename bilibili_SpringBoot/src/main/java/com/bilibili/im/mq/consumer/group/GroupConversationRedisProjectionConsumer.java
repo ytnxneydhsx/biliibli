@@ -1,35 +1,35 @@
-package com.bilibili.im.mq.consumer.single;
+package com.bilibili.im.mq.consumer.group;
 
-import com.bilibili.im.app.SingleConversationWindowApplicationService;
+import com.bilibili.im.app.GroupConversationWindowApplicationService;
+import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
-public class ConversationWindowPersistConsumer {
+public class GroupConversationRedisProjectionConsumer {
 
-    private final SingleConversationWindowApplicationService singleConversationWindowApplicationService;
+    private final GroupConversationWindowApplicationService groupConversationWindowApplicationService;
 
-    public ConversationWindowPersistConsumer(SingleConversationWindowApplicationService singleConversationWindowApplicationService) {
-        this.singleConversationWindowApplicationService = singleConversationWindowApplicationService;
+    public GroupConversationRedisProjectionConsumer(GroupConversationWindowApplicationService groupConversationWindowApplicationService) {
+        this.groupConversationWindowApplicationService = groupConversationWindowApplicationService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.conversationPersistQueue}")
-    @Transactional(rollbackFor = Exception.class)
+    @RabbitListener(queues = "#{@imMqProperties.groupConversationRedisProjectionQueue}")
     public void consume(ImMessageDispatchEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("event is invalid");
         }
-        singleConversationWindowApplicationService.projectSingleMessageToConversationWindows(
-                event.getConversationId(),
-                event.getSenderId(),
+        if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
+            return;
+        }
+        groupConversationWindowApplicationService.projectGroupConversationCardToRedis(
                 event.getReceiverId(),
                 buildConversationSummary(event.getContent()),
                 event.getSendTime(),
