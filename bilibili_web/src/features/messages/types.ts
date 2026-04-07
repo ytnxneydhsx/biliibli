@@ -1,6 +1,7 @@
 import type { UserProfileVO } from '../../types'
 
 export type ConnectionState = 'idle' | 'connecting' | 'live' | 'error'
+export type ActiveTargetType = 'single' | 'group'
 
 export type ConversationItem = {
   peerUid: string
@@ -21,6 +22,7 @@ export type MessageContent = {
 
 export type MessageItem = {
   id: string
+  serverMessageId: string
   dedupeKey: string
   direction: 'incoming' | 'outgoing'
   senderId: string
@@ -38,6 +40,7 @@ export type MessagePushPayload = {
   conversationId?: string
   senderId?: string | number
   receiverId?: string | number
+  serverMessageId?: string | number
   clientMessageId?: string | number
   senderLocation?: string
   messageType?: number
@@ -68,6 +71,26 @@ export type ConversationWindowListVO = {
   ownerUserId?: string | number
   size?: number
   records?: ConversationWindowVO[]
+}
+
+export type GroupProfileVO = {
+  groupId: string | number
+  conversationId?: string
+  groupName?: string
+  ownerUserId?: string | number
+  groupAvatar?: string
+  status?: number
+  memberCount?: number
+  isAllMuted?: number
+  lastMessage?: string
+  lastMessageTime?: string
+  lastServerMessageId?: string | number
+  lastMessageSeq?: string | number
+}
+
+export type GroupConversationUpdatedPayload = {
+  groupId?: string | number
+  lastServerMessageId?: string | number
 }
 
 export type AcceptedPayload = {

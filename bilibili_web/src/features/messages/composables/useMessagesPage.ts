@@ -5,13 +5,16 @@ import { authState } from '../../../lib/auth'
 import type { UserProfileVO } from '../../../types'
 import type {
   AcceptedPayload,
+  ActiveTargetType,
   ConnectionState,
   ConversationItem,
+  ConversationUpdatedPayload,
   ConversationWindowListVO,
   ConversationWindowVO,
-  ConversationUpdatedPayload,
   DraftImageItem,
   EventLogItem,
+  GroupConversationUpdatedPayload,
+  GroupProfileVO,
   MessageContent,
   MessageHistoryVO,
   MessageItem,
@@ -24,6 +27,12 @@ const MESSAGE_TYPE_TEXT = 1
 const MESSAGE_TYPE_IMAGE = 2
 const MESSAGE_TYPE_RICH = 3
 
+type GroupHistoryState = {
+  hasMoreHistory: boolean
+  nextBeforeServerMessageId: string
+  historyLoaded: boolean
+}
+
 export function useMessagesPage() {
   const route = useRoute()
   const router = useRouter()
@@ -33,10 +42,13 @@ export function useMessagesPage() {
   const connectionState = ref<ConnectionState>('idle')
   const eventLogs = ref<EventLogItem[]>([])
   const conversations = ref<Record<string, ConversationItem>>({})
-  const messagesByPeer = ref<Record<string, MessageItem[]>>({})
+  const messagesByStream = ref<Record<string, MessageItem[]>>({})
   const pendingMessages = ref<Record<string, MessageItem>>({})
   const peerProfiles = ref<Record<string, UserProfileVO>>({})
+  const groupProfiles = ref<Record<string, GroupProfileVO>>({})
+  const groupHistoryStates = ref<Record<string, GroupHistoryState>>({})
   const loadingPeer = ref(false)
+  const loadingGroup = ref(false)
   const loadingConversations = ref(false)
   const loadingHistory = ref(false)
   const readingConversation = ref(false)
@@ -44,7 +56,9 @@ export function useMessagesPage() {
   const messageDraft = ref('')
   const draftImages = ref<DraftImageItem[]>([])
   const messageStream = ref<HTMLDivElement | null>(null)
+  const activeTargetType = ref<ActiveTargetType>('single')
   const activePeerUid = ref('')
+  const activeGroupId = ref('')
 
   const currentUid = computed(() => authState.uid || '')
   const currentToken = computed(() => authState.token || '')
@@ -52,6 +66,10 @@ export function useMessagesPage() {
   const currentUsername = computed(() => authState.username || '')
   const peerUidFromRoute = computed(() => {
     const value = String(route.query.peerUid ?? '').trim()
+    return /^\d+$/.test(value) ? value : ''
+  })
+  const groupIdFromRoute = computed(() => {
+    const value = String(route.query.groupId ?? '').trim()
     return /^\d+$/.test(value) ? value : ''
   })
 
@@ -66,28 +84,79 @@ export function useMessagesPage() {
     Object.values(conversations.value).sort((left, right) => right.lastMessageEpoch - left.lastMessageEpoch),
   )
 
+  const activeStreamKey = computed(() => {
+    if (activeTargetType.value === 'group' && activeGroupId.value) {
+      return buildStreamKey('group', activeGroupId.value)
+    }
+    if (activeTargetType.value === 'single' && activePeerUid.value) {
+      return buildStreamKey('single', activePeerUid.value)
+    }
+    return ''
+  })
+
   const activeMessages = computed(() => {
-    if (!activePeerUid.value) return []
-    return messagesByPeer.value[activePeerUid.value] || []
+    if (!activeStreamKey.value) return []
+    return messagesByStream.value[activeStreamKey.value] || []
   })
 
   const activeConversation = computed(() => {
-    if (!activePeerUid.value) return null
+    if (activeTargetType.value !== 'single' || !activePeerUid.value) return null
     return conversations.value[activePeerUid.value] || null
   })
 
   const activePeerProfile = computed(() => {
-    if (!activePeerUid.value) return null
+    if (activeTargetType.value !== 'single' || !activePeerUid.value) return null
     return peerProfiles.value[activePeerUid.value] || null
   })
 
+  const activeGroupProfile = computed(() => {
+    if (activeTargetType.value !== 'group' || !activeGroupId.value) return null
+    return groupProfiles.value[activeGroupId.value] || null
+  })
+
+  const activeHasMoreHistory = computed(() => {
+    if (activeTargetType.value === 'group') {
+      if (!activeGroupId.value) return false
+      return Boolean(groupHistoryStates.value[activeGroupId.value]?.hasMoreHistory)
+    }
+    return Boolean(activeConversation.value?.hasMoreHistory)
+  })
+
+  const hasUploadingImages = computed(() => draftImages.value.some((item) => item.uploading))
+  const hasFailedImages = computed(() => draftImages.value.some((item) => !!item.error))
+  const canSend = computed(() => {
+    if (activeTargetType.value !== 'single') return false
+    if (!activePeerUid.value) return false
+    if (hasUploadingImages.value) return false
+    return !!messageDraft.value.trim() || draftImages.value.some((item) => !!item.uploadedUrl)
+  })
+
   const activeConversationTitle = computed(() => {
+    if (activeTargetType.value === 'group') {
+      if (!activeGroupId.value) return '还没有打开任何会话'
+      return activeGroupProfile.value?.groupName || `群聊 ${activeGroupId.value}`
+    }
     if (!activePeerUid.value) return '还没有打开任何会话'
     if (activePeerProfile.value?.nickname) return `与 ${activePeerProfile.value.nickname} 的对话`
     return `与 UID ${activePeerUid.value} 的对话`
   })
 
   const activeConversationSubtitle = computed(() => {
+    if (activeTargetType.value === 'group') {
+      if (!activeGroupId.value) {
+        return '先从私信入口进入单聊，或者通过群入口带上 groupId 打开群聊模式。'
+      }
+      if (loadingGroup.value && !activeGroupProfile.value) {
+        return '正在补全群资料。'
+      }
+      if (loadingHistory.value && !activeMessages.value.length) {
+        return '正在加载群最近消息。'
+      }
+      if (activeGroupProfile.value?.memberCount) {
+        return `${activeGroupProfile.value.memberCount} 位成员，当前主区已支持群历史与群实时接收。`
+      }
+      return '群聊模式当前先接入历史消息和实时接收，发送入口稍后补齐。'
+    }
     if (!activePeerUid.value) {
       return '从用户主页点击“私信”进入，或者等待实时窗口推送出现在这里。'
     }
@@ -100,27 +169,25 @@ export function useMessagesPage() {
     return '支持历史消息、实时收发、窗口清未读和聊天图片上传。'
   })
 
-  const hasUploadingImages = computed(() => draftImages.value.some((item) => item.uploading))
-  const hasFailedImages = computed(() => draftImages.value.some((item) => !!item.error))
-  const canSend = computed(() => {
-    if (!activePeerUid.value) return false
-    if (hasUploadingImages.value) return false
-    return !!messageDraft.value.trim() || draftImages.value.some((item) => !!item.uploadedUrl)
-  })
-
   const wsUrl = computed(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     return `${protocol}//${window.location.host}/ws/im`
   })
 
   watch(
-    peerUidFromRoute,
-    async (peerUid) => {
-      if (!peerUid) {
-        activePeerUid.value = ''
+    [groupIdFromRoute, peerUidFromRoute],
+    async ([groupId, peerUid]) => {
+      if (groupId) {
+        await activateGroup(groupId)
         return
       }
-      await activateConversation(peerUid)
+      if (peerUid) {
+        await activateConversation(peerUid)
+        return
+      }
+      activeTargetType.value = 'single'
+      activePeerUid.value = ''
+      activeGroupId.value = ''
     },
     { immediate: true },
   )
@@ -144,9 +211,6 @@ export function useMessagesPage() {
     if (currentToken.value) {
       await loadConversationWindows()
     }
-    if (peerUidFromRoute.value) {
-      await loadPeerProfile(peerUidFromRoute.value)
-    }
   })
 
   onBeforeUnmount(() => {
@@ -156,12 +220,27 @@ export function useMessagesPage() {
 
   async function activateConversation(peerUid: string) {
     ensureConversation(peerUid)
+    activeTargetType.value = 'single'
     activePeerUid.value = peerUid
+    activeGroupId.value = ''
     await Promise.all([
       loadPeerProfile(peerUid),
       ensureHistoryLoaded(peerUid),
     ])
     await markConversationRead(peerUid)
+    await nextTick()
+    scrollStreamToBottom()
+  }
+
+  async function activateGroup(groupId: string) {
+    ensureGroupHistoryState(groupId)
+    activeTargetType.value = 'group'
+    activeGroupId.value = groupId
+    activePeerUid.value = ''
+    await Promise.all([
+      loadGroupProfile(groupId),
+      ensureGroupHistoryLoaded(groupId),
+    ])
     await nextTick()
     scrollStreamToBottom()
   }
@@ -184,12 +263,38 @@ export function useMessagesPage() {
     }
   }
 
+  async function loadGroupProfile(groupId: string) {
+    if (!groupId || groupProfiles.value[groupId]) {
+      return
+    }
+    loadingGroup.value = true
+    try {
+      const profile = await api.get<GroupProfileVO>(`/me/im/groups/${groupId}`)
+      groupProfiles.value = {
+        ...groupProfiles.value,
+        [groupId]: profile,
+      }
+    } catch {
+      // keep page usable even if group profile fetch fails
+    } finally {
+      loadingGroup.value = false
+    }
+  }
+
   async function ensureHistoryLoaded(peerUid: string) {
     const conversation = conversations.value[peerUid]
     if (conversation?.historyLoaded) {
       return
     }
     await loadHistoryPage(peerUid, false)
+  }
+
+  async function ensureGroupHistoryLoaded(groupId: string) {
+    const state = groupHistoryStates.value[groupId]
+    if (state?.historyLoaded) {
+      return
+    }
+    await loadGroupHistoryPage(groupId, false)
   }
 
   async function loadConversationWindows() {
@@ -208,11 +313,14 @@ export function useMessagesPage() {
           loadedPeerUids.push(peerUid)
         }
       }
-      await Promise.all(
-        loadedPeerUids
-          .map((peerUid) => loadPeerProfile(peerUid)),
-      )
-      if (!peerUidFromRoute.value && !activePeerUid.value && loadedPeerUids.length > 0) {
+      await Promise.all(loadedPeerUids.map((peerUid) => loadPeerProfile(peerUid)))
+      if (
+        !groupIdFromRoute.value &&
+        !peerUidFromRoute.value &&
+        !activeGroupId.value &&
+        !activePeerUid.value &&
+        loadedPeerUids.length > 0
+      ) {
         openConversation(loadedPeerUids[0])
       }
     } catch (error) {
@@ -238,8 +346,8 @@ export function useMessagesPage() {
         peerUid,
         beforeServerMessageId,
       })
-      const mapped = (history.records || []).map((record) => toMessageItem(record, peerUid))
-      mergeMessages(peerUid, mapped)
+      const mapped = (history.records || []).map((record) => toSingleMessageItem(record, peerUid))
+      mergeMessages(buildStreamKey('single', peerUid), mapped)
       upsertConversation(peerUid, {
         hasMoreHistory: Boolean(history.hasMore),
         nextBeforeServerMessageId: String(history.nextBeforeServerMessageId || ''),
@@ -252,13 +360,61 @@ export function useMessagesPage() {
     }
   }
 
-  async function loadOlderMessages() {
-    if (!activePeerUid.value) {
+  async function loadGroupHistoryPage(groupId: string, appendOlder: boolean) {
+    if (!groupId) {
       return
     }
+    ensureGroupHistoryState(groupId)
+    const state = groupHistoryStates.value[groupId]
+    if (appendOlder && (!state || !state.hasMoreHistory || !state.nextBeforeServerMessageId)) {
+      return
+    }
+
+    loadingHistory.value = true
+    try {
+      const beforeServerMessageId = appendOlder ? state?.nextBeforeServerMessageId || undefined : undefined
+      const history = await api.get<MessageHistoryVO>(`/me/im/groups/${groupId}/messages/history`, {
+        beforeServerMessageId,
+      })
+      const senderIds = Array.from(
+        new Set(
+          (history.records || [])
+            .map((record) => String(record.senderId || ''))
+            .filter((senderId) => !!senderId && senderId !== currentUid.value),
+        ),
+      )
+      await Promise.all(senderIds.map((senderId) => loadPeerProfile(senderId)))
+      const mapped = (history.records || []).map((record) => toGroupMessageItem(record))
+      mergeMessages(buildStreamKey('group', groupId), mapped)
+      groupHistoryStates.value = {
+        ...groupHistoryStates.value,
+        [groupId]: {
+          hasMoreHistory: Boolean(history.hasMore),
+          nextBeforeServerMessageId: String(history.nextBeforeServerMessageId || ''),
+          historyLoaded: true,
+        },
+      }
+    } catch (error) {
+      pushEvent('error', (error as Error).message || '群历史消息加载失败')
+    } finally {
+      loadingHistory.value = false
+    }
+  }
+
+  async function loadOlderMessages() {
     const stream = messageStream.value
     const previousHeight = stream?.scrollHeight || 0
-    await loadHistoryPage(activePeerUid.value, true)
+    if (activeTargetType.value === 'group') {
+      if (!activeGroupId.value) {
+        return
+      }
+      await loadGroupHistoryPage(activeGroupId.value, true)
+    } else {
+      if (!activePeerUid.value) {
+        return
+      }
+      await loadHistoryPage(activePeerUid.value, true)
+    }
     await nextTick()
     if (stream) {
       const nextHeight = stream.scrollHeight
@@ -377,6 +533,10 @@ export function useMessagesPage() {
       void handleConversationUpdated(packet.data as ConversationUpdatedPayload | undefined)
       return
     }
+    if (type === 'group_conversation_updated') {
+      handleGroupConversationUpdated(packet.data as GroupConversationUpdatedPayload | undefined)
+      return
+    }
     if (type === 'error') {
       connectionState.value = 'error'
     }
@@ -407,7 +567,14 @@ export function useMessagesPage() {
     if (!data) {
       return
     }
+    if (isGroupConversationId(data.conversationId)) {
+      await handleReceivedGroupMessage(data)
+      return
+    }
+    await handleReceivedSingleMessage(data)
+  }
 
+  async function handleReceivedSingleMessage(data: MessagePushPayload) {
     const senderId = String(data.senderId || '')
     const receiverId = String(data.receiverId || '')
     const clientKey = String(data.clientMessageId || '')
@@ -420,7 +587,7 @@ export function useMessagesPage() {
       clearPendingMessage(clientKey, data)
     }
 
-    mergeMessages(peerUid, [toRealtimeMessageItem(data, peerUid)])
+    mergeMessages(buildStreamKey('single', peerUid), [toRealtimeSingleMessageItem(data, peerUid)])
 
     const preview = buildConversationPreview(data.content)
     upsertConversation(peerUid, {
@@ -428,16 +595,38 @@ export function useMessagesPage() {
       lastMessage: preview,
       lastMessageTime: formatDateTime(data.sendTime),
       lastMessageEpoch: toEpoch(data.sendTime),
-      unreadCount: activePeerUid.value === peerUid || senderId === currentUid.value ? 0 : 1,
+      unreadCount:
+        (activeTargetType.value === 'single' && activePeerUid.value === peerUid) || senderId === currentUid.value
+          ? 0
+          : 1,
     })
 
-    if (!activePeerUid.value) {
+    if (!activePeerUid.value && activeTargetType.value === 'single') {
       openConversation(peerUid)
       return
     }
 
-    if (activePeerUid.value === peerUid && senderId !== currentUid.value) {
+    if (activeTargetType.value === 'single' && activePeerUid.value === peerUid && senderId !== currentUid.value) {
       void markConversationRead(peerUid)
+      void nextTick().then(scrollStreamToBottom)
+    }
+  }
+
+  async function handleReceivedGroupMessage(data: MessagePushPayload) {
+    const groupId = resolveGroupId(data)
+    if (!groupId) {
+      return
+    }
+    const senderId = String(data.senderId || '')
+    await Promise.all([
+      loadGroupProfile(groupId),
+      senderId && senderId !== currentUid.value ? loadPeerProfile(senderId) : Promise.resolve(),
+    ])
+
+    mergeMessages(buildStreamKey('group', groupId), [toRealtimeGroupMessageItem(data)])
+    patchGroupProfileFromMessage(groupId, data)
+
+    if (activeTargetType.value === 'group' && activeGroupId.value === groupId) {
       void nextTick().then(scrollStreamToBottom)
     }
   }
@@ -453,10 +642,26 @@ export function useMessagesPage() {
     await loadPeerProfile(peerUid)
   }
 
+  function handleGroupConversationUpdated(data?: GroupConversationUpdatedPayload) {
+    if (!data?.groupId) {
+      return
+    }
+    const groupId = String(data.groupId)
+    if (groupProfiles.value[groupId]) {
+      groupProfiles.value = {
+        ...groupProfiles.value,
+        [groupId]: {
+          ...groupProfiles.value[groupId],
+          lastServerMessageId: data.lastServerMessageId,
+        },
+      }
+    }
+  }
+
   async function sendMessage() {
     const text = messageDraft.value.trim()
     const imageUrls = draftImages.value.map((item) => item.uploadedUrl).filter(Boolean)
-    if ((!text && !imageUrls.length) || !activePeerUid.value) {
+    if ((!text && !imageUrls.length) || activeTargetType.value !== 'single' || !activePeerUid.value) {
       return
     }
     if (hasUploadingImages.value) {
@@ -472,9 +677,11 @@ export function useMessagesPage() {
     const clientKey = String(clientMessageId)
     const peerUid = activePeerUid.value
     const messageType = resolveMessageType(text, imageUrls)
+    const streamKey = buildStreamKey('single', peerUid)
 
     const optimistic: MessageItem = {
       id: '',
+      serverMessageId: '',
       dedupeKey: `${currentUid.value}:${clientMessageId}`,
       direction: 'outgoing',
       senderId: currentUid.value,
@@ -488,7 +695,7 @@ export function useMessagesPage() {
       clientKey,
     }
 
-    mergeMessages(peerUid, [optimistic])
+    mergeMessages(streamKey, [optimistic])
     pendingMessages.value = {
       ...pendingMessages.value,
       [clientKey]: optimistic,
@@ -548,12 +755,30 @@ export function useMessagesPage() {
     })
   }
 
+  function ensureGroupHistoryState(groupId: string) {
+    if (!groupId || groupHistoryStates.value[groupId]) {
+      return
+    }
+    groupHistoryStates.value = {
+      ...groupHistoryStates.value,
+      [groupId]: {
+        hasMoreHistory: false,
+        nextBeforeServerMessageId: '',
+        historyLoaded: false,
+      },
+    }
+  }
+
   function applyConversationWindow(data?: ConversationUpdatedPayload | ConversationWindowVO) {
     if (!data?.conversationId) {
       return ''
     }
 
-    const peerUid = String(data.targetId || (data as ConversationUpdatedPayload).targetUserId || resolvePeerUidFromConversation(data.conversationId, currentUid.value))
+    const peerUid = String(
+      data.targetId ||
+      (data as ConversationUpdatedPayload).targetUserId ||
+      resolvePeerUidFromConversation(data.conversationId, currentUid.value),
+    )
     if (!peerUid) {
       return ''
     }
@@ -592,8 +817,8 @@ export function useMessagesPage() {
     }
   }
 
-  function mergeMessages(peerUid: string, incoming: MessageItem[]) {
-    const current = messagesByPeer.value[peerUid] || []
+  function mergeMessages(streamKey: string, incoming: MessageItem[]) {
+    const current = messagesByStream.value[streamKey] || []
     const merged = new Map<string, MessageItem>()
 
     for (const item of current) {
@@ -611,9 +836,9 @@ export function useMessagesPage() {
       return left.epoch - right.epoch
     })
 
-    messagesByPeer.value = {
-      ...messagesByPeer.value,
-      [peerUid]: next,
+    messagesByStream.value = {
+      ...messagesByStream.value,
+      [streamKey]: next,
     }
   }
 
@@ -680,11 +905,21 @@ export function useMessagesPage() {
   }
 
   function resolvePeerName(peerUid: string) {
+    if (peerUid === currentUid.value) {
+      return currentProfile.value?.nickname || currentUsername.value || '我'
+    }
     return peerProfiles.value[peerUid]?.nickname || `UID ${peerUid}`
   }
 
   function resolvePeerAvatar(peerUid: string) {
+    if (peerUid === currentUid.value) {
+      return currentProfile.value?.avatar || ''
+    }
     return peerProfiles.value[peerUid]?.avatar || ''
+  }
+
+  function resolveMessagePeerName(item: MessageItem) {
+    return resolvePeerName(item.peerUid)
   }
 
   function pushEvent(type: string, body: string) {
@@ -696,6 +931,42 @@ export function useMessagesPage() {
       },
       ...eventLogs.value,
     ].slice(0, 40)
+  }
+
+  function buildStreamKey(type: ActiveTargetType, rawId: string) {
+    return type === 'group' ? `g:${rawId}` : `s:${rawId}`
+  }
+
+  function isGroupConversationId(conversationId?: string) {
+    return /^g_\d+$/.test(String(conversationId || ''))
+  }
+
+  function resolveGroupId(data: MessagePushPayload) {
+    const receiverId = String(data.receiverId || '').trim()
+    if (/^\d+$/.test(receiverId)) {
+      return receiverId
+    }
+    const match = /^g_(\d+)$/.exec(String(data.conversationId || ''))
+    return match?.[1] || ''
+  }
+
+  function patchGroupProfileFromMessage(groupId: string, data: MessagePushPayload) {
+    if (!groupId) {
+      return
+    }
+    const current = groupProfiles.value[groupId]
+    if (!current) {
+      return
+    }
+    groupProfiles.value = {
+      ...groupProfiles.value,
+      [groupId]: {
+        ...current,
+        lastMessage: buildConversationPreview(data.content),
+        lastMessageTime: data.sendTime,
+        lastServerMessageId: data.serverMessageId,
+      },
+    }
   }
 
   function resolvePeerUidFromConversation(conversationId: string, uid: string) {
@@ -717,7 +988,9 @@ export function useMessagesPage() {
   }
 
   function findPendingByConversationId(conversationId: string) {
-    return Object.values(pendingMessages.value).find((item) => buildSingleConversationId(currentUid.value, item.peerUid) === conversationId)
+    return Object.values(pendingMessages.value).find((item) =>
+      buildSingleConversationId(currentUid.value, item.peerUid) === conversationId,
+    )
   }
 
   function clearPendingMessage(clientKey: string, data?: MessagePushPayload) {
@@ -727,6 +1000,7 @@ export function useMessagesPage() {
     }
 
     pending.pending = false
+    pending.serverMessageId = String(data?.serverMessageId || pending.serverMessageId || '')
     pending.senderLocation = String(data?.senderLocation || pending.senderLocation || '')
     pending.time = formatDateTime(data?.sendTime) || pending.time
     pending.epoch = toEpoch(data?.sendTime) || pending.epoch
@@ -764,12 +1038,21 @@ export function useMessagesPage() {
     return MESSAGE_TYPE_TEXT
   }
 
-  function toRealtimeMessageItem(data: MessagePushPayload, peerUid: string): MessageItem {
+  function buildRealtimeDedupeKey(senderId: string, serverMessageId: string, clientKey: string) {
+    if (serverMessageId) {
+      return `server:${serverMessageId}`
+    }
+    return `${senderId}:${clientKey}`
+  }
+
+  function toRealtimeSingleMessageItem(data: MessagePushPayload, peerUid: string): MessageItem {
     const senderId = String(data.senderId || '')
+    const serverMessageId = String(data.serverMessageId || '')
     const clientKey = String(data.clientMessageId || Date.now())
     return {
       id: '',
-      dedupeKey: `${senderId}:${clientKey}`,
+      serverMessageId,
+      dedupeKey: buildRealtimeDedupeKey(senderId, serverMessageId, clientKey),
       direction: senderId === currentUid.value ? 'outgoing' : 'incoming',
       senderId,
       senderLocation: String(data.senderLocation || ''),
@@ -783,12 +1066,35 @@ export function useMessagesPage() {
     }
   }
 
-  function toMessageItem(record: MessageVO, peerUid: string): MessageItem {
+  function toRealtimeGroupMessageItem(data: MessagePushPayload): MessageItem {
+    const senderId = String(data.senderId || '')
+    const serverMessageId = String(data.serverMessageId || '')
+    const clientKey = String(data.clientMessageId || Date.now())
+    return {
+      id: '',
+      serverMessageId,
+      dedupeKey: buildRealtimeDedupeKey(senderId, serverMessageId, clientKey),
+      direction: senderId === currentUid.value ? 'outgoing' : 'incoming',
+      senderId,
+      senderLocation: String(data.senderLocation || ''),
+      time: formatDateTime(data.sendTime),
+      epoch: toEpoch(data.sendTime),
+      text: String(data.content?.text || ''),
+      imageUrls: (data.content?.imageUrls || []).filter(Boolean),
+      pending: false,
+      peerUid: senderId,
+      clientKey,
+    }
+  }
+
+  function toSingleMessageItem(record: MessageVO, peerUid: string): MessageItem {
     const senderId = String(record.senderId || '')
+    const serverMessageId = String(record.serverMessageId || '')
     const clientKey = String(record.clientMessageId || record.id || Date.now())
     return {
       id: String(record.id || ''),
-      dedupeKey: `${senderId}:${clientKey}`,
+      serverMessageId,
+      dedupeKey: buildRealtimeDedupeKey(senderId, serverMessageId, clientKey),
       direction: senderId === currentUid.value ? 'outgoing' : 'incoming',
       senderId,
       senderLocation: String(record.senderLocation || ''),
@@ -798,6 +1104,27 @@ export function useMessagesPage() {
       imageUrls: (record.content?.imageUrls || []).filter(Boolean),
       pending: false,
       peerUid,
+      clientKey,
+    }
+  }
+
+  function toGroupMessageItem(record: MessageVO): MessageItem {
+    const senderId = String(record.senderId || '')
+    const serverMessageId = String(record.serverMessageId || '')
+    const clientKey = String(record.clientMessageId || record.id || Date.now())
+    return {
+      id: String(record.id || ''),
+      serverMessageId,
+      dedupeKey: buildRealtimeDedupeKey(senderId, serverMessageId, clientKey),
+      direction: senderId === currentUid.value ? 'outgoing' : 'incoming',
+      senderId,
+      senderLocation: String(record.senderLocation || ''),
+      time: formatDateTime(record.sendTime),
+      epoch: toEpoch(record.sendTime),
+      text: String(record.content?.text || ''),
+      imageUrls: (record.content?.imageUrls || []).filter(Boolean),
+      pending: false,
+      peerUid: senderId,
       clientKey,
     }
   }
@@ -834,9 +1161,13 @@ export function useMessagesPage() {
     activeConversation,
     activeConversationSubtitle,
     activeConversationTitle,
+    activeGroupId,
+    activeGroupProfile,
+    activeHasMoreHistory,
     activeMessages,
     activePeerProfile,
     activePeerUid,
+    activeTargetType,
     canSend,
     connectionLabel,
     connectionState,
@@ -852,10 +1183,10 @@ export function useMessagesPage() {
     loadOlderMessages,
     loadingHistory,
     messageDraft,
-    messagesByPeer,
     messageStream,
     openConversation,
     removeDraftImage,
+    resolveMessagePeerName,
     resolvePeerAvatar,
     resolvePeerName,
     sendMessage,
