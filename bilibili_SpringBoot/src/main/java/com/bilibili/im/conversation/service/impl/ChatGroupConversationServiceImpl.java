@@ -98,4 +98,15 @@ public class ChatGroupConversationServiceImpl implements ChatGroupConversationSe
                 ChatGroupStatus.ACTIVE.getCode()
         );
     }
+
+    @Override
+    public List<ChatGroupConversationDO> listVisibleGroupConversationStates(Long ownerUserId) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        return chatGroupConversationMapper.selectVisibleConversationsByOwnerUserId(
+                ownerUserId,
+                ChatGroupConversationStatus.ACTIVE.getCode()
+        );
+    }
 }

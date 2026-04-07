@@ -1,14 +1,12 @@
-package com.bilibili.im.conversation.model.vo;
+package com.bilibili.im.conversation.cache.group.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class GroupConversationWindowVO {
+public class GroupConversationCardCacheValue {
 
-    private String conversationId;
     private Long groupId;
     private String groupName;
     private String groupAvatar;
@@ -19,9 +17,4 @@ public class GroupConversationWindowVO {
     private LocalDateTime lastMessageTime;
     private Long lastServerMessageId;
     private Long lastMessageSeq;
-    private Long lastReadSeq;
-    private Integer unreadCount;
-    private Integer isMuted;
-    @JsonIgnore
-    private LocalDateTime sortTime;
 }

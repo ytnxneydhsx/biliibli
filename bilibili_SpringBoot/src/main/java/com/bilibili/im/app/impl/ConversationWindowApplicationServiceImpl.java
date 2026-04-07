@@ -7,9 +7,8 @@ import com.bilibili.im.conversation.model.entity.ChatConversationDO;
 import com.bilibili.im.conversation.model.vo.ConversationWindowListVO;
 import com.bilibili.im.conversation.model.vo.ConversationWindowVO;
 import com.bilibili.im.conversation.model.vo.GroupConversationWindowListVO;
-import com.bilibili.im.conversation.model.vo.GroupConversationWindowVO;
 import com.bilibili.im.conversation.service.ChatConversationService;
-import com.bilibili.im.conversation.service.ChatGroupConversationService;
+import com.bilibili.im.conversation.service.GroupConversationQueryService;
 import com.bilibili.im.websocket.model.dto.ConversationWindowUpdateDTO;
 import com.bilibili.im.websocket.service.ConversationWindowPushService;
 import org.springframework.stereotype.Service;
@@ -21,16 +20,16 @@ import java.util.List;
 public class ConversationWindowApplicationServiceImpl implements ConversationWindowApplicationService {
 
     private final ChatConversationService chatConversationService;
-    private final ChatGroupConversationService chatGroupConversationService;
+    private final GroupConversationQueryService groupConversationQueryService;
     private final ConversationWindowCacheService conversationWindowCacheService;
     private final ConversationWindowPushService conversationWindowPushService;
 
     public ConversationWindowApplicationServiceImpl(ChatConversationService chatConversationService,
-                                                    ChatGroupConversationService chatGroupConversationService,
+                                                    GroupConversationQueryService groupConversationQueryService,
                                                     ConversationWindowCacheService conversationWindowCacheService,
                                                     ConversationWindowPushService conversationWindowPushService) {
         this.chatConversationService = chatConversationService;
-        this.chatGroupConversationService = chatGroupConversationService;
+        this.groupConversationQueryService = groupConversationQueryService;
         this.conversationWindowCacheService = conversationWindowCacheService;
         this.conversationWindowPushService = conversationWindowPushService;
     }
@@ -68,13 +67,7 @@ public class ConversationWindowApplicationServiceImpl implements ConversationWin
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");
         }
-
-        List<GroupConversationWindowVO> records = chatGroupConversationService.listVisibleGroupConversations(ownerUserId);
-        GroupConversationWindowListVO result = new GroupConversationWindowListVO();
-        result.setOwnerUserId(ownerUserId);
-        result.setSize(records.size());
-        result.setRecords(records);
-        return result;
+        return groupConversationQueryService.listRecentGroupConversations(ownerUserId);
     }
 
     @Override

@@ -76,6 +76,25 @@ public interface ChatGroupConversationMapper {
 
     @Select("""
             SELECT
+                id,
+                conversation_id AS conversationId,
+                owner_user_id AS ownerUserId,
+                group_id AS groupId,
+                status,
+                is_muted AS isMuted,
+                last_read_seq AS lastReadSeq,
+                create_time AS createTime,
+                update_time AS updateTime
+            FROM chat_group_conversation
+            WHERE owner_user_id = #{ownerUserId}
+              AND status = #{conversationStatus}
+            ORDER BY update_time DESC, id DESC
+            """)
+    List<ChatGroupConversationDO> selectVisibleConversationsByOwnerUserId(@Param("ownerUserId") Long ownerUserId,
+                                                                          @Param("conversationStatus") Integer conversationStatus);
+
+    @Select("""
+            SELECT
                 gc.conversation_id AS conversationId,
                 gc.group_id AS groupId,
                 g.group_name AS groupName,
@@ -89,7 +108,8 @@ public interface ChatGroupConversationMapper {
                 g.last_message_seq AS lastMessageSeq,
                 gc.last_read_seq AS lastReadSeq,
                 GREATEST(g.last_message_seq - gc.last_read_seq, 0) AS unreadCount,
-                gc.is_muted AS isMuted
+                gc.is_muted AS isMuted,
+                COALESCE(g.last_message_time, gc.update_time) AS sortTime
             FROM chat_group_conversation gc
             INNER JOIN chat_group g ON g.id = gc.group_id
             WHERE gc.owner_user_id = #{ownerUserId}

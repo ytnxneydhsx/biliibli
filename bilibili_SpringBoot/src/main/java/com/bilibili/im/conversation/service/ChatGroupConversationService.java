@@ -1,6 +1,7 @@
 package com.bilibili.im.conversation.service;
 
 import com.bilibili.im.conversation.model.vo.GroupConversationWindowVO;
+import com.bilibili.im.conversation.model.entity.ChatGroupConversationDO;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ public interface ChatGroupConversationService {
     void hideAllGroupConversations(Long groupId);
 
     List<GroupConversationWindowVO> listVisibleGroupConversations(Long ownerUserId);
+
+    List<ChatGroupConversationDO> listVisibleGroupConversationStates(Long ownerUserId);
 }

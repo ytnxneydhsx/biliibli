@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 public interface ChatGroupMapper {
 
     @Insert("""
@@ -79,6 +81,31 @@ public interface ChatGroupMapper {
             FOR UPDATE
             """)
     ChatGroupDO selectByIdForUpdate(@Param("groupId") Long groupId);
+
+    @Select("""
+            <script>
+            SELECT
+                id,
+                group_name AS groupName,
+                owner_user_id AS ownerUserId,
+                group_avatar AS groupAvatar,
+                status,
+                member_count AS memberCount,
+                is_all_muted AS isAllMuted,
+                last_message AS lastMessage,
+                last_message_time AS lastMessageTime,
+                last_server_message_id AS lastServerMessageId,
+                last_message_seq AS lastMessageSeq,
+                create_time AS createTime,
+                update_time AS updateTime
+            FROM chat_group
+            WHERE id IN
+            <foreach collection="groupIds" item="groupId" open="(" separator="," close=")">
+                #{groupId}
+            </foreach>
+            </script>
+            """)
+    List<ChatGroupDO> selectByIds(@Param("groupIds") List<Long> groupIds);
 
     @Update("""
             UPDATE chat_group
