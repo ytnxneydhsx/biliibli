@@ -6,12 +6,15 @@ import MessagesSidebar from '../features/messages/components/MessagesSidebar.vue
 import { useMessagesPage } from '../features/messages/composables/useMessagesPage'
 
 const {
-  activeConversation,
   activeConversationSubtitle,
   activeConversationTitle,
+  activeGroupId,
+  activeGroupProfile,
+  activeHasMoreHistory,
   activeMessages,
   activePeerProfile,
   activePeerUid,
+  activeTargetType,
   canSend,
   connectionLabel,
   connectionState,
@@ -30,6 +33,7 @@ const {
   messageStream,
   openConversation,
   removeDraftImage,
+  resolveMessagePeerName,
   resolvePeerAvatar,
   resolvePeerName,
   sendMessage,
@@ -63,13 +67,19 @@ void messageStream
       <header class="chat-header">
         <div class="chat-peer">
           <img
-            v-if="activePeerProfile?.avatar"
+            v-if="activeTargetType === 'group' ? activeGroupProfile?.groupAvatar : activePeerProfile?.avatar"
             class="chat-avatar"
-            :src="activePeerProfile.avatar"
-            :alt="activePeerProfile.nickname"
+            :src="activeTargetType === 'group' ? activeGroupProfile?.groupAvatar : activePeerProfile?.avatar"
+            :alt="activeConversationTitle"
           />
           <div v-else class="chat-avatar fallback">
-            {{ activePeerUid ? resolvePeerName(activePeerUid).slice(0, 1) : '私' }}
+            {{
+              activeTargetType === 'group'
+                ? (activeConversationTitle || '群').slice(0, 1)
+                : activePeerUid
+                  ? resolvePeerName(activePeerUid).slice(0, 1)
+                  : '私'
+            }}
           </div>
           <div>
             <h2>{{ activeConversationTitle }}</h2>
@@ -79,29 +89,31 @@ void messageStream
       </header>
 
       <div ref="messageStream" class="message-stream">
-        <div v-if="activePeerUid && activeConversation?.hasMoreHistory" class="history-actions">
+        <div v-if="(activePeerUid || activeGroupId) && activeHasMoreHistory" class="history-actions">
           <button class="secondary-button" type="button" :disabled="loadingHistory" @click="loadOlderMessages">
             {{ loadingHistory ? '加载中…' : '加载更早消息' }}
           </button>
         </div>
 
-        <div v-if="!activePeerUid" class="empty-state">
-          现在这页已经拆成了页面壳子、消息状态和展示组件。先去任意用户主页点“私信”，我们就能直接进入对应会话。
+        <div v-if="!activePeerUid && !activeGroupId" class="empty-state">
+          现在这页已经支持主区切换单聊和群聊。先去任意用户主页点“私信”，或者从群入口带上 groupId 打开群聊模式。
         </div>
         <div v-else-if="!activeMessages.length && !loadingHistory" class="empty-state">
-          当前会话还没有消息。你现在发出去的第一条消息，会直接出现在这里。
+          当前会话还没有消息。
+          <span v-if="activeTargetType === 'group'">这版群聊主区已经能读历史和收实时消息。</span>
+          <span v-else>你现在发出去的第一条消息，会直接出现在这里。</span>
         </div>
 
         <MessageBubble
           v-for="item in activeMessages"
           :key="item.dedupeKey"
           :item="item"
-          :peer-name="resolvePeerName(item.peerUid)"
+          :peer-name="resolveMessagePeerName(item)"
         />
       </div>
 
       <MessagesComposer
-        :active-peer-uid="activePeerUid"
+        :active-peer-uid="activeTargetType === 'single' ? activePeerUid : ''"
         :draft-images="draftImages"
         :has-uploading-images="hasUploadingImages"
         :has-failed-images="hasFailedImages"
