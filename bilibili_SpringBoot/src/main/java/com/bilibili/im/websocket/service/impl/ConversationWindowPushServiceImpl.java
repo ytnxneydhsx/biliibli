@@ -2,9 +2,10 @@ package com.bilibili.im.websocket.service.impl;
 
 import com.bilibili.im.websocket.connection.ImConnectionRegistry;
 import com.bilibili.im.websocket.connection.ImSessionConnection;
-import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
 import com.bilibili.im.websocket.model.dto.ConversationWindowUpdateDTO;
+import com.bilibili.im.websocket.model.dto.GroupConversationWindowUpdateDTO;
 import com.bilibili.im.websocket.model.dto.ImWebSocketOutboundMessageDTO;
+import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
 import com.bilibili.im.websocket.service.ConversationWindowPushService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -31,17 +32,31 @@ public class ConversationWindowPushServiceImpl implements ConversationWindowPush
         if (update == null) {
             return;
         }
+        pushOutboundMessage(ownerUserId, ImWebSocketMessageType.CONVERSATION_UPDATED, update);
+    }
 
+    @Override
+    public void pushGroupConversationUpdated(Long ownerUserId, GroupConversationWindowUpdateDTO update) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (update == null) {
+            return;
+        }
+        pushOutboundMessage(ownerUserId, ImWebSocketMessageType.GROUP_CONVERSATION_UPDATED, update);
+    }
+
+    private void pushOutboundMessage(Long ownerUserId, ImWebSocketMessageType messageType, Object data) {
         List<ImSessionConnection> connections = connectionRegistry.getConnections(ownerUserId);
         if (connections.isEmpty()) {
             return;
         }
 
         ImWebSocketOutboundMessageDTO outboundMessage = new ImWebSocketOutboundMessageDTO();
-        outboundMessage.setType(ImWebSocketMessageType.CONVERSATION_UPDATED.getCode());
+        outboundMessage.setType(messageType.getCode());
         outboundMessage.setCode(0);
         outboundMessage.setMessage("OK");
-        outboundMessage.setData(update);
+        outboundMessage.setData(data);
         String payload;
         try {
             payload = objectMapper.writeValueAsString(outboundMessage);

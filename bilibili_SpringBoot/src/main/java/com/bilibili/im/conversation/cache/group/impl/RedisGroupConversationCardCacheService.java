@@ -27,6 +27,14 @@ public class RedisGroupConversationCardCacheService implements GroupConversation
     }
 
     @Override
+    public GroupConversationCardCacheValue getGroupCard(Long groupId) {
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("groupId is invalid");
+        }
+        return getGroupCards(List.of(groupId)).get(groupId);
+    }
+
+    @Override
     public Map<Long, GroupConversationCardCacheValue> getGroupCards(List<Long> groupIds) {
         if (groupIds == null || groupIds.isEmpty()) {
             return Collections.emptyMap();
@@ -62,6 +70,14 @@ public class RedisGroupConversationCardCacheService implements GroupConversation
             stringRedisTemplate.expire(cardKey, GroupConversationCacheTuning.CACHE_TTL);
         }
         return resolved;
+    }
+
+    @Override
+    public void cacheGroupCard(GroupConversationCardCacheValue record) {
+        if (record == null) {
+            return;
+        }
+        cacheGroupCards(List.of(record));
     }
 
     @Override

@@ -13,6 +13,7 @@ public enum ImWebSocketMessageType {
     SEND_MESSAGE_ACCEPTED("send_message_accepted"),
     MESSAGE_RECEIVED("message_received"),
     CONVERSATION_UPDATED("conversation_updated"),
+    GROUP_CONVERSATION_UPDATED("group_conversation_updated"),
     ERROR("error");
 
     private final String code;
