@@ -66,6 +66,7 @@ describe('SettingsView', () => {
     await signInput.setValue('新的签名')
     await flushPromises()
     await wrapper.get('button').trigger('click')
+    await flushPromises()
 
     expect(api.put).toHaveBeenCalledWith('/me/profile', expect.any(Object))
     expect(savedPayload).toEqual({
@@ -74,5 +75,28 @@ describe('SettingsView', () => {
     })
     expect(refreshCurrentUser).toHaveBeenCalled()
     expect(wrapper.text()).toContain('资料已更新')
+  })
+
+  it('uploads avatar through the existing avatar endpoint', async () => {
+    api.post.mockResolvedValue('https://example.com/new-avatar.png')
+    const wrapper = mount(SettingsView)
+    const avatarInput = wrapper.get('input[type="file"]')
+    const file = new File(['avatar'], 'avatar.png', { type: 'image/png' })
+
+    Object.defineProperty(avatarInput.element, 'files', {
+      value: [file],
+      configurable: true,
+    })
+
+    await avatarInput.trigger('change')
+    await flushPromises()
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/me/uploads/avatar',
+      expect.any(FormData),
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    )
+    expect(refreshCurrentUser).toHaveBeenCalled()
+    expect(wrapper.text()).toContain('头像上传成功')
   })
 })
