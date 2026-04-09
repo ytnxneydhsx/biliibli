@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SiteHeader from '../SiteHeader.vue'
 import router from '../../router'
@@ -52,7 +52,7 @@ describe('SiteHeader', () => {
     expect(settingsLink?.attributes('href')).toBe('/settings')
 
     await settingsLink?.trigger('click')
-    await router.isReady()
+    await flushPromises()
 
     expect(router.currentRoute.value.name).toBe('settings')
     expect(router.currentRoute.value.path).toBe('/settings')
