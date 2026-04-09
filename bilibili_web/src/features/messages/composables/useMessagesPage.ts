@@ -534,6 +534,32 @@ export function useMessagesPage() {
     }
   }
 
+  async function updateMemberRole(targetUserId: string, currentRole: number) {
+    if (!activeGroupId.value || !targetUserId || activeGroupRole.value !== 1) {
+      return
+    }
+    moderationError.value = ''
+    actionTargetUserId.value = targetUserId
+    const nextRole = Number(currentRole || 0) === 2 ? 3 : 2
+    try {
+      await api.put<void>(`/me/im/groups/${activeGroupId.value}/members/${targetUserId}/role`, {
+        role: nextRole,
+      })
+      groupMembersByGroup.value = {
+        ...groupMembersByGroup.value,
+        [activeGroupId.value]: activeGroupMembers.value.map((member) =>
+          String(member.userId || '') === targetUserId
+            ? { ...member, role: nextRole }
+            : member,
+        ),
+      }
+    } catch (error) {
+      moderationError.value = (error as Error).message || '成员角色更新失败'
+    } finally {
+      actionTargetUserId.value = ''
+    }
+  }
+
   async function kickGroupMember(targetUserId: string) {
     if (!activeGroupId.value || !targetUserId) {
       return
@@ -1663,6 +1689,7 @@ export function useMessagesPage() {
     sortedSingleConversations,
     toggleGroupMuteStatus,
     toggleMemberMute,
+    updateMemberRole,
     uploadError,
     uploadGroupAvatar,
     uploadImages,

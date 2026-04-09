@@ -25,9 +25,10 @@ describe('GroupSettingsDrawer', () => {
     isAllMuted: 0,
     moderationError: '',
     actionTargetUserId: '',
+    currentUserRole: 1,
     resolvePeerName: (uid: string) => `用户 ${uid}`,
     resolvePeerAvatar: () => '',
-    resolveGroupMemberRole: (role?: number) => (role === 1 ? '群主' : '成员'),
+    resolveGroupMemberRole: (role?: number) => (role === 1 ? '群主' : role === 2 ? '管理员' : '成员'),
     resolveGroupMemberStatus: () => '正常',
   }
 
@@ -67,6 +68,10 @@ describe('GroupSettingsDrawer', () => {
 
     await wrapper.get('.member-kick-button').trigger('click')
     expect(wrapper.emitted('kickMember')?.[0]).toEqual(['8'])
+
+    expect(wrapper.text()).toContain('设为管理员')
+    await wrapper.get('.member-role-button').trigger('click')
+    expect(wrapper.emitted('updateMemberRole')?.[0]).toEqual(['8', 3])
 
     await wrapper.findAll('.drawer-tab')[2].trigger('click')
     expect(wrapper.emitted('switchTab')?.[0]).toEqual(['moderation'])

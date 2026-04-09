@@ -203,6 +203,10 @@ describe('useMessagesPage group sending', () => {
     await page.toggleMemberMute('8', 0)
     expect(apiPut).toHaveBeenCalledWith('/me/im/groups/99/members/8/mute', { isMuted: 1 })
 
+    await page.updateMemberRole('8', 3)
+    expect(apiPut).toHaveBeenCalledWith('/me/im/groups/99/members/8/role', { role: 2 })
+    expect(page.activeGroupMembers.value.find((member) => String(member.userId) === '8')?.role).toBe(2)
+
     page.setInviteGroupMemberUid('12')
     await page.inviteGroupMember()
     expect(apiPost).toHaveBeenCalledWith('/me/im/groups/99/members', { targetUserId: 12 })

@@ -20,6 +20,7 @@ const props = defineProps<{
   isAllMuted: number
   moderationError: string
   actionTargetUserId: string
+  currentUserRole: number
   resolvePeerName: (uid: string) => string
   resolvePeerAvatar: (uid: string) => string
   resolveGroupMemberRole: (role?: number) => string
@@ -36,6 +37,7 @@ const emit = defineEmits<{
   inviteGroupMember: []
   toggleAllMuted: []
   toggleMemberMute: [userId: string, isMuted: number]
+  updateMemberRole: [userId: string, role: number]
   kickMember: [userId: string]
 }>()
 
@@ -49,6 +51,10 @@ function onAvatarChange(event: Event) {
 
 function displayMember(uid: string) {
   return uid !== props.currentUid
+}
+
+function canChangeMemberRole(role?: number) {
+  return props.currentUserRole === 1 && Number(role || 0) !== 1
 }
 </script>
 
@@ -186,6 +192,15 @@ function displayMember(uid: string) {
                     </div>
                   </div>
                   <div class="member-actions">
+                    <button
+                      v-if="canChangeMemberRole(member.role)"
+                      class="secondary-button member-role-button"
+                      type="button"
+                      :disabled="actionTargetUserId === String(member.userId || '')"
+                      @click="emit('updateMemberRole', String(member.userId || ''), Number(member.role || 0))"
+                    >
+                      {{ Number(member.role || 0) === 2 ? '撤销管理员' : '设为管理员' }}
+                    </button>
                     <button
                       class="secondary-button member-action-button"
                       type="button"

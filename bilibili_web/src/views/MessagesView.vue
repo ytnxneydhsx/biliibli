@@ -12,6 +12,7 @@ const {
   activeGroupId,
   activeGroupMembers,
   activeGroupProfile,
+  activeGroupRole,
   actionTargetUserId,
   activeHasMoreHistory,
   activeMessages,
@@ -74,6 +75,7 @@ const {
   sortedSingleConversations,
   toggleGroupMuteStatus,
   toggleMemberMute,
+  updateMemberRole,
   uploadError,
   uploadGroupAvatar,
   uploadImages,
@@ -204,6 +206,7 @@ void messageStream
         :is-all-muted="Number(activeGroupProfile?.isAllMuted || 0)"
         :moderation-error="moderationError"
         :action-target-user-id="actionTargetUserId"
+        :current-user-role="activeGroupRole"
         :resolve-peer-name="resolvePeerName"
         :resolve-peer-avatar="resolvePeerAvatar"
         :resolve-group-member-role="resolveGroupMemberRole"
@@ -217,6 +220,7 @@ void messageStream
         @invite-group-member="inviteGroupMember"
         @toggle-all-muted="toggleGroupMuteStatus"
         @toggle-member-mute="toggleMemberMute"
+        @update-member-role="updateMemberRole"
         @kick-member="kickGroupMember"
       />
     </section>
