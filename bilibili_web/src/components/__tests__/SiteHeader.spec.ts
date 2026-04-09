@@ -33,7 +33,7 @@ describe('SiteHeader', () => {
     expect(wrapper.get('.header-search .primary-button').text()).toBe('搜索')
   })
 
-  it('routes 创作中心 to /studio and 资料设置 to /settings in the real app router', async () => {
+  it('routes 创作中心 to /studio and 个人 to /profile in the real app router', async () => {
     authState.token = 'token'
     authState.uid = '7'
     authState.username = 'alice'
@@ -46,22 +46,22 @@ describe('SiteHeader', () => {
 
     const links = wrapper.findAll('a')
     const studioLink = links.find((link) => link.text() === '创作中心')
-    const settingsLink = links.find((link) => link.text() === '资料设置')
+    const profileLink = links.find((link) => link.text() === '个人')
 
     expect(studioLink?.attributes('href')).toBe('/studio')
-    expect(settingsLink?.attributes('href')).toBe('/settings')
+    expect(profileLink?.attributes('href')).toBe('/profile')
 
-    await router.push(settingsLink?.attributes('href') || '/settings')
+    await router.push(profileLink?.attributes('href') || '/profile')
 
-    expect(router.currentRoute.value.name).toBe('settings')
-    expect(router.currentRoute.value.path).toBe('/settings')
+    expect(router.currentRoute.value.name).toBe('profile')
+    expect(router.currentRoute.value.path).toBe('/profile')
   })
 
   it('returns home after logout from a protected route', async () => {
     authState.token = 'token'
     authState.uid = '7'
     authState.username = 'alice'
-    await router.push('/settings')
+    await router.push('/profile')
 
     const wrapper = mount(SiteHeader, {
       global: {
