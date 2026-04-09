@@ -1,4 +1,4 @@
-import { mount, RouterLinkStub } from '@vue/test-utils'
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import AuthView from '../AuthView.vue'
@@ -69,5 +69,26 @@ describe('AuthView', () => {
     expect(wrapper.text()).toContain('去首页看看')
     expect(wrapper.text()).toContain('进入创作中心')
     expect(wrapper.text()).not.toContain('当前已登录为')
+  })
+
+  it('returns home after logging out from the logged-in welcome card', async () => {
+    authState.token = 'token'
+    authState.uid = '7'
+    authState.username = 'alice'
+
+    const wrapper = mount(AuthView, {
+      global: {
+        plugins: [router],
+        stubs: {
+          RouterLink: RouterLinkStub,
+        },
+      },
+    })
+
+    await wrapper.get('.text-button').trigger('click')
+    await flushPromises()
+
+    expect(authState.token).toBe('')
+    expect(router.currentRoute.value.name).toBe('home')
   })
 })

@@ -33,6 +33,11 @@ const welcomeNote = computed(() => {
   return authState.profile?.sign?.trim() || '挑一条想看的视频，或者去看看大家最近在分享什么。'
 })
 
+function handleLogout() {
+  logout()
+  router.push('/')
+}
+
 async function submitLogin() {
   loading.value = true
   error.value = ''
@@ -87,7 +92,7 @@ async function submitRegister() {
         <div class="session-actions">
           <RouterLink class="secondary-button" to="/">去首页看看</RouterLink>
           <RouterLink class="primary-button" to="/studio">进入创作中心</RouterLink>
-          <button class="text-button" type="button" @click="logout">退出登录</button>
+          <button class="text-button" type="button" @click="handleLogout">退出登录</button>
         </div>
       </div>
     </article>

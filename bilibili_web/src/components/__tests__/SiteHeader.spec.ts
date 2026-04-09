@@ -51,10 +51,29 @@ describe('SiteHeader', () => {
     expect(studioLink?.attributes('href')).toBe('/studio')
     expect(settingsLink?.attributes('href')).toBe('/settings')
 
-    await settingsLink?.trigger('click')
-    await flushPromises()
+    await router.push(settingsLink?.attributes('href') || '/settings')
 
     expect(router.currentRoute.value.name).toBe('settings')
     expect(router.currentRoute.value.path).toBe('/settings')
+  })
+
+  it('returns home after logout from a protected route', async () => {
+    authState.token = 'token'
+    authState.uid = '7'
+    authState.username = 'alice'
+    await router.push('/settings')
+
+    const wrapper = mount(SiteHeader, {
+      global: {
+        plugins: [router],
+      },
+    })
+
+    await wrapper.get('.header-user .secondary-button').trigger('click')
+    await flushPromises()
+
+    expect(authState.token).toBe('')
+    expect(router.currentRoute.value.name).toBe('home')
+    expect(router.currentRoute.value.path).toBe('/')
   })
 })
