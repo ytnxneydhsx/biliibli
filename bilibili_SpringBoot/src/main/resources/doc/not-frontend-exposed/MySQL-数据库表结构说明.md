@@ -15,6 +15,7 @@
 
 - `t_user` 用户账号表
 - `t_user_info` 用户资料表
+- `t_im_sensitive_word` IM 敏感词库表
 - `t_video` 视频主表
 - `t_danmaku` 弹幕表
 - `t_danmaku_like` 弹幕点赞关系表
@@ -63,7 +64,7 @@ KEY `idx_update_time` (`update_time`)
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| `id` | `BIGINT` | 主键 |
+| `id` | `BIGINT` | 主键（自增） |
 | `user_id` | `BIGINT` | 关联 `t_user.id` |
 | `nickname` | `VARCHAR(32)` | 昵称 |
 | `avatar_url` | `VARCHAR(255)` | 头像 URL |
@@ -91,7 +92,7 @@ KEY `idx_update_time` (`update_time`)
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| `id` | `BIGINT` | 主键 |
+| `id` | `BIGINT` | 主键（自增） |
 | `user_id` | `BIGINT` | 作者 uid |
 | `title` | `VARCHAR(100)` | 标题 |
 | `description` | `TEXT` | 简介 |
@@ -118,7 +119,30 @@ KEY `idx_status_create` (`status`, `create_time`),
 KEY `idx_user_status_create` (`user_id`, `status`, `create_time`)
 ```
 
-## 3.4 `t_danmaku`
+## 3.4 `t_im_sensitive_word`
+
+作用：IM 敏感词库。
+
+字段：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `id` | `BIGINT` | 主键 |
+| `word` | `VARCHAR(255)` | 敏感词 |
+| `status` | `TINYINT(1)` | 状态（0 正常，1 删除） |
+| `create_time` | `DATETIME` | 创建时间 |
+| `update_time` | `DATETIME` | 更新时间 |
+
+索引（摘自 `bilibili.sql`）：
+
+```sql
+PRIMARY KEY (`id`),
+UNIQUE KEY `uk_word` (`word`),
+KEY `idx_status_create` (`status`, `create_time`),
+KEY `idx_update_time` (`update_time`)
+```
+
+## 3.5 `t_danmaku`
 
 作用：视频弹幕内容。
 
@@ -145,7 +169,7 @@ KEY `idx_like_count` (`like_count`),
 KEY `idx_create_time` (`create_time`)
 ```
 
-## 3.5 `t_danmaku_like`
+## 3.6 `t_danmaku_like`
 
 作用：弹幕点赞关系（用户-弹幕）。
 
@@ -170,7 +194,7 @@ KEY `idx_create_time` (`create_time`),
 KEY `idx_update_time` (`update_time`)
 ```
 
-## 3.6 `t_video_like`
+## 3.7 `t_video_like`
 
 作用：视频点赞关系（用户-视频）。
 
@@ -195,7 +219,7 @@ KEY `idx_create_time` (`create_time`),
 KEY `idx_update_time` (`update_time`)
 ```
 
-## 3.7 `t_comment`
+## 3.8 `t_comment`
 
 作用：评论与一级回复数据。
 
@@ -224,7 +248,7 @@ KEY `idx_video_status_parent_create` (`video_id`, `status`, `parent_id`, `create
 KEY `idx_root_create` (`root_id`, `create_time`)
 ```
 
-## 3.8 `t_comment_like`
+## 3.9 `t_comment_like`
 
 作用：评论点赞关系（用户-评论）。
 
@@ -249,7 +273,7 @@ KEY `idx_create_time` (`create_time`),
 KEY `idx_update_time` (`update_time`)
 ```
 
-## 3.9 `t_following`
+## 3.10 `t_following`
 
 作用：关注关系（A 关注 B）。
 
@@ -273,7 +297,7 @@ KEY `idx_user_status_following` (`user_id`, `status`, `following_user_id`),
 KEY `idx_following_status_user` (`following_user_id`, `status`, `user_id`)
 ```
 
-## 3.10 `t_video_upload_task`
+## 3.11 `t_video_upload_task`
 
 作用：分片上传会话与状态机。
 
@@ -307,7 +331,7 @@ KEY `idx_user_status` (`user_id`, `status`),
 KEY `idx_expire_time` (`expire_time`)
 ```
 
-## 3.11 `t_tag`
+## 3.12 `t_tag`
 
 作用：标签主数据。
 
@@ -331,7 +355,7 @@ KEY `idx_create_time` (`create_time`),
 KEY `idx_update_time` (`update_time`)
 ```
 
-## 3.12 `t_video_tag`
+## 3.13 `t_video_tag`
 
 作用：视频与标签的多对多关系表。
 

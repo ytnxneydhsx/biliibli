@@ -6,7 +6,9 @@ import com.bilibili.im.common.id.MessageIdGenerator;
 import com.bilibili.im.common.time.ImTimeService;
 import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.conversation.service.ChatConversationService;
+import com.bilibili.im.conversation.service.ChatGroupConversationService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
+import com.bilibili.im.group.permission.GroupPermissionService;
 import com.bilibili.im.message.model.command.SendMessageCommand;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.message.model.enums.MessageStatus;
@@ -28,6 +30,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     private final UserAccessService userAccessService;
     private final MessagePermissionDomainService messagePermissionDomainService;
     private final ChatConversationService chatConversationService;
+    private final ChatGroupConversationService chatGroupConversationService;
+    private final GroupPermissionService groupPermissionService;
     private final ImTimeService imTimeService;
     private final ImMessageProducer imMessageProducer;
     private final IpLocationService ipLocationService;
@@ -36,6 +40,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     public ImApplicationServiceImpl(UserAccessService userAccessService,
                                     MessagePermissionDomainService messagePermissionDomainService,
                                     ChatConversationService chatConversationService,
+                                    ChatGroupConversationService chatGroupConversationService,
+                                    GroupPermissionService groupPermissionService,
                                     ImTimeService imTimeService,
                                     ImMessageProducer imMessageProducer,
                                     IpLocationService ipLocationService,
@@ -43,6 +49,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         this.userAccessService = userAccessService;
         this.messagePermissionDomainService = messagePermissionDomainService;
         this.chatConversationService = chatConversationService;
+        this.chatGroupConversationService = chatGroupConversationService;
+        this.groupPermissionService = groupPermissionService;
         this.imTimeService = imTimeService;
         this.imMessageProducer = imMessageProducer;
         this.ipLocationService = ipLocationService;
@@ -60,14 +68,10 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         }
         Integer conversationType = normalizeConversationType(command.getConversationType());
         command.setConversationType(conversationType);
-        if (!Integer.valueOf(ConversationType.SINGLE.getCode()).equals(conversationType)) {
-            throw new IllegalArgumentException("group message send is not implemented yet");
-        }
         userAccessService.validateCanSendImMessage(senderId);
-        messagePermissionDomainService.validateCanSendMessage(senderId, command.getReceiverId());
         validateMessageContent(command.getMessageType(), command.getContent());
 
-        String conversationId = chatConversationService.resolveSingleConversationId(senderId, command.getReceiverId());
+        String conversationId = resolveConversationId(senderId, command.getReceiverId(), conversationType);
         LocalDateTime sendTime = imTimeService.now();
         String senderLocation = ipLocationService.resolveLocation(clientIp);
         long serverMessageId = messageIdGenerator.nextId();
@@ -89,6 +93,17 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         sendMessageVO.setSendTime(sendTime);
         sendMessageVO.setStatus(MessageStatus.ACCEPTED.getCode());
         return sendMessageVO;
+    }
+
+    private String resolveConversationId(Long senderId, Long receiverId, Integer conversationType) {
+        if (Integer.valueOf(ConversationType.SINGLE.getCode()).equals(conversationType)) {
+            messagePermissionDomainService.validateCanSendMessage(senderId, receiverId);
+            return chatConversationService.resolveSingleConversationId(senderId, receiverId);
+        }
+
+        groupPermissionService.requireActiveGroup(receiverId);
+        groupPermissionService.requireActiveMembership(receiverId, senderId);
+        return chatGroupConversationService.resolveGroupConversationId(receiverId);
     }
 
     private static ImMessageDispatchEvent buildDispatchEvent(String conversationId,
