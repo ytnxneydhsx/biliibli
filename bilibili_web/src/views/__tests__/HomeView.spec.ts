@@ -70,9 +70,13 @@ describe('HomeView', () => {
 
     await flushPromises()
 
+    const watchLink = wrapper
+      .findAllComponents(RouterLinkStub)
+      .find((component) => component.attributes('data-testid') === 'featured-watch-link')
+
     expect(wrapper.find('.featured-hero').exists()).toBe(true)
     expect(wrapper.text()).toContain('春日第一条视频')
-    expect(wrapper.find('[data-testid="featured-watch-link"]').attributes('to')).toBe('/video/101')
+    expect(watchLink?.props('to')).toBe('/video/101')
     expect(wrapper.findAll('.hero-rank-item')).toHaveLength(1)
     expect(wrapper.text()).toContain('热榜第一')
     expect(mockedGet).toHaveBeenNthCalledWith(1, '/videos', { pageNo: 1, pageSize: 12 })

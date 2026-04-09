@@ -33,7 +33,14 @@ const authorHref = computed(() => `/user/${props.video.authorUid}`)
 
 <style scoped>
 .video-card {
+  position: relative;
   overflow: hidden;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(52, 80, 130, 0.16);
 }
 
 .video-cover {
@@ -41,6 +48,14 @@ const authorHref = computed(() => `/user/${props.video.authorUid}`)
   display: block;
   aspect-ratio: 16 / 10;
   background: linear-gradient(135deg, rgba(251, 114, 153, 0.16), rgba(0, 161, 214, 0.18));
+}
+
+.video-cover::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 48%;
+  background: linear-gradient(180deg, transparent, rgba(18, 28, 45, 0.46));
 }
 
 .video-cover img {
@@ -71,12 +86,13 @@ const authorHref = computed(() => `/user/${props.video.authorUid}`)
 }
 
 .video-body {
-  padding: 14px 14px 16px;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
 }
 
 .video-title {
   display: -webkit-box;
-  margin-bottom: 8px;
   min-height: 44px;
   overflow: hidden;
   font-weight: 700;
@@ -87,13 +103,13 @@ const authorHref = computed(() => `/user/${props.video.authorUid}`)
 
 .video-author {
   color: var(--muted);
+  font-size: 14px;
 }
 
 .video-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 10px;
   color: var(--muted);
   font-size: 13px;
 }
