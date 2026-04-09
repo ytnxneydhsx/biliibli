@@ -58,7 +58,7 @@ function handleLogout() {
       <RouterLink :to="{ name: 'search' }">搜索</RouterLink>
       <RouterLink v-if="authState.token" :to="{ name: 'messages' }">私信</RouterLink>
       <RouterLink v-if="authState.token" to="/studio">创作中心</RouterLink>
-      <RouterLink v-if="authState.token" to="/settings">资料设置</RouterLink>
+      <RouterLink v-if="authState.token" to="/profile">个人</RouterLink>
     </nav>
 
     <div class="header-user">

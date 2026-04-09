@@ -123,3 +123,8 @@ export type VideoUploadCompleteVO = {
   videoId: string
   videoUrl: string
 }
+
+export type UserPrivacySettingVO = {
+  userId: string
+  privateMessagePolicy: number
+}
