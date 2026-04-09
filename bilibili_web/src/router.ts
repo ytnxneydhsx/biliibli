@@ -34,6 +34,27 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/profile',
+    component: () => import('./views/ProfileView.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'profile',
+        component: () => import('./views/SettingsView.vue'),
+      },
+      {
+        path: 'privacy',
+        name: 'profile-privacy',
+        component: () => import('./views/ProfilePrivacyView.vue'),
+      },
+    ],
+  },
+  {
+    path: '/settings',
+    redirect: '/profile',
+  },
+  {
     path: '/messages',
     name: 'messages',
     component: () => import('./views/MessagesView.vue'),

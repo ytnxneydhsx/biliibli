@@ -28,7 +28,7 @@ function submitSearch() {
 
 function handleLogout() {
   logout()
-  if (route.name === 'studio') {
+  if (route.meta.requiresAuth) {
     router.push('/')
   }
 }
@@ -38,9 +38,9 @@ function handleLogout() {
   <header class="site-header panel">
     <RouterLink class="brand" to="/">
       <div class="brand-mark">bili</div>
-      <div>
+      <div class="brand-copy">
         <strong>BiliBili Clone</strong>
-        <span>Spring Boot + Vue</span>
+        <span>一起看点喜欢的视频</span>
       </div>
     </RouterLink>
 
@@ -48,9 +48,9 @@ function handleLogout() {
       <input
         v-model="searchKeyword"
         type="search"
-        placeholder="搜索视频或用户"
+        placeholder="搜索视频、作者、关键字"
       />
-      <button class="primary-button" type="submit">搜索</button>
+      <button class="primary-button search-submit" type="submit">搜索</button>
     </form>
 
     <nav class="header-nav">
@@ -58,7 +58,7 @@ function handleLogout() {
       <RouterLink :to="{ name: 'search' }">搜索</RouterLink>
       <RouterLink v-if="authState.token" :to="{ name: 'messages' }">私信</RouterLink>
       <RouterLink v-if="authState.token" to="/studio">创作中心</RouterLink>
-      <RouterLink v-if="authState.token" to="/studio">资料设置</RouterLink>
+      <RouterLink v-if="authState.token" to="/profile">个人</RouterLink>
     </nav>
 
     <div class="header-user">
@@ -80,12 +80,16 @@ function handleLogout() {
 <style scoped>
 .site-header {
   width: min(var(--content-width), calc(100vw - 32px));
+  position: sticky;
+  top: 16px;
+  z-index: 20;
   margin: 16px auto 0;
-  padding: 16px 20px;
+  padding: 18px 22px;
   display: grid;
-  grid-template-columns: 240px minmax(260px, 1fr) auto auto;
+  grid-template-columns: 240px minmax(280px, 1fr) auto auto;
   gap: 18px;
   align-items: center;
+  background: var(--bg-panel-strong);
 }
 
 .brand {
@@ -94,10 +98,16 @@ function handleLogout() {
   gap: 14px;
 }
 
+.brand-copy {
+  display: grid;
+  gap: 4px;
+}
+
 .brand strong {
   display: block;
   font-family: var(--font-heading);
   font-size: 20px;
+  letter-spacing: -0.02em;
 }
 
 .brand span {
@@ -113,6 +123,7 @@ function handleLogout() {
   place-items: center;
   background: linear-gradient(135deg, #ffdce8 0%, #c4f0ff 100%);
   color: var(--pink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--shadow-soft);
   font-weight: 900;
   font-size: 19px;
 }
@@ -122,22 +133,41 @@ function handleLogout() {
   gap: 10px;
 }
 
+.search-submit {
+  flex: 0 0 auto;
+  min-width: 88px;
+  white-space: nowrap;
+}
+
 .header-search input {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 12px 16px;
-  background: #fff;
+  padding: 13px 18px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .header-nav {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 14px;
   color: var(--muted);
 }
 
+.header-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.header-nav a:hover,
 .header-nav .router-link-active {
+  background: rgba(255, 255, 255, 0.72);
   color: var(--text);
   font-weight: 700;
 }
@@ -155,7 +185,7 @@ function handleLogout() {
   gap: 10px;
   padding: 6px 10px 6px 6px;
   border-radius: 999px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--line);
 }
 
@@ -179,6 +209,10 @@ function handleLogout() {
     grid-template-columns: 1fr;
   }
 
+  .header-search {
+    order: 2;
+  }
+
   .header-nav,
   .header-user {
     justify-content: flex-start;
@@ -192,7 +226,7 @@ function handleLogout() {
   }
 
   .header-search {
-    flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .header-nav {

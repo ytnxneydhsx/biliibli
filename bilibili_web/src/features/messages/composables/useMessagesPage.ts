@@ -9,12 +9,17 @@ import type {
   ConnectionState,
   ConversationItem,
   ConversationUpdatedPayload,
+  GroupConversationWindowListVO,
+  GroupConversationWindowVO,
   ConversationWindowListVO,
   ConversationWindowVO,
   DraftImageItem,
   EventLogItem,
   GroupConversationUpdatedPayload,
+  GroupMemberItem,
+  GroupMemberListVO,
   GroupProfileVO,
+  GroupSettingsTab,
   MessageContent,
   MessageHistoryVO,
   MessageItem,
@@ -42,10 +47,12 @@ export function useMessagesPage() {
   const connectionState = ref<ConnectionState>('idle')
   const eventLogs = ref<EventLogItem[]>([])
   const conversations = ref<Record<string, ConversationItem>>({})
+  const groupWindows = ref<Record<string, GroupConversationWindowVO>>({})
   const messagesByStream = ref<Record<string, MessageItem[]>>({})
   const pendingMessages = ref<Record<string, MessageItem>>({})
   const peerProfiles = ref<Record<string, UserProfileVO>>({})
   const groupProfiles = ref<Record<string, GroupProfileVO>>({})
+  const groupMembersByGroup = ref<Record<string, GroupMemberItem[]>>({})
   const groupHistoryStates = ref<Record<string, GroupHistoryState>>({})
   const loadingPeer = ref(false)
   const loadingGroup = ref(false)
@@ -53,9 +60,24 @@ export function useMessagesPage() {
   const loadingHistory = ref(false)
   const readingConversation = ref(false)
   const uploadError = ref('')
+  const groupSettingsVisible = ref(false)
+  const groupSettingsTab = ref<GroupSettingsTab>('profile')
+  const groupNameDraft = ref('')
+  const groupNameSaving = ref(false)
+  const groupAvatarUploading = ref(false)
+  const profileError = ref('')
+  const inviteGroupMemberUid = ref('')
+  const inviteGroupMemberLoading = ref(false)
+  const inviteGroupMemberError = ref('')
+  const groupMembersLoading = ref(false)
+  const groupMembersError = ref('')
+  const groupMuteUpdating = ref(false)
+  const moderationError = ref('')
+  const actionTargetUserId = ref('')
   const messageDraft = ref('')
   const draftImages = ref<DraftImageItem[]>([])
   const messageStream = ref<HTMLDivElement | null>(null)
+  const sidebarTab = ref<ActiveTargetType>('single')
   const activeTargetType = ref<ActiveTargetType>('single')
   const activePeerUid = ref('')
   const activeGroupId = ref('')
@@ -80,8 +102,14 @@ export function useMessagesPage() {
     return '未连接'
   })
 
-  const sortedConversations = computed(() =>
+  const sortedSingleConversations = computed(() =>
     Object.values(conversations.value).sort((left, right) => right.lastMessageEpoch - left.lastMessageEpoch),
+  )
+
+  const sortedGroupConversations = computed(() =>
+    Object.values(groupWindows.value).sort(
+      (left, right) => toEpoch(right.lastMessageTime) - toEpoch(left.lastMessageTime),
+    ),
   )
 
   const activeStreamKey = computed(() => {
@@ -114,6 +142,26 @@ export function useMessagesPage() {
     return groupProfiles.value[activeGroupId.value] || null
   })
 
+  const activeGroupMembers = computed(() => {
+    if (activeTargetType.value !== 'group' || !activeGroupId.value) return []
+    return groupMembersByGroup.value[activeGroupId.value] || []
+  })
+
+  const activeGroupRole = computed(() => {
+    if (activeTargetType.value !== 'group' || !activeGroupId.value || !currentUid.value) {
+      return 0
+    }
+    if (String(activeGroupProfile.value?.ownerUserId || '') === currentUid.value) {
+      return 1
+    }
+    const membership = activeGroupMembers.value.find(
+      (member) => String(member.userId || '') === currentUid.value,
+    )
+    return Number(membership?.role || 0)
+  })
+
+  const canManageActiveGroup = computed(() => activeGroupRole.value === 1 || activeGroupRole.value === 2)
+
   const activeHasMoreHistory = computed(() => {
     if (activeTargetType.value === 'group') {
       if (!activeGroupId.value) return false
@@ -125,8 +173,10 @@ export function useMessagesPage() {
   const hasUploadingImages = computed(() => draftImages.value.some((item) => item.uploading))
   const hasFailedImages = computed(() => draftImages.value.some((item) => !!item.error))
   const canSend = computed(() => {
-    if (activeTargetType.value !== 'single') return false
-    if (!activePeerUid.value) return false
+    const targetAvailable =
+      (activeTargetType.value === 'single' && !!activePeerUid.value) ||
+      (activeTargetType.value === 'group' && !!activeGroupId.value)
+    if (!targetAvailable) return false
     if (hasUploadingImages.value) return false
     return !!messageDraft.value.trim() || draftImages.value.some((item) => !!item.uploadedUrl)
   })
@@ -178,14 +228,16 @@ export function useMessagesPage() {
     [groupIdFromRoute, peerUidFromRoute],
     async ([groupId, peerUid]) => {
       if (groupId) {
+        sidebarTab.value = 'group'
         await activateGroup(groupId)
         return
       }
       if (peerUid) {
+        sidebarTab.value = 'single'
         await activateConversation(peerUid)
         return
       }
-      activeTargetType.value = 'single'
+      activeTargetType.value = sidebarTab.value
       activePeerUid.value = ''
       activeGroupId.value = ''
     },
@@ -223,6 +275,7 @@ export function useMessagesPage() {
     activeTargetType.value = 'single'
     activePeerUid.value = peerUid
     activeGroupId.value = ''
+    groupSettingsVisible.value = false
     await Promise.all([
       loadPeerProfile(peerUid),
       ensureHistoryLoaded(peerUid),
@@ -237,10 +290,13 @@ export function useMessagesPage() {
     activeTargetType.value = 'group'
     activeGroupId.value = groupId
     activePeerUid.value = ''
+    upsertGroupWindow(groupId, { unreadCount: 0 })
     await Promise.all([
       loadGroupProfile(groupId),
       ensureGroupHistoryLoaded(groupId),
+      loadGroupMembers(groupId),
     ])
+    groupNameDraft.value = groupProfiles.value[groupId]?.groupName || ''
     await nextTick()
     scrollStreamToBottom()
   }
@@ -281,6 +337,263 @@ export function useMessagesPage() {
     }
   }
 
+  async function loadGroupMembers(groupId = activeGroupId.value) {
+    if (!groupId) {
+      return
+    }
+    groupMembersLoading.value = true
+    groupMembersError.value = ''
+    try {
+      const payload = await api.get<GroupMemberListVO>(`/me/im/groups/${groupId}/members`)
+      groupMembersByGroup.value = {
+        ...groupMembersByGroup.value,
+        [groupId]: payload.records || [],
+      }
+      const peerUids = (payload.records || [])
+        .map((item) => String(item.userId || ''))
+        .filter((uid) => uid && uid !== currentUid.value)
+      await Promise.all(peerUids.map((uid) => loadPeerProfile(uid)))
+    } catch (error) {
+      groupMembersError.value = (error as Error).message || '群成员加载失败'
+    } finally {
+      groupMembersLoading.value = false
+    }
+  }
+
+  function openGroupSettings() {
+    if (!activeGroupId.value || !canManageActiveGroup.value) {
+      return
+    }
+    groupSettingsVisible.value = true
+    profileError.value = ''
+    moderationError.value = ''
+    inviteGroupMemberError.value = ''
+    groupMembersError.value = ''
+    groupSettingsTab.value = 'profile'
+    groupNameDraft.value = activeGroupProfile.value?.groupName || ''
+    void loadGroupMembers()
+  }
+
+  function closeGroupSettings() {
+    groupSettingsVisible.value = false
+  }
+
+  function setGroupSettingsTab(tab: GroupSettingsTab) {
+    groupSettingsTab.value = tab
+    if (tab === 'members') {
+      void loadGroupMembers()
+    }
+  }
+
+  function setGroupNameDraft(value: string) {
+    groupNameDraft.value = value
+  }
+
+  async function saveGroupName() {
+    if (!activeGroupId.value) {
+      return
+    }
+    profileError.value = ''
+    groupNameSaving.value = true
+    const nextName = groupNameDraft.value.trim()
+    try {
+      const savedName = await api.put<string>(`/me/im/groups/${activeGroupId.value}/name`, {
+        groupName: nextName,
+      })
+      const groupId = activeGroupId.value
+      const resolvedName = String(savedName || nextName)
+      groupNameDraft.value = resolvedName
+      if (groupProfiles.value[groupId]) {
+        groupProfiles.value = {
+          ...groupProfiles.value,
+          [groupId]: {
+            ...groupProfiles.value[groupId],
+            groupName: resolvedName,
+          },
+        }
+      }
+      if (groupWindows.value[groupId]) {
+        upsertGroupWindow(groupId, { groupName: resolvedName })
+      }
+    } catch (error) {
+      profileError.value = (error as Error).message || '群名称保存失败'
+    } finally {
+      groupNameSaving.value = false
+    }
+  }
+
+  async function uploadGroupAvatar(files: File[]) {
+    if (!activeGroupId.value || !files.length) {
+      return
+    }
+    profileError.value = ''
+    groupAvatarUploading.value = true
+    try {
+      const form = new FormData()
+      form.append('file', files[0])
+      const avatarUrl = await api.put<string>(`/me/im/groups/${activeGroupId.value}/avatar`, form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      const groupId = activeGroupId.value
+      if (groupProfiles.value[groupId]) {
+        groupProfiles.value = {
+          ...groupProfiles.value,
+          [groupId]: {
+            ...groupProfiles.value[groupId],
+            groupAvatar: avatarUrl,
+          },
+        }
+      }
+      if (groupWindows.value[groupId]) {
+        upsertGroupWindow(groupId, { groupAvatar: avatarUrl })
+      }
+    } catch (error) {
+      profileError.value = (error as Error).message || '群头像上传失败'
+    } finally {
+      groupAvatarUploading.value = false
+    }
+  }
+
+  function setInviteGroupMemberUid(value: string) {
+    inviteGroupMemberUid.value = value.replace(/[^\d]/g, '')
+  }
+
+  async function inviteGroupMember() {
+    if (!activeGroupId.value || !inviteGroupMemberUid.value) {
+      return
+    }
+    inviteGroupMemberError.value = ''
+    inviteGroupMemberLoading.value = true
+    try {
+      await api.post<void>(`/me/im/groups/${activeGroupId.value}/members`, {
+        targetUserId: Number(inviteGroupMemberUid.value),
+      })
+      inviteGroupMemberUid.value = ''
+      await loadGroupMembers()
+    } catch (error) {
+      inviteGroupMemberError.value = (error as Error).message || '邀请成员失败'
+    } finally {
+      inviteGroupMemberLoading.value = false
+    }
+  }
+
+  async function toggleGroupMuteStatus() {
+    if (!activeGroupId.value || !activeGroupProfile.value) {
+      return
+    }
+    moderationError.value = ''
+    groupMuteUpdating.value = true
+    const nextMuted = Number(activeGroupProfile.value.isAllMuted || 0) === 1 ? 0 : 1
+    try {
+      await api.put<void>(`/me/im/groups/${activeGroupId.value}/mute`, {
+        isMuted: nextMuted,
+      })
+      const groupId = activeGroupId.value
+      groupProfiles.value = {
+        ...groupProfiles.value,
+        [groupId]: {
+          ...groupProfiles.value[groupId],
+          isAllMuted: nextMuted,
+        },
+      }
+      if (groupWindows.value[groupId]) {
+        upsertGroupWindow(groupId, { isAllMuted: nextMuted })
+      }
+    } catch (error) {
+      moderationError.value = (error as Error).message || '全员禁言设置失败'
+    } finally {
+      groupMuteUpdating.value = false
+    }
+  }
+
+  async function toggleMemberMute(targetUserId: string, currentMuted: number) {
+    if (!activeGroupId.value || !targetUserId) {
+      return
+    }
+    moderationError.value = ''
+    actionTargetUserId.value = targetUserId
+    const nextMuted = Number(currentMuted || 0) === 1 ? 0 : 1
+    try {
+      await api.put<void>(`/me/im/groups/${activeGroupId.value}/members/${targetUserId}/mute`, {
+        isMuted: nextMuted,
+      })
+      groupMembersByGroup.value = {
+        ...groupMembersByGroup.value,
+        [activeGroupId.value]: activeGroupMembers.value.map((member) =>
+          String(member.userId || '') === targetUserId
+            ? { ...member, isMuted: nextMuted }
+            : member,
+        ),
+      }
+    } catch (error) {
+      moderationError.value = (error as Error).message || '成员禁言设置失败'
+    } finally {
+      actionTargetUserId.value = ''
+    }
+  }
+
+  async function updateMemberRole(targetUserId: string, currentRole: number) {
+    if (!activeGroupId.value || !targetUserId || activeGroupRole.value !== 1) {
+      return
+    }
+    moderationError.value = ''
+    actionTargetUserId.value = targetUserId
+    const nextRole = Number(currentRole || 0) === 2 ? 3 : 2
+    try {
+      await api.put<void>(`/me/im/groups/${activeGroupId.value}/members/${targetUserId}/role`, {
+        role: nextRole,
+      })
+      groupMembersByGroup.value = {
+        ...groupMembersByGroup.value,
+        [activeGroupId.value]: activeGroupMembers.value.map((member) =>
+          String(member.userId || '') === targetUserId
+            ? { ...member, role: nextRole }
+            : member,
+        ),
+      }
+    } catch (error) {
+      moderationError.value = (error as Error).message || '成员角色更新失败'
+    } finally {
+      actionTargetUserId.value = ''
+    }
+  }
+
+  async function kickGroupMember(targetUserId: string) {
+    if (!activeGroupId.value || !targetUserId) {
+      return
+    }
+    moderationError.value = ''
+    actionTargetUserId.value = targetUserId
+    try {
+      await api.delete<void>(`/me/im/groups/${activeGroupId.value}/members/${targetUserId}`)
+      groupMembersByGroup.value = {
+        ...groupMembersByGroup.value,
+        [activeGroupId.value]: activeGroupMembers.value.filter(
+          (member) => String(member.userId || '') !== targetUserId,
+        ),
+      }
+      const nextCount = Math.max(0, Number(activeGroupProfile.value?.memberCount || 0) - 1)
+      if (groupProfiles.value[activeGroupId.value]) {
+        groupProfiles.value = {
+          ...groupProfiles.value,
+          [activeGroupId.value]: {
+            ...groupProfiles.value[activeGroupId.value],
+            memberCount: nextCount,
+          },
+        }
+      }
+      if (groupWindows.value[activeGroupId.value]) {
+        upsertGroupWindow(activeGroupId.value, { memberCount: nextCount })
+      }
+    } catch (error) {
+      moderationError.value = (error as Error).message || '移出成员失败'
+    } finally {
+      actionTargetUserId.value = ''
+    }
+  }
+
   async function ensureHistoryLoaded(peerUid: string) {
     const conversation = conversations.value[peerUid]
     if (conversation?.historyLoaded) {
@@ -304,8 +617,11 @@ export function useMessagesPage() {
 
     loadingConversations.value = true
     try {
-      const payload = await api.get<ConversationWindowListVO>('/me/im/conversations')
-      const records = payload.records || []
+      const [singlePayload, groupPayload] = await Promise.all([
+        api.get<ConversationWindowListVO>('/me/im/conversations'),
+        api.get<GroupConversationWindowListVO>('/me/im/conversations/groups'),
+      ])
+      const records = singlePayload.records || []
       const loadedPeerUids: string[] = []
       for (const record of records) {
         const peerUid = applyConversationWindow(record)
@@ -313,15 +629,18 @@ export function useMessagesPage() {
           loadedPeerUids.push(peerUid)
         }
       }
+      for (const record of groupPayload.records || []) {
+        applyGroupConversationWindow(record)
+      }
       await Promise.all(loadedPeerUids.map((peerUid) => loadPeerProfile(peerUid)))
       if (
         !groupIdFromRoute.value &&
         !peerUidFromRoute.value &&
         !activeGroupId.value &&
         !activePeerUid.value &&
-        loadedPeerUids.length > 0
+        sortedSingleConversations.value.length > 0
       ) {
-        openConversation(loadedPeerUids[0])
+        openConversation(sortedSingleConversations.value[0].peerUid)
       }
     } catch (error) {
       pushEvent('error', (error as Error).message || '会话窗口加载失败')
@@ -625,6 +944,7 @@ export function useMessagesPage() {
 
     mergeMessages(buildStreamKey('group', groupId), [toRealtimeGroupMessageItem(data)])
     patchGroupProfileFromMessage(groupId, data)
+    patchGroupWindowFromMessage(groupId, data)
 
     if (activeTargetType.value === 'group' && activeGroupId.value === groupId) {
       void nextTick().then(scrollStreamToBottom)
@@ -647,21 +967,18 @@ export function useMessagesPage() {
       return
     }
     const groupId = String(data.groupId)
-    if (groupProfiles.value[groupId]) {
-      groupProfiles.value = {
-        ...groupProfiles.value,
-        [groupId]: {
-          ...groupProfiles.value[groupId],
-          lastServerMessageId: data.lastServerMessageId,
-        },
-      }
+    if (!groupWindows.value[groupId]) {
+      return
     }
+    upsertGroupWindow(groupId, {
+      lastServerMessageId: data.lastServerMessageId,
+    })
   }
 
   async function sendMessage() {
     const text = messageDraft.value.trim()
     const imageUrls = draftImages.value.map((item) => item.uploadedUrl).filter(Boolean)
-    if ((!text && !imageUrls.length) || activeTargetType.value !== 'single' || !activePeerUid.value) {
+    if (!text && !imageUrls.length) {
       return
     }
     if (hasUploadingImages.value) {
@@ -676,8 +993,13 @@ export function useMessagesPage() {
     const clientMessageId = Date.now()
     const clientKey = String(clientMessageId)
     const peerUid = activePeerUid.value
+    const groupId = activeGroupId.value
+    const receiverId = activeTargetType.value === 'group' ? groupId : peerUid
+    if (!receiverId) {
+      return
+    }
     const messageType = resolveMessageType(text, imageUrls)
-    const streamKey = buildStreamKey('single', peerUid)
+    const streamKey = buildStreamKey(activeTargetType.value, receiverId)
 
     const optimistic: MessageItem = {
       id: '',
@@ -691,7 +1013,7 @@ export function useMessagesPage() {
       text,
       imageUrls,
       pending: true,
-      peerUid,
+      peerUid: activeTargetType.value === 'group' ? currentUid.value : peerUid,
       clientKey,
     }
 
@@ -700,18 +1022,28 @@ export function useMessagesPage() {
       ...pendingMessages.value,
       [clientKey]: optimistic,
     }
-    upsertConversation(peerUid, {
-      conversationId: buildSingleConversationId(currentUid.value, peerUid),
-      lastMessage: buildConversationPreview({ text, imageUrls }),
-      lastMessageTime: '刚刚',
-      lastMessageEpoch: Date.now(),
-      unreadCount: 0,
-    })
+    if (activeTargetType.value === 'group') {
+      upsertGroupWindow(groupId, {
+        conversationId: `g_${groupId}`,
+        lastMessage: buildConversationPreview({ text, imageUrls }),
+        lastMessageTime: new Date().toISOString(),
+        unreadCount: 0,
+      })
+    } else {
+      upsertConversation(peerUid, {
+        conversationId: buildSingleConversationId(currentUid.value, peerUid),
+        lastMessage: buildConversationPreview({ text, imageUrls }),
+        lastMessageTime: '刚刚',
+        lastMessageEpoch: Date.now(),
+        unreadCount: 0,
+      })
+    }
 
     socket.value.send(
       JSON.stringify({
         type: 'send_message',
-        receiverId: peerUid,
+        conversationType: activeTargetType.value === 'group' ? 2 : 1,
+        receiverId,
         clientMessageId,
         messageType,
         content: {
@@ -733,10 +1065,53 @@ export function useMessagesPage() {
     if (!peerUid) {
       return
     }
+    sidebarTab.value = 'single'
     router.replace({
       name: 'messages',
       query: { peerUid },
     })
+  }
+
+  function openGroupConversation(groupId: string) {
+    if (!groupId) {
+      return
+    }
+    sidebarTab.value = 'group'
+    router.replace({
+      name: 'messages',
+      query: { groupId },
+    })
+  }
+
+  function setSidebarTab(nextTab: ActiveTargetType) {
+    if (sidebarTab.value === nextTab && activeTargetType.value === nextTab) {
+      return
+    }
+
+    sidebarTab.value = nextTab
+
+    if (nextTab === 'single') {
+      const firstSingleConversation = sortedSingleConversations.value[0]
+      if (firstSingleConversation) {
+        openConversation(firstSingleConversation.peerUid)
+        return
+      }
+      router.replace({ name: 'messages' })
+      activeTargetType.value = 'single'
+      activePeerUid.value = ''
+      activeGroupId.value = ''
+      return
+    }
+
+    const firstGroupConversation = sortedGroupConversations.value[0]
+    if (firstGroupConversation?.groupId) {
+      openGroupConversation(String(firstGroupConversation.groupId))
+      return
+    }
+    router.replace({ name: 'messages' })
+    activeTargetType.value = 'group'
+    activePeerUid.value = ''
+    activeGroupId.value = ''
   }
 
   function ensureConversation(peerUid: string) {
@@ -753,6 +1128,34 @@ export function useMessagesPage() {
       nextBeforeServerMessageId: '',
       historyLoaded: false,
     })
+  }
+
+  function applyGroupConversationWindow(data?: GroupConversationWindowVO) {
+    const groupId = String(data?.groupId || '').trim()
+    if (!groupId) {
+      return ''
+    }
+
+    const shouldClearUnread =
+      activeTargetType.value === 'group' && activeGroupId.value === groupId
+
+    upsertGroupWindow(groupId, {
+      conversationId: String(data?.conversationId || `g_${groupId}`),
+      groupId,
+      groupName: data?.groupName,
+      groupAvatar: data?.groupAvatar,
+      status: data?.status,
+      memberCount: data?.memberCount,
+      isAllMuted: data?.isAllMuted,
+      lastMessage: String(data?.lastMessage || ''),
+      lastMessageTime: String(data?.lastMessageTime || ''),
+      lastServerMessageId: data?.lastServerMessageId,
+      lastMessageSeq: data?.lastMessageSeq,
+      lastReadSeq: data?.lastReadSeq,
+      unreadCount: shouldClearUnread ? 0 : Number(data?.unreadCount || 0),
+      isMuted: data?.isMuted,
+    })
+    return groupId
   }
 
   function ensureGroupHistoryState(groupId: string) {
@@ -813,6 +1216,25 @@ export function useMessagesPage() {
         ...current,
         ...patch,
         peerUid,
+      },
+    }
+  }
+
+  function upsertGroupWindow(groupId: string, patch: Partial<GroupConversationWindowVO>) {
+    const current = groupWindows.value[groupId] || {
+      groupId,
+      conversationId: `g_${groupId}`,
+      lastMessage: '',
+      lastMessageTime: '',
+      unreadCount: 0,
+    }
+
+    groupWindows.value = {
+      ...groupWindows.value,
+      [groupId]: {
+        ...current,
+        ...patch,
+        groupId,
       },
     }
   }
@@ -922,6 +1344,27 @@ export function useMessagesPage() {
     return resolvePeerName(item.peerUid)
   }
 
+  function resolveGroupName(groupId: string) {
+    return groupWindows.value[groupId]?.groupName || `群聊 ${groupId}`
+  }
+
+  function resolveGroupAvatar(groupId: string) {
+    return groupWindows.value[groupId]?.groupAvatar || ''
+  }
+
+  function resolveGroupMemberRole(role?: number) {
+    if (Number(role || 0) === 1) return '群主'
+    if (Number(role || 0) === 2) return '管理员'
+    return '成员'
+  }
+
+  function resolveGroupMemberStatus(status?: number) {
+    if (Number(status || 0) === 1) return '正常'
+    if (Number(status || 0) === 2) return '已离开'
+    if (Number(status || 0) === 3) return '已移出'
+    return '未知状态'
+  }
+
   function pushEvent(type: string, body: string) {
     eventLogs.value = [
       {
@@ -967,6 +1410,22 @@ export function useMessagesPage() {
         lastServerMessageId: data.serverMessageId,
       },
     }
+  }
+
+  function patchGroupWindowFromMessage(groupId: string, data: MessagePushPayload) {
+    const current = groupWindows.value[groupId]
+    if (!current) {
+      return
+    }
+    upsertGroupWindow(groupId, {
+      lastMessage: buildConversationPreview(data.content),
+      lastMessageTime: String(data.sendTime || ''),
+      lastServerMessageId: data.serverMessageId,
+      unreadCount:
+        activeTargetType.value === 'group' && activeGroupId.value === groupId
+          ? 0
+          : Number(current.unreadCount || 0) + 1,
+    })
   }
 
   function resolvePeerUidFromConversation(conversationId: string, uid: string) {
@@ -1162,13 +1621,18 @@ export function useMessagesPage() {
     activeConversationSubtitle,
     activeConversationTitle,
     activeGroupId,
+    activeGroupMembers,
     activeGroupProfile,
+    activeGroupRole,
     activeHasMoreHistory,
     activeMessages,
     activePeerProfile,
     activePeerUid,
     activeTargetType,
+    actionTargetUserId,
     canSend,
+    canManageActiveGroup,
+    closeGroupSettings,
     connectionLabel,
     connectionState,
     connectSocket,
@@ -1178,23 +1642,56 @@ export function useMessagesPage() {
     disconnectSocket,
     draftImages,
     eventLogs,
+    groupAvatarUploading,
+    groupMembersError,
+    groupMembersLoading,
+    groupMuteUpdating,
+    groupNameDraft,
+    groupNameSaving,
+    groupSettingsTab,
+    groupSettingsVisible,
     hasFailedImages,
     hasUploadingImages,
+    inviteGroupMember,
+    inviteGroupMemberError,
+    inviteGroupMemberLoading,
+    inviteGroupMemberUid,
+    kickGroupMember,
     loadOlderMessages,
     loadingHistory,
+    loadGroupMembers,
     messageDraft,
     messageStream,
+    moderationError,
     openConversation,
+    openGroupConversation,
+    openGroupSettings,
+    profileError,
     removeDraftImage,
+    resolveGroupAvatar,
+    resolveGroupMemberRole,
+    resolveGroupMemberStatus,
+    resolveGroupName,
     resolveMessagePeerName,
     resolvePeerAvatar,
     resolvePeerName,
+    saveGroupName,
     sendMessage,
+    setGroupNameDraft,
+    setGroupSettingsTab,
+    setInviteGroupMemberUid,
+    setSidebarTab,
+    sidebarTab,
     setMessageDraft: (value: string) => {
       messageDraft.value = value
     },
-    sortedConversations,
+    sortedGroupConversations,
+    sortedSingleConversations,
+    toggleGroupMuteStatus,
+    toggleMemberMute,
+    updateMemberRole,
     uploadError,
+    uploadGroupAvatar,
     uploadImages,
   }
 }

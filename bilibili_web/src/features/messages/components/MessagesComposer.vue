@@ -3,6 +3,7 @@ import type { DraftImageItem } from '../types'
 
 defineProps<{
   activePeerUid: string
+  composerEnabled: boolean
   draftImages: DraftImageItem[]
   hasUploadingImages: boolean
   hasFailedImages: boolean
@@ -49,19 +50,19 @@ function onFileChange(event: Event) {
       <textarea
         :model-value="messageDraft"
         placeholder="发送一条文字、图片或图文消息"
-        :disabled="!activePeerUid"
+        :disabled="!composerEnabled"
         @input="emit('update:messageDraft', ($event.target as HTMLTextAreaElement).value)"
       />
 
       <div class="composer-toolbar">
-        <label class="secondary-button upload-button" :class="{ disabled: !activePeerUid }">
+        <label class="secondary-button upload-button" :class="{ disabled: !composerEnabled }">
           添加图片
           <input
             class="hidden-input"
             type="file"
             accept="image/png,image/jpeg,image/webp"
             multiple
-            :disabled="!activePeerUid"
+            :disabled="!composerEnabled"
             @change="onFileChange"
           />
         </label>

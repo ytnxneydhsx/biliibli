@@ -1,18 +1,22 @@
 :root {
-  --bg: #f6f7fb;
-  --bg-panel: rgba(255, 255, 255, 0.92);
+  --bg: #f4f7ff;
+  --bg-panel: rgba(255, 255, 255, 0.84);
+  --bg-panel-strong: rgba(255, 255, 255, 0.94);
   --bg-soft: #fff8fb;
   --text: #1f2433;
   --muted: #677083;
-  --line: rgba(16, 24, 40, 0.08);
+  --line: rgba(123, 139, 169, 0.16);
+  --line-strong: rgba(73, 93, 131, 0.18);
   --pink: #fb7299;
   --pink-deep: #e85a86;
   --blue: #00a1d6;
   --blue-soft: #dff6ff;
+  --pink-soft: #ffe3ef;
   --warning: #ffb74d;
   --success: #27c08a;
   --danger: #ff5c7c;
-  --shadow: 0 20px 60px rgba(31, 36, 51, 0.08);
+  --shadow: 0 22px 60px rgba(42, 56, 92, 0.12);
+  --shadow-soft: 0 16px 34px rgba(53, 77, 122, 0.12);
   --radius-xl: 28px;
   --radius-lg: 20px;
   --radius-md: 14px;
@@ -43,9 +47,9 @@ body,
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(251, 114, 153, 0.16), transparent 26%),
-    radial-gradient(circle at top right, rgba(0, 161, 214, 0.18), transparent 24%),
-    linear-gradient(180deg, #fbfdff 0%, var(--bg) 48%, #eef3fb 100%);
+    radial-gradient(circle at 0% 0%, rgba(255, 153, 188, 0.2), transparent 28%),
+    radial-gradient(circle at 100% 0%, rgba(74, 192, 255, 0.18), transparent 24%),
+    linear-gradient(180deg, #fcfdff 0%, #f4f7ff 42%, #eef4ff 100%);
 }
 
 a {
@@ -84,7 +88,7 @@ img {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
 }
 
 .section-title {
@@ -129,13 +133,13 @@ img {
 .primary-button {
   background: linear-gradient(135deg, var(--pink) 0%, #ff8db0 100%);
   color: #fff;
-  box-shadow: 0 12px 24px rgba(251, 114, 153, 0.28);
+  box-shadow: 0 14px 30px rgba(251, 114, 153, 0.3);
 }
 
 .secondary-button {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.88);
   color: var(--text);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
 }
 
 .danger-button {
@@ -166,7 +170,7 @@ img {
   min-height: 28px;
   padding: 0 12px;
   border-radius: 999px;
-  background: rgba(0, 161, 214, 0.1);
+  background: linear-gradient(135deg, rgba(0, 161, 214, 0.12), rgba(251, 114, 153, 0.12));
   color: var(--blue);
   font-size: 13px;
 }

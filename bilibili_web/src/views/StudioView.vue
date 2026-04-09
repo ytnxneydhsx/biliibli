@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { authState, refreshCurrentUser } from '../lib/auth'
+import { reactive, ref } from 'vue'
 import { api } from '../lib/api'
 import type {
   VideoUploadCompleteVO,
@@ -8,13 +7,6 @@ import type {
   VideoUploadPartSignVO,
 } from '../types'
 
-const profileForm = reactive({
-  nickname: '',
-  sign: '',
-})
-
-const profileMessage = ref('')
-const avatarMessage = ref('')
 const coverMessage = ref('')
 const uploadMessage = ref('')
 const coverUrl = ref('')
@@ -29,28 +21,7 @@ const uploadForm = reactive({
   description: '',
 })
 
-const currentAvatar = computed(() => authState.profile?.avatar || '')
-
-function syncProfileForm() {
-  profileForm.nickname = authState.profile?.nickname || ''
-  profileForm.sign = authState.profile?.sign || ''
-}
-
-syncProfileForm()
-
-async function saveProfile() {
-  profileMessage.value = ''
-  try {
-    await api.put<void>('/me/profile', profileForm)
-    await refreshCurrentUser()
-    syncProfileForm()
-    profileMessage.value = '资料已更新'
-  } catch (err) {
-    profileMessage.value = err instanceof Error ? err.message : '资料更新失败'
-  }
-}
-
-async function uploadSingleImage(event: Event, endpoint: string, target: 'avatar' | 'cover') {
+async function uploadCover(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) {
@@ -61,23 +32,13 @@ async function uploadSingleImage(event: Event, endpoint: string, target: 'avatar
   formData.append('file', file)
 
   try {
-    const url = await api.post<string>(endpoint, formData, {
+    const url = await api.post<string>('/me/uploads/video-cover', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    if (target === 'avatar') {
-      await refreshCurrentUser()
-      avatarMessage.value = '头像上传成功'
-    } else {
-      coverUrl.value = url
-      coverMessage.value = '封面上传成功'
-    }
+    coverUrl.value = url
+    coverMessage.value = '封面上传成功'
   } catch (err) {
-    const message = err instanceof Error ? err.message : '上传失败'
-    if (target === 'avatar') {
-      avatarMessage.value = message
-    } else {
-      coverMessage.value = message
-    }
+    coverMessage.value = err instanceof Error ? err.message : '上传失败'
   } finally {
     input.value = ''
   }
@@ -203,41 +164,10 @@ async function publishVideo() {
 <template>
   <section class="studio-layout">
     <article class="panel studio-block">
-      <div class="section-title">
-        <h2>资料设置 / 头像修改</h2>
-      </div>
-      <div class="studio-profile">
-        <img v-if="currentAvatar" class="profile-avatar" :src="currentAvatar" alt="avatar" />
-        <div v-else class="profile-avatar fallback-avatar">{{ authState.profile?.nickname?.slice(0, 1) || '我' }}</div>
-        <div class="studio-profile-actions">
-          <label class="primary-button upload-picker">
-            修改头像
-            <input type="file" accept="image/*" @change="uploadSingleImage($event, '/me/uploads/avatar', 'avatar')" />
-          </label>
-          <span class="muted">支持直接上传头像、修改昵称和个性签名</span>
-        </div>
-      </div>
-      <p v-if="avatarMessage" class="muted">{{ avatarMessage }}</p>
-
-      <div class="field-grid">
-        <div class="field-group">
-          <label for="nickname">昵称</label>
-          <input id="nickname" v-model.trim="profileForm.nickname" />
-        </div>
-        <div class="field-group">
-          <label for="sign">签名</label>
-          <textarea id="sign" v-model.trim="profileForm.sign" />
-        </div>
-        <div class="status-line">
-          <button class="primary-button" type="button" @click="saveProfile">保存资料</button>
-          <span class="muted">{{ profileMessage }}</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="panel studio-block">
-      <div class="section-title">
-        <h2>上传视频</h2>
+      <div class="studio-heading">
+        <p class="studio-eyebrow">创作中心</p>
+        <h1>把新作品整理好，再发给大家看。</h1>
+        <p class="studio-copy">这里专心负责上传内容。头像、昵称和签名已经单独拆开，不会再和发布流程混在一起。</p>
       </div>
 
       <div class="field-grid">
@@ -256,7 +186,7 @@ async function publishVideo() {
           <div class="status-line">
             <label class="secondary-button upload-picker">
               上传封面
-              <input type="file" accept="image/*" @change="uploadSingleImage($event, '/me/uploads/video-cover', 'cover')" />
+              <input type="file" accept="image/*" @change="uploadCover" />
             </label>
             <span class="muted">{{ coverMessage }}</span>
           </div>
@@ -305,35 +235,34 @@ async function publishVideo() {
 }
 
 .studio-block {
-  padding: 24px;
+  padding: 28px;
+  display: grid;
+  gap: 24px;
 }
 
-.studio-profile {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.studio-profile-actions {
+.studio-heading {
   display: grid;
   gap: 10px;
 }
 
-.profile-avatar {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  object-fit: cover;
+.studio-eyebrow {
+  margin: 0;
+  color: #ff6b9f;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-.fallback-avatar {
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, var(--pink) 0%, #ff9ab6 100%);
-  color: #fff;
-  font-size: 34px;
-  font-weight: 700;
+.studio-heading h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.studio-copy {
+  margin: 0;
+  max-width: 48rem;
+  color: rgba(33, 52, 79, 0.72);
+  line-height: 1.7;
 }
 
 .upload-picker {
@@ -354,5 +283,11 @@ async function publishVideo() {
   object-fit: cover;
   border-radius: 16px;
   border: 1px solid var(--line);
+}
+
+@media (max-width: 720px) {
+  .studio-block {
+    padding: 22px;
+  }
 }
 </style>

@@ -73,6 +73,29 @@ export type ConversationWindowListVO = {
   records?: ConversationWindowVO[]
 }
 
+export type GroupConversationWindowVO = {
+  conversationId?: string
+  groupId?: string | number
+  groupName?: string
+  groupAvatar?: string
+  status?: number
+  memberCount?: number
+  isAllMuted?: number
+  lastMessage?: string
+  lastMessageTime?: string
+  lastServerMessageId?: string | number
+  lastMessageSeq?: string | number
+  lastReadSeq?: string | number
+  unreadCount?: number
+  isMuted?: number
+}
+
+export type GroupConversationWindowListVO = {
+  ownerUserId?: string | number
+  size?: number
+  records?: GroupConversationWindowVO[]
+}
+
 export type GroupProfileVO = {
   groupId: string | number
   conversationId?: string
@@ -92,6 +115,21 @@ export type GroupConversationUpdatedPayload = {
   groupId?: string | number
   lastServerMessageId?: string | number
 }
+
+export type GroupMemberItem = {
+  userId?: string | number
+  role?: number
+  status?: number
+  isMuted?: number
+}
+
+export type GroupMemberListVO = {
+  groupId?: string | number
+  size?: number
+  records?: GroupMemberItem[]
+}
+
+export type GroupSettingsTab = 'profile' | 'members' | 'moderation'
 
 export type AcceptedPayload = {
   conversationId?: string
