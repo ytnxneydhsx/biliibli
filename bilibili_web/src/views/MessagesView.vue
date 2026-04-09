@@ -132,6 +132,7 @@ void messageStream
 
       <MessagesComposer
         :active-peer-uid="activeTargetType === 'single' ? activePeerUid : ''"
+        :composer-enabled="(activeTargetType === 'single' && !!activePeerUid) || (activeTargetType === 'group' && !!activeGroupId)"
         :draft-images="draftImages"
         :has-uploading-images="hasUploadingImages"
         :has-failed-images="hasFailedImages"

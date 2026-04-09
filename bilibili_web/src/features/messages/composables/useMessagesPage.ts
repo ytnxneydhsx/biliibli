@@ -135,8 +135,10 @@ export function useMessagesPage() {
   const hasUploadingImages = computed(() => draftImages.value.some((item) => item.uploading))
   const hasFailedImages = computed(() => draftImages.value.some((item) => !!item.error))
   const canSend = computed(() => {
-    if (activeTargetType.value !== 'single') return false
-    if (!activePeerUid.value) return false
+    const targetAvailable =
+      (activeTargetType.value === 'single' && !!activePeerUid.value) ||
+      (activeTargetType.value === 'group' && !!activeGroupId.value)
+    if (!targetAvailable) return false
     if (hasUploadingImages.value) return false
     return !!messageDraft.value.trim() || draftImages.value.some((item) => !!item.uploadedUrl)
   })
@@ -677,7 +679,7 @@ export function useMessagesPage() {
   async function sendMessage() {
     const text = messageDraft.value.trim()
     const imageUrls = draftImages.value.map((item) => item.uploadedUrl).filter(Boolean)
-    if ((!text && !imageUrls.length) || activeTargetType.value !== 'single' || !activePeerUid.value) {
+    if (!text && !imageUrls.length) {
       return
     }
     if (hasUploadingImages.value) {
@@ -692,8 +694,13 @@ export function useMessagesPage() {
     const clientMessageId = Date.now()
     const clientKey = String(clientMessageId)
     const peerUid = activePeerUid.value
+    const groupId = activeGroupId.value
+    const receiverId = activeTargetType.value === 'group' ? groupId : peerUid
+    if (!receiverId) {
+      return
+    }
     const messageType = resolveMessageType(text, imageUrls)
-    const streamKey = buildStreamKey('single', peerUid)
+    const streamKey = buildStreamKey(activeTargetType.value, receiverId)
 
     const optimistic: MessageItem = {
       id: '',
@@ -707,7 +714,7 @@ export function useMessagesPage() {
       text,
       imageUrls,
       pending: true,
-      peerUid,
+      peerUid: activeTargetType.value === 'group' ? currentUid.value : peerUid,
       clientKey,
     }
 
@@ -716,18 +723,28 @@ export function useMessagesPage() {
       ...pendingMessages.value,
       [clientKey]: optimistic,
     }
-    upsertConversation(peerUid, {
-      conversationId: buildSingleConversationId(currentUid.value, peerUid),
-      lastMessage: buildConversationPreview({ text, imageUrls }),
-      lastMessageTime: '刚刚',
-      lastMessageEpoch: Date.now(),
-      unreadCount: 0,
-    })
+    if (activeTargetType.value === 'group') {
+      upsertGroupWindow(groupId, {
+        conversationId: `g_${groupId}`,
+        lastMessage: buildConversationPreview({ text, imageUrls }),
+        lastMessageTime: new Date().toISOString(),
+        unreadCount: 0,
+      })
+    } else {
+      upsertConversation(peerUid, {
+        conversationId: buildSingleConversationId(currentUid.value, peerUid),
+        lastMessage: buildConversationPreview({ text, imageUrls }),
+        lastMessageTime: '刚刚',
+        lastMessageEpoch: Date.now(),
+        unreadCount: 0,
+      })
+    }
 
     socket.value.send(
       JSON.stringify({
         type: 'send_message',
-        receiverId: peerUid,
+        conversationType: activeTargetType.value === 'group' ? 2 : 1,
+        receiverId,
         clientMessageId,
         messageType,
         content: {
