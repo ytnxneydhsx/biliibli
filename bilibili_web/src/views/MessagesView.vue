@@ -32,13 +32,19 @@ const {
   messageDraft,
   messageStream,
   openConversation,
+  openGroupConversation,
   removeDraftImage,
+  resolveGroupAvatar,
+  resolveGroupName,
   resolveMessagePeerName,
   resolvePeerAvatar,
   resolvePeerName,
   sendMessage,
+  setSidebarTab,
+  sidebarTab,
   setMessageDraft,
-  sortedConversations,
+  sortedGroupConversations,
+  sortedSingleConversations,
   uploadError,
   uploadImages,
 } = useMessagesPage()
@@ -54,13 +60,20 @@ void messageStream
       :current-username="currentUsername"
       :connection-state="connectionState"
       :connection-label="connectionLabel"
-      :conversations="sortedConversations"
+      :active-tab="sidebarTab"
+      :single-conversations="sortedSingleConversations"
+      :group-conversations="sortedGroupConversations"
       :active-peer-uid="activePeerUid"
+      :active-group-id="activeGroupId"
+      :resolve-group-name="resolveGroupName"
+      :resolve-group-avatar="resolveGroupAvatar"
       :resolve-peer-name="resolvePeerName"
       :resolve-peer-avatar="resolvePeerAvatar"
       @reconnect="connectSocket"
       @disconnect="disconnectSocket"
-      @open="openConversation"
+      @switch-tab="setSidebarTab"
+      @open-single="openConversation"
+      @open-group="openGroupConversation"
     />
 
     <section class="messages-main panel">
@@ -96,7 +109,12 @@ void messageStream
         </div>
 
         <div v-if="!activePeerUid && !activeGroupId" class="empty-state">
-          现在这页已经支持主区切换单聊和群聊。先去任意用户主页点“私信”，或者从群入口带上 groupId 打开群聊模式。
+          <template v-if="sidebarTab === 'group'">
+            群聊天现在单独收进一个分栏里了。等有群聊窗口时，会集中显示在左侧这一栏。
+          </template>
+          <template v-else>
+            私人聊天会单独显示在左侧。先去任意用户主页点“私信”，这里就会出现对应会话。
+          </template>
         </div>
         <div v-else-if="!activeMessages.length && !loadingHistory" class="empty-state">
           当前会话还没有消息。

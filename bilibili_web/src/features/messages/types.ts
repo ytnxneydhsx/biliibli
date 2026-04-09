@@ -73,6 +73,29 @@ export type ConversationWindowListVO = {
   records?: ConversationWindowVO[]
 }
 
+export type GroupConversationWindowVO = {
+  conversationId?: string
+  groupId?: string | number
+  groupName?: string
+  groupAvatar?: string
+  status?: number
+  memberCount?: number
+  isAllMuted?: number
+  lastMessage?: string
+  lastMessageTime?: string
+  lastServerMessageId?: string | number
+  lastMessageSeq?: string | number
+  lastReadSeq?: string | number
+  unreadCount?: number
+  isMuted?: number
+}
+
+export type GroupConversationWindowListVO = {
+  ownerUserId?: string | number
+  size?: number
+  records?: GroupConversationWindowVO[]
+}
+
 export type GroupProfileVO = {
   groupId: string | number
   conversationId?: string

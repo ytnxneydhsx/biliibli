@@ -9,6 +9,8 @@ import type {
   ConnectionState,
   ConversationItem,
   ConversationUpdatedPayload,
+  GroupConversationWindowListVO,
+  GroupConversationWindowVO,
   ConversationWindowListVO,
   ConversationWindowVO,
   DraftImageItem,
@@ -42,6 +44,7 @@ export function useMessagesPage() {
   const connectionState = ref<ConnectionState>('idle')
   const eventLogs = ref<EventLogItem[]>([])
   const conversations = ref<Record<string, ConversationItem>>({})
+  const groupWindows = ref<Record<string, GroupConversationWindowVO>>({})
   const messagesByStream = ref<Record<string, MessageItem[]>>({})
   const pendingMessages = ref<Record<string, MessageItem>>({})
   const peerProfiles = ref<Record<string, UserProfileVO>>({})
@@ -56,6 +59,7 @@ export function useMessagesPage() {
   const messageDraft = ref('')
   const draftImages = ref<DraftImageItem[]>([])
   const messageStream = ref<HTMLDivElement | null>(null)
+  const sidebarTab = ref<ActiveTargetType>('single')
   const activeTargetType = ref<ActiveTargetType>('single')
   const activePeerUid = ref('')
   const activeGroupId = ref('')
@@ -80,8 +84,14 @@ export function useMessagesPage() {
     return '未连接'
   })
 
-  const sortedConversations = computed(() =>
+  const sortedSingleConversations = computed(() =>
     Object.values(conversations.value).sort((left, right) => right.lastMessageEpoch - left.lastMessageEpoch),
+  )
+
+  const sortedGroupConversations = computed(() =>
+    Object.values(groupWindows.value).sort(
+      (left, right) => toEpoch(right.lastMessageTime) - toEpoch(left.lastMessageTime),
+    ),
   )
 
   const activeStreamKey = computed(() => {
@@ -178,14 +188,16 @@ export function useMessagesPage() {
     [groupIdFromRoute, peerUidFromRoute],
     async ([groupId, peerUid]) => {
       if (groupId) {
+        sidebarTab.value = 'group'
         await activateGroup(groupId)
         return
       }
       if (peerUid) {
+        sidebarTab.value = 'single'
         await activateConversation(peerUid)
         return
       }
-      activeTargetType.value = 'single'
+      activeTargetType.value = sidebarTab.value
       activePeerUid.value = ''
       activeGroupId.value = ''
     },
@@ -304,8 +316,11 @@ export function useMessagesPage() {
 
     loadingConversations.value = true
     try {
-      const payload = await api.get<ConversationWindowListVO>('/me/im/conversations')
-      const records = payload.records || []
+      const [singlePayload, groupPayload] = await Promise.all([
+        api.get<ConversationWindowListVO>('/me/im/conversations'),
+        api.get<GroupConversationWindowListVO>('/me/im/conversations/groups'),
+      ])
+      const records = singlePayload.records || []
       const loadedPeerUids: string[] = []
       for (const record of records) {
         const peerUid = applyConversationWindow(record)
@@ -313,15 +328,18 @@ export function useMessagesPage() {
           loadedPeerUids.push(peerUid)
         }
       }
+      for (const record of groupPayload.records || []) {
+        applyGroupConversationWindow(record)
+      }
       await Promise.all(loadedPeerUids.map((peerUid) => loadPeerProfile(peerUid)))
       if (
         !groupIdFromRoute.value &&
         !peerUidFromRoute.value &&
         !activeGroupId.value &&
         !activePeerUid.value &&
-        loadedPeerUids.length > 0
+        sortedSingleConversations.value.length > 0
       ) {
-        openConversation(loadedPeerUids[0])
+        openConversation(sortedSingleConversations.value[0].peerUid)
       }
     } catch (error) {
       pushEvent('error', (error as Error).message || '会话窗口加载失败')
@@ -625,6 +643,7 @@ export function useMessagesPage() {
 
     mergeMessages(buildStreamKey('group', groupId), [toRealtimeGroupMessageItem(data)])
     patchGroupProfileFromMessage(groupId, data)
+    patchGroupWindowFromMessage(groupId, data)
 
     if (activeTargetType.value === 'group' && activeGroupId.value === groupId) {
       void nextTick().then(scrollStreamToBottom)
@@ -647,15 +666,12 @@ export function useMessagesPage() {
       return
     }
     const groupId = String(data.groupId)
-    if (groupProfiles.value[groupId]) {
-      groupProfiles.value = {
-        ...groupProfiles.value,
-        [groupId]: {
-          ...groupProfiles.value[groupId],
-          lastServerMessageId: data.lastServerMessageId,
-        },
-      }
+    if (!groupWindows.value[groupId]) {
+      return
     }
+    upsertGroupWindow(groupId, {
+      lastServerMessageId: data.lastServerMessageId,
+    })
   }
 
   async function sendMessage() {
@@ -733,10 +749,53 @@ export function useMessagesPage() {
     if (!peerUid) {
       return
     }
+    sidebarTab.value = 'single'
     router.replace({
       name: 'messages',
       query: { peerUid },
     })
+  }
+
+  function openGroupConversation(groupId: string) {
+    if (!groupId) {
+      return
+    }
+    sidebarTab.value = 'group'
+    router.replace({
+      name: 'messages',
+      query: { groupId },
+    })
+  }
+
+  function setSidebarTab(nextTab: ActiveTargetType) {
+    if (sidebarTab.value === nextTab && activeTargetType.value === nextTab) {
+      return
+    }
+
+    sidebarTab.value = nextTab
+
+    if (nextTab === 'single') {
+      const firstSingleConversation = sortedSingleConversations.value[0]
+      if (firstSingleConversation) {
+        openConversation(firstSingleConversation.peerUid)
+        return
+      }
+      router.replace({ name: 'messages' })
+      activeTargetType.value = 'single'
+      activePeerUid.value = ''
+      activeGroupId.value = ''
+      return
+    }
+
+    const firstGroupConversation = sortedGroupConversations.value[0]
+    if (firstGroupConversation?.groupId) {
+      openGroupConversation(String(firstGroupConversation.groupId))
+      return
+    }
+    router.replace({ name: 'messages' })
+    activeTargetType.value = 'group'
+    activePeerUid.value = ''
+    activeGroupId.value = ''
   }
 
   function ensureConversation(peerUid: string) {
@@ -753,6 +812,31 @@ export function useMessagesPage() {
       nextBeforeServerMessageId: '',
       historyLoaded: false,
     })
+  }
+
+  function applyGroupConversationWindow(data?: GroupConversationWindowVO) {
+    const groupId = String(data?.groupId || '').trim()
+    if (!groupId) {
+      return ''
+    }
+
+    upsertGroupWindow(groupId, {
+      conversationId: String(data?.conversationId || `g_${groupId}`),
+      groupId,
+      groupName: data?.groupName,
+      groupAvatar: data?.groupAvatar,
+      status: data?.status,
+      memberCount: data?.memberCount,
+      isAllMuted: data?.isAllMuted,
+      lastMessage: String(data?.lastMessage || ''),
+      lastMessageTime: String(data?.lastMessageTime || ''),
+      lastServerMessageId: data?.lastServerMessageId,
+      lastMessageSeq: data?.lastMessageSeq,
+      lastReadSeq: data?.lastReadSeq,
+      unreadCount: Number(data?.unreadCount || 0),
+      isMuted: data?.isMuted,
+    })
+    return groupId
   }
 
   function ensureGroupHistoryState(groupId: string) {
@@ -813,6 +897,25 @@ export function useMessagesPage() {
         ...current,
         ...patch,
         peerUid,
+      },
+    }
+  }
+
+  function upsertGroupWindow(groupId: string, patch: Partial<GroupConversationWindowVO>) {
+    const current = groupWindows.value[groupId] || {
+      groupId,
+      conversationId: `g_${groupId}`,
+      lastMessage: '',
+      lastMessageTime: '',
+      unreadCount: 0,
+    }
+
+    groupWindows.value = {
+      ...groupWindows.value,
+      [groupId]: {
+        ...current,
+        ...patch,
+        groupId,
       },
     }
   }
@@ -922,6 +1025,14 @@ export function useMessagesPage() {
     return resolvePeerName(item.peerUid)
   }
 
+  function resolveGroupName(groupId: string) {
+    return groupWindows.value[groupId]?.groupName || `群聊 ${groupId}`
+  }
+
+  function resolveGroupAvatar(groupId: string) {
+    return groupWindows.value[groupId]?.groupAvatar || ''
+  }
+
   function pushEvent(type: string, body: string) {
     eventLogs.value = [
       {
@@ -967,6 +1078,22 @@ export function useMessagesPage() {
         lastServerMessageId: data.serverMessageId,
       },
     }
+  }
+
+  function patchGroupWindowFromMessage(groupId: string, data: MessagePushPayload) {
+    const current = groupWindows.value[groupId]
+    if (!current) {
+      return
+    }
+    upsertGroupWindow(groupId, {
+      lastMessage: buildConversationPreview(data.content),
+      lastMessageTime: String(data.sendTime || ''),
+      lastServerMessageId: data.serverMessageId,
+      unreadCount:
+        activeTargetType.value === 'group' && activeGroupId.value === groupId
+          ? 0
+          : Number(current.unreadCount || 0) + 1,
+    })
   }
 
   function resolvePeerUidFromConversation(conversationId: string, uid: string) {
@@ -1185,15 +1312,21 @@ export function useMessagesPage() {
     messageDraft,
     messageStream,
     openConversation,
+    openGroupConversation,
     removeDraftImage,
+    resolveGroupAvatar,
+    resolveGroupName,
     resolveMessagePeerName,
     resolvePeerAvatar,
     resolvePeerName,
     sendMessage,
+    setSidebarTab,
+    sidebarTab,
     setMessageDraft: (value: string) => {
       messageDraft.value = value
     },
-    sortedConversations,
+    sortedGroupConversations,
+    sortedSingleConversations,
     uploadError,
     uploadImages,
   }
