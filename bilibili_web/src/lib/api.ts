@@ -63,8 +63,8 @@ export const api = {
   post<T>(url: string, data?: unknown, config?: Record<string, unknown>) {
     return http.post(url, data, config) as Promise<T>
   },
-  put<T>(url: string, data?: unknown) {
-    return http.put(url, data) as Promise<T>
+  put<T>(url: string, data?: unknown, config?: Record<string, unknown>) {
+    return http.put(url, data, config) as Promise<T>
   },
   delete<T>(url: string) {
     return http.delete(url) as Promise<T>

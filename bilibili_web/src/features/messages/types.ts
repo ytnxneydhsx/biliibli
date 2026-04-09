@@ -116,6 +116,21 @@ export type GroupConversationUpdatedPayload = {
   lastServerMessageId?: string | number
 }
 
+export type GroupMemberItem = {
+  userId?: string | number
+  role?: number
+  status?: number
+  isMuted?: number
+}
+
+export type GroupMemberListVO = {
+  groupId?: string | number
+  size?: number
+  records?: GroupMemberItem[]
+}
+
+export type GroupSettingsTab = 'profile' | 'members' | 'moderation'
+
 export type AcceptedPayload = {
   conversationId?: string
   clientMessageId?: string | number

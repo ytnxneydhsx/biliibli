@@ -15,6 +15,9 @@ const router = {
 }
 
 const apiGet = vi.fn()
+const apiPost = vi.fn()
+const apiPut = vi.fn()
+const apiDelete = vi.fn()
 
 vi.mock('vue-router', () => ({
   useRoute: () => route,
@@ -24,7 +27,9 @@ vi.mock('vue-router', () => ({
 vi.mock('../../../lib/api', () => ({
   api: {
     get: (...args: unknown[]) => apiGet(...args),
-    post: vi.fn(),
+    post: (...args: unknown[]) => apiPost(...args),
+    put: (...args: unknown[]) => apiPut(...args),
+    delete: (...args: unknown[]) => apiDelete(...args),
   },
 }))
 
@@ -84,6 +89,16 @@ describe('useMessagesPage group sending', () => {
           groupName: '摸鱼群',
           groupAvatar: '',
           memberCount: 5,
+          ownerUserId: '7',
+          isAllMuted: 0,
+        }
+      }
+      if (url === '/me/im/groups/99/members') {
+        return {
+          records: [
+            { userId: '7', role: 1, status: 1, isMuted: 0 },
+            { userId: '8', role: 3, status: 1, isMuted: 0 },
+          ],
         }
       }
       if (url === '/me/im/groups/99/messages/history') {
@@ -95,6 +110,10 @@ describe('useMessagesPage group sending', () => {
       }
       return { records: [] }
     })
+
+    apiPost.mockResolvedValue(undefined)
+    apiPut.mockResolvedValue(undefined)
+    apiDelete.mockResolvedValue(undefined)
 
     vi.stubGlobal('WebSocket', FakeWebSocket as unknown as typeof WebSocket)
   })
@@ -131,5 +150,64 @@ describe('useMessagesPage group sending', () => {
     expect(FakeWebSocket.instances[0].send).toHaveBeenCalledWith(
       expect.stringContaining('"conversationType":2'),
     )
+  })
+
+  it('exposes group settings controls for managers and updates the group name', async () => {
+    let page!: ReturnType<typeof useMessagesPage>
+
+    const Harness = defineComponent({
+      setup() {
+        page = useMessagesPage()
+        return () => null
+      },
+    })
+
+    mount(Harness)
+    await flushPromises()
+    await nextTick()
+
+    expect(page.canManageActiveGroup.value).toBe(true)
+
+    page.openGroupSettings()
+    await flushPromises()
+
+    expect(page.groupSettingsVisible.value).toBe(true)
+    expect(page.activeGroupMembers.value).toHaveLength(2)
+
+    page.setGroupNameDraft('新的群聊名字')
+    await page.saveGroupName()
+
+    expect(apiPut).toHaveBeenCalledWith('/me/im/groups/99/name', {
+      groupName: '新的群聊名字',
+    })
+    expect(page.activeGroupProfile.value?.groupName).toBe('新的群聊名字')
+  })
+
+  it('manages group moderation actions through the existing group APIs', async () => {
+    let page!: ReturnType<typeof useMessagesPage>
+
+    const Harness = defineComponent({
+      setup() {
+        page = useMessagesPage()
+        return () => null
+      },
+    })
+
+    mount(Harness)
+    await flushPromises()
+    await nextTick()
+
+    await page.toggleGroupMuteStatus()
+    expect(apiPut).toHaveBeenCalledWith('/me/im/groups/99/mute', { isMuted: 1 })
+
+    await page.toggleMemberMute('8', 0)
+    expect(apiPut).toHaveBeenCalledWith('/me/im/groups/99/members/8/mute', { isMuted: 1 })
+
+    page.setInviteGroupMemberUid('12')
+    await page.inviteGroupMember()
+    expect(apiPost).toHaveBeenCalledWith('/me/im/groups/99/members', { targetUserId: 12 })
+
+    await page.kickGroupMember('8')
+    expect(apiDelete).toHaveBeenCalledWith('/me/im/groups/99/members/8')
   })
 })
