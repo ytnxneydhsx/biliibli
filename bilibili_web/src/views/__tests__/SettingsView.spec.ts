@@ -44,8 +44,8 @@ describe('SettingsView', () => {
 
     expect(wrapper.text()).toContain('资料设置')
     expect(wrapper.text()).toContain('修改头像')
-    expect(wrapper.get('#nickname').element.value).toBe('小桃')
-    expect(wrapper.get('#sign').element.value).toBe('热爱分享日常')
+    expect((wrapper.get('#nickname').element as HTMLInputElement).value).toBe('小桃')
+    expect((wrapper.get('#sign').element as HTMLTextAreaElement).value).toBe('热爱分享日常')
     expect(wrapper.text()).not.toContain('上传视频')
     expect(wrapper.text()).not.toContain('上传并发布')
     expect(wrapper.text()).not.toContain('视频封面')
