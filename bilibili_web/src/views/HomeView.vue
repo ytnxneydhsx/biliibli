@@ -50,7 +50,7 @@ onMounted(loadHome)
     <section class="hero-grid">
       <article v-if="featuredVideo" class="featured-hero panel">
         <div class="featured-copy">
-          <span class="tag-chip">青春活泼 · 看视频优先</span>
+          <span class="tag-chip">今日推荐</span>
           <h1>{{ featuredVideo.title }}</h1>
           <p>{{ featuredSummary }}</p>
           <div class="status-line featured-stats">
@@ -119,7 +119,7 @@ onMounted(loadHome)
       <div class="section-title">
         <div class="content-heading">
           <h2>最新公开视频</h2>
-          <p class="muted">全部来自后端真实返回的数据，不添加假分类和假推荐位。</p>
+          <p class="muted">看看最近更新了哪些值得点开的内容。</p>
         </div>
         <RouterLink class="text-button" :to="{ name: 'search' }">去搜索</RouterLink>
       </div>

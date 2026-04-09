@@ -40,7 +40,7 @@ function handleLogout() {
       <div class="brand-mark">bili</div>
       <div class="brand-copy">
         <strong>BiliBili Clone</strong>
-        <span>青春内容站 · Spring Boot + Vue</span>
+        <span>一起看点喜欢的视频</span>
       </div>
     </RouterLink>
 
@@ -50,7 +50,7 @@ function handleLogout() {
         type="search"
         placeholder="搜索视频、作者、关键字"
       />
-      <button class="primary-button" type="submit">开搜</button>
+      <button class="primary-button search-submit" type="submit">搜索</button>
     </form>
 
     <nav class="header-nav">
@@ -131,6 +131,12 @@ function handleLogout() {
 .header-search {
   display: flex;
   gap: 10px;
+}
+
+.search-submit {
+  flex: 0 0 auto;
+  min-width: 88px;
+  white-space: nowrap;
 }
 
 .header-search input {
@@ -220,7 +226,7 @@ function handleLogout() {
   }
 
   .header-search {
-    flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .header-nav {

@@ -76,6 +76,8 @@ describe('HomeView', () => {
 
     expect(wrapper.find('.featured-hero').exists()).toBe(true)
     expect(wrapper.text()).toContain('春日第一条视频')
+    expect(wrapper.text()).not.toContain('青春活泼')
+    expect(wrapper.text()).not.toContain('看视频优先')
     expect(watchLink?.props('to')).toBe('/video/101')
     expect(wrapper.findAll('.hero-rank-item')).toHaveLength(1)
     expect(wrapper.text()).toContain('热榜第一')
