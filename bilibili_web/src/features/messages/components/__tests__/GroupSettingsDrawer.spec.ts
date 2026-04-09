@@ -36,6 +36,9 @@ describe('GroupSettingsDrawer', () => {
       props: baseProps,
     })
 
+    expect(wrapper.find('.drawer-shell').exists()).toBe(true)
+    expect(wrapper.find('.drawer-body').exists()).toBe(true)
+    expect(wrapper.findAll('.drawer-panel')).toHaveLength(2)
     expect(wrapper.text()).toContain('群资料')
     expect(wrapper.text()).toContain('成员管理')
     expect(wrapper.text()).toContain('群管理')
@@ -55,6 +58,7 @@ describe('GroupSettingsDrawer', () => {
       },
     })
 
+    expect(wrapper.find('.member-list-shell').exists()).toBe(true)
     expect(wrapper.text()).toContain('用户 8')
     expect(wrapper.text()).toContain('邀请成员')
 
