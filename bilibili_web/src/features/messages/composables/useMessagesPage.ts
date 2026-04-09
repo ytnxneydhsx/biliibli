@@ -290,6 +290,7 @@ export function useMessagesPage() {
     activeTargetType.value = 'group'
     activeGroupId.value = groupId
     activePeerUid.value = ''
+    upsertGroupWindow(groupId, { unreadCount: 0 })
     await Promise.all([
       loadGroupProfile(groupId),
       ensureGroupHistoryLoaded(groupId),
@@ -1109,6 +1110,9 @@ export function useMessagesPage() {
       return ''
     }
 
+    const shouldClearUnread =
+      activeTargetType.value === 'group' && activeGroupId.value === groupId
+
     upsertGroupWindow(groupId, {
       conversationId: String(data?.conversationId || `g_${groupId}`),
       groupId,
@@ -1122,7 +1126,7 @@ export function useMessagesPage() {
       lastServerMessageId: data?.lastServerMessageId,
       lastMessageSeq: data?.lastMessageSeq,
       lastReadSeq: data?.lastReadSeq,
-      unreadCount: Number(data?.unreadCount || 0),
+      unreadCount: shouldClearUnread ? 0 : Number(data?.unreadCount || 0),
       isMuted: data?.isMuted,
     })
     return groupId

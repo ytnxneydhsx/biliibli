@@ -210,4 +210,68 @@ describe('useMessagesPage group sending', () => {
     await page.kickGroupMember('8')
     expect(apiDelete).toHaveBeenCalledWith('/me/im/groups/99/members/8')
   })
+
+  it('clears the local unread badge when opening an unread group conversation', async () => {
+    route.query = { groupId: '2' }
+
+    apiGet.mockImplementation(async (url: string) => {
+      if (url === '/me/im/conversations') {
+        return { records: [] }
+      }
+      if (url === '/me/im/conversations/groups') {
+        return {
+          records: [
+            {
+              groupId: '2',
+              conversationId: 'g_2',
+              groupName: '二号群',
+              lastMessage: '还有未读',
+              lastMessageTime: '2026-04-09T10:30:00Z',
+              unreadCount: 3,
+            },
+          ],
+        }
+      }
+      if (url === '/me/im/groups/2') {
+        return {
+          groupId: '2',
+          groupName: '二号群',
+          groupAvatar: '',
+          memberCount: 4,
+          ownerUserId: '7',
+          isAllMuted: 0,
+        }
+      }
+      if (url === '/me/im/groups/2/members') {
+        return {
+          records: [{ userId: '7', role: 1, status: 1, isMuted: 0 }],
+        }
+      }
+      if (url === '/me/im/groups/2/messages/history') {
+        return {
+          records: [],
+          hasMore: false,
+          nextBeforeServerMessageId: null,
+        }
+      }
+      return { records: [] }
+    })
+
+    let page!: ReturnType<typeof useMessagesPage>
+
+    const Harness = defineComponent({
+      setup() {
+        page = useMessagesPage()
+        return () => null
+      },
+    })
+
+    mount(Harness)
+    await flushPromises()
+    await nextTick()
+
+    expect(page.sortedGroupConversations.value[0].groupId).toBe('2')
+    expect(page.activeGroupId.value).toBe('2')
+    expect(page.sortedGroupConversations.value[0].unreadCount).toBe(0)
+  })
 })
