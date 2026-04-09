@@ -42,4 +42,26 @@ describe('StudioView', () => {
     expect(wrapper.text()).toContain('请先选择视频文件')
     expect(api.post).not.toHaveBeenCalled()
   })
+
+  it('uploads cover images through the existing cover endpoint', async () => {
+    api.post.mockResolvedValue('https://example.com/cover.png')
+    const wrapper = mount(StudioView)
+    const coverInput = wrapper.get('input[type="file"][accept="image/*"]')
+    const file = new File(['cover'], 'cover.png', { type: 'image/png' })
+
+    Object.defineProperty(coverInput.element, 'files', {
+      value: [file],
+      configurable: true,
+    })
+
+    await coverInput.trigger('change')
+    await flushPromises()
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/me/uploads/video-cover',
+      expect.any(FormData),
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    )
+    expect(wrapper.text()).toContain('封面上传成功')
+  })
 })
