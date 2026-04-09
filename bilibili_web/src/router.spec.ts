@@ -26,4 +26,15 @@ describe('router studio/settings split', () => {
     expect(router.currentRoute.value.name).toBe('auth')
     expect(router.currentRoute.value.query.redirect).toBe('/settings')
   })
+
+  it('resolves /settings to a dedicated authenticated route', async () => {
+    authState.token = 'token'
+    authState.uid = '7'
+    authState.username = 'alice'
+
+    await router.push('/settings')
+
+    expect(router.currentRoute.value.name).toBe('settings')
+    expect(router.currentRoute.value.path).toBe('/settings')
+  })
 })
