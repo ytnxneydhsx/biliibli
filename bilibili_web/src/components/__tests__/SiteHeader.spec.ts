@@ -47,4 +47,26 @@ describe('SiteHeader', () => {
     expect(wrapper.get('input[type="search"]').attributes('placeholder')).toBe('搜索视频、作者、关键字')
     expect(wrapper.get('.header-search .primary-button').text()).toBe('搜索')
   })
+
+  it('routes 创作中心 to /studio and 资料设置 to settings', async () => {
+    authState.token = 'token'
+    authState.uid = '7'
+    authState.username = 'alice'
+
+    const wrapper = mount(SiteHeader, {
+      global: {
+        plugins: [router],
+        stubs: {
+          RouterLink: RouterLinkStub,
+        },
+      },
+    })
+
+    const links = wrapper.findAllComponents(RouterLinkStub)
+    const studioLink = links.find((component) => component.text() === '创作中心')
+    const settingsLink = links.find((component) => component.text() === '资料设置')
+
+    expect(studioLink?.props('to')).toBe('/studio')
+    expect(settingsLink?.props('to')).toEqual({ name: 'settings' })
+  })
 })
