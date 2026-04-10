@@ -215,14 +215,14 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         if (window == null || window.getLastMessageTime() == null) {
             return 0D;
         }
-        return window.getLastMessageTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+        return window.getLastMessageTime().toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
     }
 
     private double toScore(ConversationWindowCacheValue window) {
         if (window == null || window.getLastMessageTime() == null) {
             return 0D;
         }
-        return window.getLastMessageTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+        return window.getLastMessageTime().toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
     }
 
     private boolean isValidWindow(ConversationWindowVO window) {

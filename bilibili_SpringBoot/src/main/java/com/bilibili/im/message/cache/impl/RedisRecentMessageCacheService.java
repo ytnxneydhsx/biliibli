@@ -168,7 +168,7 @@ public class RedisRecentMessageCacheService implements RecentMessageCacheService
     }
 
     private double toScore(MessageVO record) {
-        return record.getSendTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+        return record.getSendTime().toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
     }
 
     private String writeCacheValue(RecentMessageCacheValue value) {

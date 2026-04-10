@@ -3,7 +3,7 @@ spring:
     name: bilibili_SpringBoot
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL:jdbc:mysql://mysql:3306/bilibili?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8}
+    url: ${DB_URL:jdbc:mysql://mysql:3306/bilibili?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
   data:

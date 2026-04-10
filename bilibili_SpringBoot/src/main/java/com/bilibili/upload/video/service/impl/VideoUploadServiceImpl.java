@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
         String uploadId = UUID.randomUUID().toString().replace("-", "");
         String objectKey = multipartObjectStorageService.buildObjectKey(uid, fileName, contentType);
         String multipartUploadId = multipartObjectStorageService.createMultipartUpload(objectKey, contentType);
-        LocalDateTime expireTime = LocalDateTime.now().plusHours(minioProperties.getSessionExpireHours());
+        LocalDateTime expireTime = LocalDateTime.now(ZoneId.of("Asia/Shanghai")).plusHours(minioProperties.getSessionExpireHours());
 
         VideoUploadTaskDO task = new VideoUploadTaskDO();
         task.setUploadId(uploadId);
@@ -124,7 +125,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
 
         VideoUploadPartSignVO vo = new VideoUploadPartSignVO();
         vo.setUploadId(task.getUploadId());
-        vo.setExpireTime(LocalDateTime.now().plusSeconds(minioProperties.getPartUrlExpireSeconds()).toString());
+        vo.setExpireTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")).plusSeconds(minioProperties.getPartUrlExpireSeconds()).toString());
         vo.setParts(signedUrls.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> {
@@ -280,7 +281,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
             throw new ForbiddenException("no permission for this upload task");
         }
         if (task.getExpireTime() != null
-                && LocalDateTime.now().isAfter(task.getExpireTime())
+                && LocalDateTime.now(ZoneId.of("Asia/Shanghai")).isAfter(task.getExpireTime())
                 && UploadTaskStatus.UPLOADING.matches(task.getStatus())) {
             multipartObjectStorageService.abortMultipartUpload(task.getObjectKey(), task.getMultipartUploadId());
             LambdaUpdateWrapper<VideoUploadTaskDO> markExpired = new LambdaUpdateWrapper<>();
