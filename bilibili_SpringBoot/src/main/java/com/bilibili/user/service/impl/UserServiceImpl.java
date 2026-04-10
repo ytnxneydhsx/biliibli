@@ -2,6 +2,7 @@ package com.bilibili.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.bilibili.common.enums.UserRole;
 import com.bilibili.common.enums.UserStatus;
 import com.bilibili.user.mapper.UserInfoMapper;
 import com.bilibili.user.mapper.UserMapper;
@@ -62,6 +63,7 @@ public class UserServiceImpl implements UserService {
         UserDO user = new UserDO();
         user.setUsername(username);
         user.setPassword(encryptPassword(dto.getPassword()));
+        user.setRoleCode(UserRole.USER.code());
         user.setStatus(UserStatus.NORMAL.code());
         int userRows = userMapper.insert(user);
         if (userRows != 1 || user.getId() == null) {
@@ -102,6 +104,7 @@ public class UserServiceImpl implements UserService {
         UserLoginVO loginVO = new UserLoginVO();
         loginVO.setUid(user.getId());
         loginVO.setUsername(user.getUsername());
+        loginVO.setRoleCode(UserRole.fromCodeOrDefault(user.getRoleCode(), UserRole.USER).code());
         return loginVO;
     }
 

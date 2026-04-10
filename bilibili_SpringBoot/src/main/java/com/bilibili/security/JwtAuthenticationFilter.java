@@ -1,6 +1,7 @@
 package com.bilibili.security;
 
 import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.common.enums.UserRole;
 import com.bilibili.security.resolver.AuthenticatedUserResolver;
 import com.bilibili.security.resolver.TokenResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -45,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(
                                 principal,
                                 null,
-                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                                resolveAuthorities(principal)
                         );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -55,5 +58,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private Collection<SimpleGrantedAuthority> resolveAuthorities(AuthenticatedUser principal) {
+        UserRole role = principal == null ? UserRole.USER : principal.getRole();
+        if (role == null) {
+            role = UserRole.USER;
+        }
+
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+        if (UserRole.ADMIN.equals(role)) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
+        return authorities;
     }
 }

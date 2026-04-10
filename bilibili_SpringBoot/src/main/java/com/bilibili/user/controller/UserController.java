@@ -1,5 +1,6 @@
 package com.bilibili.user.controller;
 
+import com.bilibili.common.enums.UserRole;
 import com.bilibili.common.result.Result;
 import com.bilibili.user.model.dto.UserLoginDTO;
 import com.bilibili.user.model.dto.UserRegisterDTO;
@@ -36,7 +37,10 @@ public class UserController {
     @Operation(summary = "User login")
     public Result<UserLoginVO> login(@RequestBody UserLoginDTO dto) {
         UserLoginVO loginVO = userService.login(dto);
-        String token = jwtTokenService.generateToken(loginVO.getUid());
+        String token = jwtTokenService.generateToken(
+                loginVO.getUid(),
+                UserRole.fromCodeOrDefault(loginVO.getRoleCode(), UserRole.USER)
+        );
         loginVO.setToken(token);
         return Result.success(loginVO);
     }

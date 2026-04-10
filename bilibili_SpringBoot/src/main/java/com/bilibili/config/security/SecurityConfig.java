@@ -98,6 +98,7 @@ public class SecurityConfig {
                     auth.requestMatchers(PUBLIC_PATHS).permitAll();
                     auth.requestMatchers(HttpMethod.GET, PUBLIC_GET_PATHS).permitAll();
                     auth.requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS).permitAll();
+                    auth.requestMatchers("/admin/**").hasRole("ADMIN");
                     auth.anyRequest().authenticated();
                 })
                 .addFilterAfter(requestLoggingFilter, SecurityContextHolderFilter.class)

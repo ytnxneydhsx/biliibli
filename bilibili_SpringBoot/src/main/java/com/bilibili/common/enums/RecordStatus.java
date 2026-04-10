@@ -4,7 +4,8 @@ import java.util.Objects;
 
 public enum RecordStatus {
     NORMAL(0),
-    DELETED(1);
+    DELETED(1),
+    PENDING(2);
 
     private final int code;
 
