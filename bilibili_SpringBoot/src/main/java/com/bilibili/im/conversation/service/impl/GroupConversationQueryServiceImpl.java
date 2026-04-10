@@ -97,6 +97,7 @@ public class GroupConversationQueryServiceImpl implements GroupConversationQuery
             List<GroupConversationCardCacheValue> missedCards = groups.stream()
                     .map(this::toCardCacheValue)
                     .toList();
+            groupConversationCardCacheService.cacheGroupCards(missedCards);
             Map<Long, GroupConversationCardCacheValue> merged = new java.util.HashMap<>(cachedCards);
             for (GroupConversationCardCacheValue missedCard : missedCards) {
                 merged.put(missedCard.getGroupId(), missedCard);

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,17 @@ public class RedisGroupConversationCardCacheService implements GroupConversation
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");
         }
-        return getGroupCards(List.of(groupId)).get(groupId);
+
+        String key = GroupConversationCacheKeys.cardKey(groupId);
+        String raw = stringRedisTemplate.opsForValue().get(key);
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        GroupConversationCardCacheValue card = readCacheValue(raw);
+        if (!isValidCard(card)) {
+            return null;
+        }
+        return card;
     }
 
     @Override
@@ -40,44 +49,44 @@ public class RedisGroupConversationCardCacheService implements GroupConversation
             return Collections.emptyMap();
         }
 
-        String cardKey = GroupConversationCacheKeys.publicCardKey();
-        List<String> fields = groupIds.stream()
+        List<Long> validGroupIds = groupIds.stream()
                 .filter(groupId -> groupId != null && groupId > 0)
-                .map(String::valueOf)
                 .toList();
-        if (fields.isEmpty()) {
+        if (validGroupIds.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        List<Object> rawValues = stringRedisTemplate.opsForHash().multiGet(cardKey, new ArrayList<>(fields));
+        List<String> keys = validGroupIds.stream()
+                .map(GroupConversationCacheKeys::cardKey)
+                .toList();
+
+        List<String> rawValues = stringRedisTemplate.opsForValue().multiGet(keys);
         if (rawValues == null || rawValues.isEmpty()) {
             return Collections.emptyMap();
         }
 
         Map<Long, GroupConversationCardCacheValue> resolved = new HashMap<>();
-        for (int i = 0; i < fields.size(); i++) {
-            Object rawValue = rawValues.get(i);
-            if (!(rawValue instanceof String value) || value.isBlank()) {
+        for (int i = 0; i < validGroupIds.size(); i++) {
+            String raw = rawValues.get(i);
+            if (raw == null || raw.isBlank()) {
                 continue;
             }
-            GroupConversationCardCacheValue card = readCacheValue(value);
+            GroupConversationCardCacheValue card = readCacheValue(raw);
             if (!isValidCard(card)) {
                 continue;
             }
             resolved.put(card.getGroupId(), card);
-        }
-        if (!resolved.isEmpty()) {
-            stringRedisTemplate.expire(cardKey, GroupConversationCacheTuning.CACHE_TTL);
         }
         return resolved;
     }
 
     @Override
     public void cacheGroupCard(GroupConversationCardCacheValue record) {
-        if (record == null) {
+        if (!isValidCard(record)) {
             return;
         }
-        cacheGroupCards(List.of(record));
+        String key = GroupConversationCacheKeys.cardKey(record.getGroupId());
+        stringRedisTemplate.opsForValue().set(key, writeCacheValue(record), GroupConversationCacheTuning.CACHE_TTL);
     }
 
     @Override
@@ -85,21 +94,9 @@ public class RedisGroupConversationCardCacheService implements GroupConversation
         if (records == null || records.isEmpty()) {
             return;
         }
-
-        String cardKey = GroupConversationCacheKeys.publicCardKey();
-        Map<String, String> payloads = new HashMap<>();
         for (GroupConversationCardCacheValue record : records) {
-            if (!isValidCard(record)) {
-                continue;
-            }
-            payloads.put(String.valueOf(record.getGroupId()), writeCacheValue(record));
+            cacheGroupCard(record);
         }
-        if (payloads.isEmpty()) {
-            return;
-        }
-
-        stringRedisTemplate.opsForHash().putAll(cardKey, payloads);
-        stringRedisTemplate.expire(cardKey, GroupConversationCacheTuning.CACHE_TTL);
     }
 
     private boolean isValidCard(GroupConversationCardCacheValue card) {
