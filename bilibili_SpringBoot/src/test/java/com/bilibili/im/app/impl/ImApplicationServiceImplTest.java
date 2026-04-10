@@ -13,6 +13,7 @@ import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.message.model.enums.MessageStatus;
 import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.SendMessageVO;
+import com.bilibili.im.moderation.service.SensitiveWordTrieService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
 import com.bilibili.location.service.IpLocationService;
@@ -44,6 +45,7 @@ class ImApplicationServiceImplTest {
         ImMessageProducer imMessageProducer = mock(ImMessageProducer.class);
         IpLocationService ipLocationService = mock(IpLocationService.class);
         MessageIdGenerator messageIdGenerator = mock(MessageIdGenerator.class);
+        SensitiveWordTrieService sensitiveWordTrieService = mock(SensitiveWordTrieService.class);
 
         ImApplicationServiceImpl service = new ImApplicationServiceImpl(
                 userAccessService,
@@ -54,7 +56,8 @@ class ImApplicationServiceImplTest {
                 imTimeService,
                 imMessageProducer,
                 ipLocationService,
-                messageIdGenerator
+                messageIdGenerator,
+                sensitiveWordTrieService
         );
 
         LocalDateTime now = LocalDateTime.of(2026, 4, 7, 12, 30, 0);
@@ -62,6 +65,7 @@ class ImApplicationServiceImplTest {
         when(ipLocationService.resolveLocation("127.0.0.1")).thenReturn("Shanghai");
         when(messageIdGenerator.nextId()).thenReturn(9527L);
         when(chatGroupConversationService.resolveGroupConversationId(3001L)).thenReturn("g_3001");
+        when(sensitiveWordTrieService.containSensitiveWord("hello group")).thenReturn(false);
         doNothing().when(userAccessService).validateCanSendImMessage(1001L);
 
         SendMessageCommand command = new SendMessageCommand();

@@ -5,6 +5,7 @@ import com.bilibili.im.moderation.model.dto.CreateSensitiveWordDTO;
 import com.bilibili.im.moderation.model.dto.UpdateSensitiveWordDTO;
 import com.bilibili.im.moderation.model.vo.SensitiveWordVO;
 import com.bilibili.im.moderation.service.SensitiveWordService;
+import com.bilibili.im.moderation.service.SensitiveWordTrieService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,9 +30,13 @@ import java.util.List;
 public class ImSensitiveWordController {
 
     private final SensitiveWordService sensitiveWordService;
+    private final SensitiveWordTrieService sensitiveWordTrieService;
 
-    public ImSensitiveWordController(SensitiveWordService sensitiveWordService) {
+    public ImSensitiveWordController(
+            SensitiveWordService sensitiveWordService,
+            SensitiveWordTrieService sensitiveWordTrieService) {
         this.sensitiveWordService = sensitiveWordService;
+        this.sensitiveWordTrieService = sensitiveWordTrieService;
     }
 
     @PostMapping
@@ -50,6 +55,13 @@ public class ImSensitiveWordController {
     @Operation(summary = "List active sensitive words")
     public Result<List<SensitiveWordVO>> listActiveSensitiveWords() {
         return Result.success(sensitiveWordService.listActiveSensitiveWords());
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh sensitive word trie")
+    public Result<Void> refreshSensitiveWordTrie() {
+        sensitiveWordTrieService.refreshTrie();
+        return Result.success(null);
     }
 
     @PutMapping("/{id}")

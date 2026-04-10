@@ -14,6 +14,7 @@ import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.message.model.enums.MessageStatus;
 import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.SendMessageVO;
+import com.bilibili.im.moderation.service.SensitiveWordTrieService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
 import com.bilibili.location.service.IpLocationService;
@@ -36,6 +37,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     private final ImMessageProducer imMessageProducer;
     private final IpLocationService ipLocationService;
     private final MessageIdGenerator messageIdGenerator;
+    private final SensitiveWordTrieService sensitiveWordTrieService;
 
     public ImApplicationServiceImpl(UserAccessService userAccessService,
                                     MessagePermissionDomainService messagePermissionDomainService,
@@ -45,7 +47,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
                                     ImTimeService imTimeService,
                                     ImMessageProducer imMessageProducer,
                                     IpLocationService ipLocationService,
-                                    MessageIdGenerator messageIdGenerator) {
+                                    MessageIdGenerator messageIdGenerator,
+                                    SensitiveWordTrieService sensitiveWordTrieService) {
         this.userAccessService = userAccessService;
         this.messagePermissionDomainService = messagePermissionDomainService;
         this.chatConversationService = chatConversationService;
@@ -55,6 +58,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         this.imMessageProducer = imMessageProducer;
         this.ipLocationService = ipLocationService;
         this.messageIdGenerator = messageIdGenerator;
+        this.sensitiveWordTrieService = sensitiveWordTrieService;
     }
 
     @Override
@@ -70,6 +74,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         command.setConversationType(conversationType);
         userAccessService.validateCanSendImMessage(senderId);
         validateMessageContent(command.getMessageType(), command.getContent());
+        validateSensitiveWord(command.getContent());
 
         String conversationId = resolveConversationId(senderId, command.getReceiverId(), conversationType);
         LocalDateTime sendTime = imTimeService.now();
@@ -159,6 +164,15 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         }
         if (type == MessageType.RICH && !hasText && !hasImages) {
             throw new IllegalArgumentException("rich message content is invalid");
+        }
+    }
+
+    private void validateSensitiveWord(MessageContentDTO content) {
+        if (content == null || content.getText() == null || content.getText().isBlank()) {
+            return;
+        }
+        if (sensitiveWordTrieService.containSensitiveWord(content.getText())) {
+            throw new IllegalArgumentException("message contains sensitive word");
         }
     }
 }

@@ -1,4 +1,4 @@
 /**
- * 敏感词文本清洗与归一化工具。
+ * 敏感词文本清洗、前缀树结构与匹配辅助工具。
  */
 package com.bilibili.im.moderation.tool;
