@@ -1,5 +1,6 @@
 package com.bilibili.user.controller;
 
+import com.bilibili.common.enums.UserRole;
 import com.bilibili.user.model.dto.UserLoginDTO;
 import com.bilibili.user.model.vo.UserLoginVO;
 import com.bilibili.user.model.vo.UserProfileVO;
@@ -39,8 +40,9 @@ class UserControllerWebMvcTest {
         UserLoginVO loginVO = new UserLoginVO();
         loginVO.setUid(1001L);
         loginVO.setUsername("u1001");
+        loginVO.setRoleCode(UserRole.ADMIN.code());
         when(userService.login(any(UserLoginDTO.class))).thenReturn(loginVO);
-        when(jwtTokenService.generateToken(1001L)).thenReturn("jwt-token-1001");
+        when(jwtTokenService.generateToken(1001L, UserRole.ADMIN)).thenReturn("jwt-token-1001");
 
         mockMvc.perform(post("/users/login")
                         .contentType(APPLICATION_JSON)
@@ -55,10 +57,11 @@ class UserControllerWebMvcTest {
                 .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data.uid").value(1001L))
                 .andExpect(jsonPath("$.data.username").value("u1001"))
+                .andExpect(jsonPath("$.data.roleCode").value(UserRole.ADMIN.code()))
                 .andExpect(jsonPath("$.data.token").value("jwt-token-1001"));
 
         verify(userService).login(any(UserLoginDTO.class));
-        verify(jwtTokenService).generateToken(1001L);
+        verify(jwtTokenService).generateToken(1001L, UserRole.ADMIN);
     }
 
     @Test

@@ -122,4 +122,32 @@
           AND status = 0
     </update>
 
+    <select id="selectPendingVideosByCursor" resultType="com.bilibili.admin.model.vo.AdminPendingVideoVO">
+        SELECT
+            v.id,
+            v.user_id AS author_uid,
+            v.title,
+            v.description,
+            v.cover_url,
+            v.video_url,
+            v.duration,
+            v.create_time,
+            u.nickname
+        FROM t_video v
+        LEFT JOIN t_user_info u ON v.user_id = u.user_id
+        WHERE v.status = 2
+        <if test="cursor != null">
+            AND v.id &lt; #{cursor}
+        </if>
+        ORDER BY v.id DESC
+        LIMIT #{size}
+    </select>
+
+    <update id="updateVideoStatus">
+        UPDATE t_video
+        SET status = #{newStatus}
+        WHERE id = #{videoId}
+          AND status = #{oldStatus}
+    </update>
+
 </mapper>

@@ -1,6 +1,7 @@
 package com.bilibili.security;
 
 import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.common.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -32,10 +33,16 @@ public class JwtTokenService {
     }
 
     public String generateToken(Long uid) {
+        return generateToken(uid, UserRole.defaultRole());
+    }
+
+    public String generateToken(Long uid, UserRole role) {
         Date now = new Date();
         Date expireAt = new Date(now.getTime() + expireSeconds * 1000L);
+        UserRole normalizedRole = role == null ? UserRole.defaultRole() : role;
         return Jwts.builder()
                 .setSubject(String.valueOf(uid))
+                .claim(UserRole.ROLE_CODE_CLAIM, normalizedRole.code())
                 .setIssuedAt(now)
                 .setExpiration(expireAt)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -50,6 +57,8 @@ public class JwtTokenService {
 
         Claims claims = jws.getBody();
         Long uid = Long.valueOf(claims.getSubject());
-        return new AuthenticatedUser(uid);
+        Number roleCode = claims.get(UserRole.ROLE_CODE_CLAIM, Number.class);
+        UserRole role = UserRole.fromCodeOrDefault(roleCode == null ? null : roleCode.intValue());
+        return new AuthenticatedUser(uid, role);
     }
 }

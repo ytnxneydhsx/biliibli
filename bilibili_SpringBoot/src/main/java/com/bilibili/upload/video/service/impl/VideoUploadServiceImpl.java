@@ -215,7 +215,7 @@ public class VideoUploadServiceImpl implements VideoUploadService {
             video.setViewCount(0L);
             video.setLikeCount(0L);
             video.setCommentCount(0L);
-            video.setStatus(RecordStatus.NORMAL.code());
+            video.setStatus(RecordStatus.PENDING.code());
             if (videoMapper.insert(video) != 1 || video.getId() == null) {
                 throw new RuntimeException("insert video failed");
             }

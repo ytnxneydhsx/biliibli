@@ -22,6 +22,9 @@ public class UserDO implements Serializable {
     private String password;
 
     
+    private Integer roleCode;
+
+    
     @TableLogic
     private Integer status;
 

@@ -42,6 +42,7 @@
 | `id` | `BIGINT` | 主键，snowflake id |
 | `username` | `VARCHAR(32)` | 登录用户名 |
 | `password` | `VARCHAR(100)` | 密码哈希 |
+| `role_code` | `TINYINT` | 角色编码（0 普通用户，1 审核员，2 管理员） |
 | `status` | `TINYINT(1)` | 状态（0 正常，1 删除） |
 | `create_time` | `DATETIME` | 创建时间 |
 | `update_time` | `DATETIME` | 更新时间（自动更新） |

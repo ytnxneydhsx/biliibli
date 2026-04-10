@@ -3,6 +3,7 @@ package com.bilibili.video.mapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bilibili.admin.model.vo.AdminPendingVideoVO;
 import com.bilibili.video.model.entity.VideoDO;
 import com.bilibili.video.model.vo.VideoVO;
 import org.apache.ibatis.annotations.Param;
@@ -33,4 +34,11 @@ public interface VideoMapper extends BaseMapper<VideoDO> {
 
     int updateViewCountAbsolute(@Param("videoId") Long videoId,
                                 @Param("viewCount") Long viewCount);
+
+    List<AdminPendingVideoVO> selectPendingVideosByCursor(@Param("cursor") Long cursor,
+                                                          @Param("size") int size);
+
+    int updateVideoStatus(@Param("videoId") Long videoId,
+                          @Param("oldStatus") int oldStatus,
+                          @Param("newStatus") int newStatus);
 }
