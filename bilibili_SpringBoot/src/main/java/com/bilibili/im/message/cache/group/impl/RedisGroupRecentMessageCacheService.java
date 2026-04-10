@@ -83,7 +83,6 @@ public class RedisGroupRecentMessageCacheService implements GroupRecentMessageCa
             records.add(message);
         }
         Collections.reverse(records);
-        refreshTtl(conversationId);
         return records;
     }
 

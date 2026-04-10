@@ -83,7 +83,6 @@ public class RedisRecentMessageCacheService implements RecentMessageCacheService
             records.add(message);
         }
         Collections.reverse(records);
-        refreshTtl(conversationId);
         return records;
     }
 

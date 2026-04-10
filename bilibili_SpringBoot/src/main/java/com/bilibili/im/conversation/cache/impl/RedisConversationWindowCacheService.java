@@ -85,7 +85,6 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
             }
             records.add(window);
         }
-        refreshTtl(listKey, metaKey, initKey);
         return records;
     }
 
