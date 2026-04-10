@@ -61,24 +61,15 @@ public class RedisGroupRecentMessageCacheService implements GroupRecentMessageCa
             return null;
         }
 
-        Map<String, MessageVO> resolved = new LinkedHashMap<>();
+        List<MessageVO> records = new ArrayList<>(orderedIds.size());
         for (int i = 0; i < orderedIds.size(); i++) {
             Object rawValue = rawValues.get(i);
             if (!(rawValue instanceof String value) || value.isBlank()) {
-                return null;
+                continue;
             }
             MessageVO message = toMessageVO(readCacheValue(value));
             if (message == null || message.getServerMessageId() == null) {
-                return null;
-            }
-            resolved.put(orderedIds.get(i), message);
-        }
-
-        List<MessageVO> records = new ArrayList<>(orderedIds.size());
-        for (String orderedId : orderedIds) {
-            MessageVO message = resolved.get(orderedId);
-            if (message == null) {
-                return null;
+                continue;
             }
             records.add(message);
         }

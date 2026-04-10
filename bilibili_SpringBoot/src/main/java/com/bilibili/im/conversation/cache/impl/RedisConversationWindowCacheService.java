@@ -7,13 +7,20 @@ import com.bilibili.im.conversation.cache.ConversationWindowCacheTuning;
 import com.bilibili.im.conversation.cache.model.ConversationWindowCacheValue;
 import com.bilibili.im.conversation.model.vo.ConversationWindowVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,24 +71,15 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
             return null;
         }
 
-        Map<String, ConversationWindowVO> resolved = new LinkedHashMap<>();
+        List<ConversationWindowVO> records = new ArrayList<>(orderedIds.size());
         for (int i = 0; i < orderedIds.size(); i++) {
             Object rawValue = rawValues.get(i);
             if (!(rawValue instanceof String value) || value.isBlank()) {
-                return null;
+                continue;
             }
             ConversationWindowVO window = toConversationWindowVO(readWindowValue(value));
             if (window == null || window.getConversationId() == null || window.getConversationId().isBlank()) {
-                return null;
-            }
-            resolved.put(orderedIds.get(i), window);
-        }
-
-        List<ConversationWindowVO> records = new ArrayList<>(orderedIds.size());
-        for (String orderedId : orderedIds) {
-            ConversationWindowVO window = resolved.get(orderedId);
-            if (window == null) {
-                return null;
+                continue;
             }
             records.add(window);
         }
@@ -97,27 +95,40 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         String listKey = ConversationWindowCacheKeys.listKey(ownerUserId);
         String metaKey = ConversationWindowCacheKeys.metaKey(ownerUserId);
         String initKey = ConversationWindowCacheKeys.initKey(ownerUserId);
+        Duration ttl = ConversationWindowCacheTuning.CACHE_TTL;
 
-        stringRedisTemplate.delete(List.of(listKey, metaKey, initKey));
-        stringRedisTemplate.opsForValue().set(
-                initKey,
-                ConversationWindowCacheTuning.INIT_VALUE,
-                ConversationWindowCacheTuning.CACHE_TTL
-        );
+        int limit = ConversationWindowTuning.RECENT_WINDOW_LIMIT;
+        Set<ZSetOperations.TypedTuple<String>> tuples = new LinkedHashSet<>();
+        Map<String, String> payloads = new HashMap<>();
 
-        if (records == null || records.isEmpty()) {
-            return;
-        }
-
-        for (ConversationWindowVO record : records) {
-            if (!isValidWindow(record)) {
-                continue;
+        if (records != null) {
+            List<ConversationWindowVO> bounded = records.size() <= limit ? records : records.subList(0, limit);
+            for (ConversationWindowVO record : bounded) {
+                if (!isValidWindow(record)) {
+                    continue;
+                }
+                tuples.add(new DefaultTypedTuple<>(record.getConversationId(), toScore(record)));
+                payloads.put(record.getConversationId(), writeWindow(toCacheValue(record)));
             }
-            stringRedisTemplate.opsForZSet().add(listKey, record.getConversationId(), toScore(record));
-            stringRedisTemplate.opsForHash().put(metaKey, record.getConversationId(), writeWindow(toCacheValue(record)));
         }
-        trimOverflow(listKey, metaKey);
-        refreshTtl(listKey, metaKey, initKey);
+
+        stringRedisTemplate.executePipelined(new SessionCallback<>() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object execute(RedisOperations operations) {
+                operations.delete(List.of(listKey, metaKey, initKey));
+                operations.opsForValue().set(initKey, ConversationWindowCacheTuning.INIT_VALUE, ttl);
+                if (!tuples.isEmpty()) {
+                    operations.opsForZSet().add(listKey, tuples);
+                    operations.expire(listKey, ttl);
+                }
+                if (!payloads.isEmpty()) {
+                    operations.opsForHash().putAll(metaKey, payloads);
+                    operations.expire(metaKey, ttl);
+                }
+                return null;
+            }
+        });
     }
 
     @Override
