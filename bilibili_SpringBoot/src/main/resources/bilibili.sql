@@ -32,6 +32,18 @@ CREATE TABLE IF NOT EXISTS `t_user_info` (
     KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `t_im_sensitive_word` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'sensitive word id',
+    `word` VARCHAR(255) NOT NULL COMMENT 'sensitive word',
+    `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0 normal, 1 deleted',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_word` (`word`),
+    KEY `idx_status_create` (`status`, `create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `t_video` (
     `id` BIGINT NOT NULL COMMENT 'snowflake id',
     `user_id` BIGINT NOT NULL COMMENT 'author uid',
