@@ -12,7 +12,7 @@ public class ImWebSocketProperties {
     @Value("${app.im.websocket.path:/ws/im}")
     private String path;
 
-    @Value("${app.im.websocket.allowedOrigins:http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080}")
+    @Value("${app.im.websocket.allowedOrigins:http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080,http://localhost:5174,http://127.0.0.1:5174,http://150.158.146.80:5174}")
     private String allowedOrigins;
 
     @Value("${app.im.websocket.heartbeatTimeoutMillis:90000}")
