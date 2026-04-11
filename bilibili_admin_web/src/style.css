@@ -151,8 +151,137 @@ input {
   gap: 20px;
 }
 
+.video-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+  gap: 20px;
+}
+
 .panel {
   padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.refresh-button {
+  border: 1px solid #c8d3e6;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  color: #172033;
+}
+
+.empty-state {
+  display: grid;
+  gap: 8px;
+  padding: 24px 0 6px;
+  color: #54617b;
+}
+
+.video-list {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.video-item {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #d6e0ee;
+  border-radius: 18px;
+  background: #fbfcff;
+}
+
+.video-cover {
+  width: 100%;
+  height: 96px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #e8eef8;
+}
+
+.video-meta {
+  display: grid;
+  gap: 8px;
+}
+
+.video-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.video-title-row h3,
+.empty-state h3 {
+  margin: 0;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #dbe7ff;
+  color: #1d4ed8;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.video-subtitle,
+.video-description,
+.hint-text {
+  margin: 0;
+  color: #54617b;
+}
+
+.review-link {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.drawer-cover {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin: 8px 0 14px;
+  background: #e8eef8;
+}
+
+.drawer-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.approve-button,
+.reject-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fff;
+}
+
+.approve-button {
+  background: #16a34a;
+}
+
+.reject-button {
+  background: #dc2626;
 }
 
 .placeholder-list {
@@ -170,6 +299,14 @@ input {
   }
 
   .video-placeholder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .video-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .video-item {
     grid-template-columns: 1fr;
   }
 }

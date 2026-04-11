@@ -84,4 +84,7 @@ export const api = {
   post<T>(url: string, data?: unknown, config?: Record<string, unknown>) {
     return http.post(url, data, config) as Promise<T>
   },
+  put<T>(url: string, data?: unknown, config?: Record<string, unknown>) {
+    return http.put(url, data, config) as Promise<T>
+  },
 }
