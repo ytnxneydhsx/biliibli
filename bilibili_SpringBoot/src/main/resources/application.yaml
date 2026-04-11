@@ -49,7 +49,7 @@ jwt:
   expireSeconds: 604800
 
 cors:
-  allowedOrigins: http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080
+  allowedOrigins: http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080,http://localhost:5174,http://127.0.0.1:5174,http://150.158.146.80:5174
 
 storage:
   avatar:
@@ -63,20 +63,20 @@ storage:
   allowedVideoTypes: video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-matroska,video/ogg
   allowedVideoExtensions: .mp4,.mov,.webm,.m4v,.mkv,.ogv
 
-minio:
-  endpoint: ${MINIO_ENDPOINT:http://minio:9000}
-  publicEndpoint: ${MINIO_PUBLIC_ENDPOINT:http://localhost:9000}
-  accessKey: ${MINIO_ACCESS_KEY:minioadmin}
-  secretKey: ${MINIO_SECRET_KEY:minioadmin}
-  region: ${MINIO_REGION:us-east-1}
-  bucket: ${MINIO_BUCKET:bilibili-media}
-  avatarPrefix: ${MINIO_AVATAR_PREFIX:avatar}
-  groupAvatarPrefix: ${MINIO_GROUP_AVATAR_PREFIX:group-avatar}
-  coverPrefix: ${MINIO_COVER_PREFIX:cover}
-  videoPrefix: ${MINIO_VIDEO_PREFIX:video}
-  partUrlExpireSeconds: ${MINIO_PART_URL_EXPIRE_SECONDS:1800}
-  sessionExpireHours: ${MINIO_SESSION_EXPIRE_HOURS:24}
-  corsAllowedOrigins: ${MINIO_CORS_ALLOWED_ORIGINS:http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080}
+  minio:
+    endpoint: ${MINIO_ENDPOINT:http://minio:9000}
+    public-endpoint: ${MINIO_PUBLIC_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    region: ${MINIO_REGION:us-east-1}
+    bucket: ${MINIO_BUCKET:bilibili-media}
+    avatar-prefix: ${MINIO_AVATAR_PREFIX:avatar}
+    group-avatar-prefix: ${MINIO_GROUP_AVATAR_PREFIX:group-avatar}
+    cover-prefix: ${MINIO_COVER_PREFIX:cover}
+    video-prefix: ${MINIO_VIDEO_PREFIX:video}
+    part-url-expire-seconds: ${MINIO_PART_URL_EXPIRE_SECONDS:1800}
+    session-expire-hours: ${MINIO_SESSION_EXPIRE_HOURS:24}
+    cors-allowed-origins: ${MINIO_CORS_ALLOWED_ORIGINS:http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080,http://localhost:5174,http://127.0.0.1:5174,http://150.158.146.80:5174}
 
 springdoc:
   api-docs:
@@ -109,7 +109,7 @@ app:
     websocket:
       enabled: true
       path: /ws/im
-      allowedOrigins: http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080
+      allowedOrigins: http://localhost:63342,http://127.0.0.1:63342,http://localhost:8080,http://127.0.0.1:8080,http://localhost:5174,http://127.0.0.1:5174,http://150.158.146.80:5174
   video:
     rankSize: 100
     switchIntervalMinutes: 5

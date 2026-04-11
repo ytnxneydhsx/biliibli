@@ -70,7 +70,8 @@ public class MinioBucketInitializer implements ApplicationRunner {
                         bucket, unwrap(e).getMessage());
             }
         } catch (Exception e) {
-            throw new RuntimeException("initialize MinIO bucket failed", unwrap(e));
+            log.warn("initialize MinIO bucket failed, continue application startup: bucket={}, cause={}",
+                    bucket, unwrap(e).getMessage());
         }
     }
 
