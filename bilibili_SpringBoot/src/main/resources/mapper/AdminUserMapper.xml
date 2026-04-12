@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bilibili.admin.mapper.AdminUserMapper">
+
+    <sql id="AdminUserColumns">
+        SELECT
+            u.id AS uid,
+            u.username AS username,
+            u.role_code AS roleCode,
+            u.status AS status,
+            ui.nickname AS nickname,
+            ui.avatar_url AS avatar,
+            ui.sign AS sign,
+            CASE WHEN IFNULL(ua.like_enabled, 1) = 1 THEN TRUE ELSE FALSE END AS likeEnabled,
+            CASE WHEN IFNULL(ua.comment_enabled, 1) = 1 THEN TRUE ELSE FALSE END AS commentEnabled,
+            CASE WHEN IFNULL(ua.im_message_send_enabled, 1) = 1 THEN TRUE ELSE FALSE END AS imMessageSendEnabled,
+            CASE WHEN IFNULL(ua.video_upload_enabled, 1) = 1 THEN TRUE ELSE FALSE END AS videoUploadEnabled,
+            CASE WHEN IFNULL(ua.profile_edit_enabled, 1) = 1 THEN TRUE ELSE FALSE END AS profileEditEnabled,
+            CASE
+                WHEN IFNULL(ua.like_enabled, 1) = 1
+                 AND IFNULL(ua.comment_enabled, 1) = 1
+                 AND IFNULL(ua.video_upload_enabled, 1) = 1
+                THEN FALSE
+                ELSE TRUE
+            END AS videoBusinessBanned
+        FROM t_user u
+        LEFT JOIN t_user_info ui ON ui.user_id = u.id
+        LEFT JOIN t_user_access ua ON ua.user_id = u.id
+    </sql>
+
+    <select id="selectAdminUsers" resultType="com.bilibili.admin.model.vo.AdminUserVO">
+        <include refid="AdminUserColumns"/>
+        ORDER BY u.id DESC
+    </select>
+
+    <select id="selectAdminUserById" resultType="com.bilibili.admin.model.vo.AdminUserVO">
+        <include refid="AdminUserColumns"/>
+        WHERE u.id = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>

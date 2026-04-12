@@ -1,5 +1,6 @@
 package com.bilibili.admin.controller;
 
+import com.bilibili.admin.model.vo.AdminUserVO;
 import com.bilibili.admin.service.AdminUserAccessService;
 import com.bilibili.common.auth.AuthenticatedUser;
 import com.bilibili.common.result.Result;
@@ -30,29 +31,27 @@ public class AdminUserAccessController {
 
     @PostMapping("/{userId}/video-business-ban")
     @Operation(summary = "封禁用户的视频业务能力")
-    public Result<Void> banVideoBusiness(
+    public Result<AdminUserVO> banVideoBusiness(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
             @PathVariable("userId")
             @NotNull(message = "userId cannot be null")
             @Positive(message = "userId must be positive") Long userId) {
-        adminUserAccessService.banVideoBusiness(
+        return Result.success(adminUserAccessService.banVideoBusiness(
                 userId,
                 currentUser == null ? null : currentUser.getUid()
-        );
-        return Result.success(null);
+        ));
     }
 
     @DeleteMapping("/{userId}/video-business-ban")
     @Operation(summary = "解禁用户的视频业务能力")
-    public Result<Void> unbanVideoBusiness(
+    public Result<AdminUserVO> unbanVideoBusiness(
             @Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser currentUser,
             @PathVariable("userId")
             @NotNull(message = "userId cannot be null")
             @Positive(message = "userId must be positive") Long userId) {
-        adminUserAccessService.unbanVideoBusiness(
+        return Result.success(adminUserAccessService.unbanVideoBusiness(
                 userId,
                 currentUser == null ? null : currentUser.getUid()
-        );
-        return Result.success(null);
+        ));
     }
 }
