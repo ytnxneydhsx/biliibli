@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan(
         basePackages = {
+                "com.bilibili.admin.mapper",
                 "com.bilibili.user.mapper",
                 "com.bilibili.video.mapper",
                 "com.bilibili.comment.mapper",

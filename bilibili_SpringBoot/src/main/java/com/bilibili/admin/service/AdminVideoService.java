@@ -7,5 +7,9 @@ public interface AdminVideoService {
 
     CursorPageVO<AdminPendingVideoVO> listPendingVideos(Long cursor);
 
+    CursorPageVO<AdminPendingVideoVO> listDeletedVideos(Long cursor);
+
+    CursorPageVO<AdminPendingVideoVO> listPublishedVideos(Long cursor);
+
     void reviewVideo(Long videoId, Integer status);
 }

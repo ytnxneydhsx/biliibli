@@ -32,6 +32,22 @@ public class AdminVideoController {
         return Result.success(adminVideoService.listPendingVideos(cursor));
     }
 
+    @GetMapping("/deleted")
+    @Operation(summary = "查询已删除视频列表（游标分页）")
+    public Result<CursorPageVO<AdminPendingVideoVO>> listDeletedVideos(
+            @Parameter(description = "游标，传上一页最后一条的id，首页不传")
+            @RequestParam(required = false) Long cursor) {
+        return Result.success(adminVideoService.listDeletedVideos(cursor));
+    }
+
+    @GetMapping("/published")
+    @Operation(summary = "查询已上架视频列表（游标分页）")
+    public Result<CursorPageVO<AdminPendingVideoVO>> listPublishedVideos(
+            @Parameter(description = "游标，传上一页最后一条的id，首页不传")
+            @RequestParam(required = false) Long cursor) {
+        return Result.success(adminVideoService.listPublishedVideos(cursor));
+    }
+
     @PutMapping("/{videoId}/status")
     @Operation(summary = "审核视频：通过(0)或拒绝(1)")
     public Result<Void> reviewVideo(
