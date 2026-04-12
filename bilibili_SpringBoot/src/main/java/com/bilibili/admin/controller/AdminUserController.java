@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,7 +27,8 @@ public class AdminUserController {
 
     @GetMapping
     @Operation(summary = "分页查询所有用户及权限状态")
-    public Result<PageVO<AdminUserVO>> listUsers(PageQueryDTO pageQuery) {
-        return Result.success(adminUserService.listUsers(pageQuery));
+    public Result<PageVO<AdminUserVO>> listUsers(PageQueryDTO pageQuery,
+                                                 @RequestParam(value = "keyword", required = false) String keyword) {
+        return Result.success(adminUserService.listUsers(pageQuery, keyword));
     }
 }

@@ -30,6 +30,16 @@
 
     <select id="selectAdminUsers" resultType="com.bilibili.admin.model.vo.AdminUserVO">
         <include refid="AdminUserColumns"/>
+        <where>
+            <if test="keyword != null">
+                AND (
+                    u.username LIKE CONCAT('%', #{keyword}, '%')
+                    <if test="uidKeyword != null">
+                        OR u.id = #{uidKeyword}
+                    </if>
+                )
+            </if>
+        </where>
         ORDER BY u.id DESC
     </select>
 

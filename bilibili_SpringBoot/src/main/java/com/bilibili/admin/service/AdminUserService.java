@@ -6,5 +6,5 @@ import com.bilibili.common.page.PageVO;
 
 public interface AdminUserService {
 
-    PageVO<AdminUserVO> listUsers(PageQueryDTO pageQuery);
+    PageVO<AdminUserVO> listUsers(PageQueryDTO pageQuery, String keyword);
 }
