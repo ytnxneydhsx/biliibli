@@ -857,8 +857,34 @@ export function useMessagesPage() {
       return
     }
     if (type === 'error') {
-      connectionState.value = 'error'
+      handleSendError(packet.message, packet.data as { clientMessageId?: string | number } | undefined)
     }
+  }
+
+  function handleSendError(reason?: string, data?: { clientMessageId?: string | number } | null) {
+    const clientKey = data?.clientMessageId != null ? String(data.clientMessageId) : ''
+    const pending = clientKey
+      ? pendingMessages.value[clientKey]
+      : findLatestPending()
+
+    if (!pending) {
+      return
+    }
+
+    pending.pending = false
+    pending.failed = true
+    pending.failReason = reason || '发送失败'
+    pending.time = '发送失败'
+
+    const nextPending = { ...pendingMessages.value }
+    delete nextPending[pending.clientKey]
+    pendingMessages.value = nextPending
+  }
+
+  function findLatestPending(): MessageItem | undefined {
+    const entries = Object.values(pendingMessages.value)
+    if (entries.length === 0) return undefined
+    return entries.reduce((latest, item) => (item.epoch > latest.epoch ? item : latest))
   }
 
   function handleAccepted(data?: AcceptedPayload) {
@@ -1013,6 +1039,8 @@ export function useMessagesPage() {
       text,
       imageUrls,
       pending: true,
+      failed: false,
+      failReason: '',
       peerUid: activeTargetType.value === 'group' ? currentUid.value : peerUid,
       clientKey,
     }
@@ -1520,6 +1548,8 @@ export function useMessagesPage() {
       text: String(data.content?.text || ''),
       imageUrls: (data.content?.imageUrls || []).filter(Boolean),
       pending: false,
+      failed: false,
+      failReason: '',
       peerUid,
       clientKey,
     }
@@ -1541,6 +1571,8 @@ export function useMessagesPage() {
       text: String(data.content?.text || ''),
       imageUrls: (data.content?.imageUrls || []).filter(Boolean),
       pending: false,
+      failed: false,
+      failReason: '',
       peerUid: senderId,
       clientKey,
     }
@@ -1562,6 +1594,8 @@ export function useMessagesPage() {
       text: String(record.content?.text || ''),
       imageUrls: (record.content?.imageUrls || []).filter(Boolean),
       pending: false,
+      failed: false,
+      failReason: '',
       peerUid,
       clientKey,
     }
@@ -1583,6 +1617,8 @@ export function useMessagesPage() {
       text: String(record.content?.text || ''),
       imageUrls: (record.content?.imageUrls || []).filter(Boolean),
       pending: false,
+      failed: false,
+      failReason: '',
       peerUid: senderId,
       clientKey,
     }

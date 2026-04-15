@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <article class="message-bubble" :class="[item.direction, { pending: item.pending }]">
+  <article class="message-bubble" :class="[item.direction, { pending: item.pending, failed: item.failed }]">
     <div class="message-meta">
       <span>{{ item.direction === 'outgoing' ? '我' : peerName }}</span>
       <span>{{ item.time }}</span>
@@ -25,6 +25,9 @@ defineProps<{
     </div>
     <div v-if="item.senderLocation" class="message-location">
       {{ item.senderLocation }}
+    </div>
+    <div v-if="item.failed" class="message-fail-reason">
+      {{ item.failReason }}
     </div>
   </article>
 </template>
@@ -51,6 +54,18 @@ defineProps<{
 
 .message-bubble.pending {
   opacity: 0.72;
+}
+
+.message-bubble.failed {
+  opacity: 1;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.message-fail-reason {
+  margin-top: 8px;
+  color: #ef4444;
+  font-size: 12px;
 }
 
 .message-meta {

@@ -16,11 +16,15 @@ public class ImProtocolResponseFactory {
     }
 
     public ImWebSocketOutboundMessageDTO error(String message) {
+        return error(message, null);
+    }
+
+    public ImWebSocketOutboundMessageDTO error(String message, Long clientMessageId) {
         return simpleMessage(
                 ImWebSocketMessageType.ERROR,
                 message == null || message.isBlank() ? "websocket message handling failed" : message,
                 1,
-                null
+                clientMessageId != null ? java.util.Map.of("clientMessageId", clientMessageId) : null
         );
     }
 

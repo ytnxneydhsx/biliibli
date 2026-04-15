@@ -32,6 +32,8 @@ export type MessageItem = {
   text: string
   imageUrls: string[]
   pending: boolean
+  failed: boolean
+  failReason: string
   peerUid: string
   clientKey: string
 }

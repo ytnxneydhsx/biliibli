@@ -38,13 +38,14 @@ public class ImProtocolDispatcher {
         }
 
         if (ImWebSocketMessageType.matches(inboundMessage.getType(), ImWebSocketMessageType.SEND_MESSAGE)) {
+            Long clientMessageId = inboundMessage.getClientMessageId();
             try {
                 boolean acquired = realtimePushIdempotencyService.tryAcquire(
                         userId,
-                        inboundMessage.getClientMessageId()
+                        clientMessageId
                 );
                 if (!acquired) {
-                    return responseFactory.error("websocket message is duplicated");
+                    return responseFactory.error("websocket message is duplicated", clientMessageId);
                 }
 
                 SendMessageVO sendMessageVO = imApplicationService.acceptMessage(
@@ -54,7 +55,7 @@ public class ImProtocolDispatcher {
                 );
                 return responseFactory.sendMessageAccepted(sendMessageVO);
             } catch (Exception ex) {
-                return responseFactory.error(ex.getMessage());
+                return responseFactory.error(ex.getMessage(), clientMessageId);
             }
         }
 
