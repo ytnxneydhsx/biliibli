@@ -83,11 +83,12 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                 LocalDateTime lastMessageTime,
                                                 Long lastServerMessageId) {
         Integer type = ConversationType.SINGLE.getCode();
-        int senderRows = chatConversationMapper.updateSenderConversationSummary(
-                conversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
-        if (senderRows <= 0) {
-            throw new RuntimeException("update sender conversation summary failed");
+        ChatConversationDO current = chatConversationMapper.selectByOwnerTargetAndType(senderId, receiverId, type);
+        if (!shouldUpdateSummary(current, lastServerMessageId)) {
+            return;
         }
+        chatConversationMapper.updateSenderConversationSummary(
+                conversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
 
     @Override
@@ -103,11 +104,24 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
 
         Integer type = ConversationType.SINGLE.getCode();
-        int receiverRows = chatConversationMapper.updateReceiverConversationSummary(
-                resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
-        if (receiverRows <= 0) {
-            throw new RuntimeException("update receiver conversation summary failed");
+        chatConversationMapper.incrementUnreadCount(receiverId, senderId, type);
+
+        ChatConversationDO current = chatConversationMapper.selectByOwnerTargetAndType(receiverId, senderId, type);
+        if (!shouldUpdateSummary(current, lastServerMessageId)) {
+            return;
         }
+        chatConversationMapper.updateReceiverConversationSummary(
+                resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
+    }
+
+    private boolean shouldUpdateSummary(ChatConversationDO current, Long lastServerMessageId) {
+        if (lastServerMessageId == null) {
+            return true;
+        }
+        if (current == null || current.getLastServerMessageId() == null) {
+            return true;
+        }
+        return current.getLastServerMessageId() < lastServerMessageId;
     }
 
     @Override

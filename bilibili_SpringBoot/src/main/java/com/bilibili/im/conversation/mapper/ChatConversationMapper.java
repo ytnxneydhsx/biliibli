@@ -48,7 +48,6 @@ public interface ChatConversationMapper {
                 last_message = #{lastMessage},
                 last_message_time = #{lastMessageTime},
                 last_server_message_id = #{lastServerMessageId},
-                unread_count = unread_count + 1,
                 update_time = CURRENT_TIMESTAMP
             WHERE owner_user_id = #{ownerUserId}
               AND target_id = #{targetId}
@@ -61,6 +60,18 @@ public interface ChatConversationMapper {
                                           @Param("lastMessage") String lastMessage,
                                           @Param("lastMessageTime") java.time.LocalDateTime lastMessageTime,
                                           @Param("lastServerMessageId") Long lastServerMessageId);
+
+    @Update("""
+            UPDATE chat_conversation
+            SET unread_count = unread_count + 1,
+                update_time = CURRENT_TIMESTAMP
+            WHERE owner_user_id = #{ownerUserId}
+              AND target_id = #{targetId}
+              AND type = #{type}
+            """)
+    int incrementUnreadCount(@Param("ownerUserId") Long ownerUserId,
+                             @Param("targetId") Long targetId,
+                             @Param("type") Integer type);
 
     @Update("""
             UPDATE chat_conversation
