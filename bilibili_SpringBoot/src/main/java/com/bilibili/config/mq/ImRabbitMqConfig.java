@@ -3,7 +3,9 @@ package com.bilibili.config.mq;
 import com.bilibili.config.properties.ImMqProperties;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -32,12 +34,18 @@ public class ImRabbitMqConfig {
 
     @Bean
     public Queue messagePersistQueue(ImMqProperties properties) {
-        return new Queue(properties.getMessagePersistQueue(), true);
+        return QueueBuilder.durable(properties.getMessagePersistQueue())
+                .deadLetterExchange("im.message.dlx")
+                .deadLetterRoutingKey(properties.getMessagePersistQueue() + ".dlq")
+                .build();
     }
 
     @Bean
     public Queue conversationPersistQueue(ImMqProperties properties) {
-        return new Queue(properties.getConversationPersistQueue(), true);
+        return QueueBuilder.durable(properties.getConversationPersistQueue())
+                .deadLetterExchange("im.message.dlx")
+                .deadLetterRoutingKey(properties.getConversationPersistQueue() + ".dlq")
+                .build();
     }
 
     @Bean
@@ -57,7 +65,10 @@ public class ImRabbitMqConfig {
 
     @Bean
     public Queue groupMessagePersistQueue(ImMqProperties properties) {
-        return new Queue(properties.getGroupMessagePersistQueue(), true);
+        return QueueBuilder.durable(properties.getGroupMessagePersistQueue())
+                .deadLetterExchange("im.message.dlx")
+                .deadLetterRoutingKey(properties.getGroupMessagePersistQueue() + ".dlq")
+                .build();
     }
 
     @Bean
@@ -163,5 +174,54 @@ public class ImRabbitMqConfig {
         return BindingBuilder.bind(groupRecentMessageCacheProjectionQueue)
                 .to(imEventExchange)
                 .with(properties.getGroupRoutingKey());
+    }
+
+    // ==================== 死信交换机 + 死信队列 ====================
+
+    @Bean
+    public DirectExchange imDeadLetterExchange() {
+        return new DirectExchange("im.message.dlx", true, false);
+    }
+
+    @Bean
+    public Queue messagePersistDlq(ImMqProperties properties) {
+        return QueueBuilder.durable(properties.getMessagePersistQueue() + ".dlq").build();
+    }
+
+    @Bean
+    public Queue conversationPersistDlq(ImMqProperties properties) {
+        return QueueBuilder.durable(properties.getConversationPersistQueue() + ".dlq").build();
+    }
+
+    @Bean
+    public Queue groupMessagePersistDlq(ImMqProperties properties) {
+        return QueueBuilder.durable(properties.getGroupMessagePersistQueue() + ".dlq").build();
+    }
+
+    @Bean
+    public Binding messagePersistDlqBinding(@Qualifier("messagePersistDlq") Queue dlq,
+                                             DirectExchange imDeadLetterExchange,
+                                             ImMqProperties properties) {
+        return BindingBuilder.bind(dlq)
+                .to(imDeadLetterExchange)
+                .with(properties.getMessagePersistQueue() + ".dlq");
+    }
+
+    @Bean
+    public Binding conversationPersistDlqBinding(@Qualifier("conversationPersistDlq") Queue dlq,
+                                                  DirectExchange imDeadLetterExchange,
+                                                  ImMqProperties properties) {
+        return BindingBuilder.bind(dlq)
+                .to(imDeadLetterExchange)
+                .with(properties.getConversationPersistQueue() + ".dlq");
+    }
+
+    @Bean
+    public Binding groupMessagePersistDlqBinding(@Qualifier("groupMessagePersistDlq") Queue dlq,
+                                                  DirectExchange imDeadLetterExchange,
+                                                  ImMqProperties properties) {
+        return BindingBuilder.bind(dlq)
+                .to(imDeadLetterExchange)
+                .with(properties.getGroupMessagePersistQueue() + ".dlq");
     }
 }
