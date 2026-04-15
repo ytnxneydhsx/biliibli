@@ -85,4 +85,41 @@ describe('AdminVideosView', () => {
     expect(get).toHaveBeenCalledTimes(2)
     expect(wrapper.text()).toContain('当前没有待审核视频')
   })
+
+  it('switches to the published tab and loads the published endpoint', async () => {
+    get.mockResolvedValueOnce({
+      records: [],
+      nextCursor: null,
+      hasMore: false,
+    })
+    get.mockResolvedValueOnce({
+      records: [
+        {
+          id: '3003',
+          authorUid: '4004',
+          title: '已上架视频',
+          description: '公开可见',
+          coverUrl: 'https://example.com/published-cover.png',
+          videoUrl: 'https://example.com/published-video.mp4',
+          duration: 98,
+          createTime: '2026-04-12T11:00:00',
+          nickname: 'admin-user',
+        },
+      ],
+      nextCursor: null,
+      hasMore: false,
+    })
+
+    const wrapper = mount(AdminVideosView)
+    await flushPromises()
+
+    await wrapper.get('button[data-tab="published"]').trigger('click')
+    await flushPromises()
+
+    expect(get).toHaveBeenLastCalledWith('/admin/videos/published')
+    expect(wrapper.text()).toContain('已上架视频')
+    expect(wrapper.text()).toContain('当前展示已上架视频')
+    expect(wrapper.find('button.approve-button').exists()).toBe(false)
+    expect(wrapper.find('button.reject-button').exists()).toBe(false)
+  })
 })

@@ -1,39 +1,47 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { api } from '../lib/api'
+import type { AdminVideoVO, CursorPageVO } from '../types'
 
-type AdminPendingVideoVO = {
-  id: string
-  authorUid: string
-  title: string
-  description: string
-  coverUrl: string
-  videoUrl: string
-  duration: number
-  createTime: string
-  nickname: string
+type VideoTabKey = 'pending' | 'published' | 'deleted'
+
+const TAB_CONFIG: Record<VideoTabKey, { label: string; endpoint: string; statusLabel: string; summary: string }> = {
+  pending: {
+    label: '待审核',
+    endpoint: '/admin/videos/pending',
+    statusLabel: '待审核',
+    summary: '当前展示待审核视频',
+  },
+  published: {
+    label: '已通过',
+    endpoint: '/admin/videos/published',
+    statusLabel: '已上架',
+    summary: '当前展示已上架视频',
+  },
+  deleted: {
+    label: '已拒绝',
+    endpoint: '/admin/videos/deleted',
+    statusLabel: '已拒绝',
+    summary: '当前展示已拒绝视频',
+  },
 }
 
-type CursorPageVO<T> = {
-  records: T[]
-  nextCursor: string | null
-  hasMore: boolean
-}
-
-const videos = ref<AdminPendingVideoVO[]>([])
+const videos = ref<AdminVideoVO[]>([])
 const loading = ref(false)
 const errorMessage = ref('')
 const nextCursor = ref<string | null>(null)
 const hasMore = ref(false)
 const selectedVideoId = ref<string | null>(null)
+const activeTab = ref<VideoTabKey>('pending')
 
 const selectedVideo = computed(() =>
   videos.value.find((video) => video.id === selectedVideoId.value) ?? null,
 )
 
-const emptyTitle = computed(() => (loading.value ? '正在加载待审核视频…' : '当前没有待审核视频'))
+const activeTabConfig = computed(() => TAB_CONFIG[activeTab.value])
+const emptyTitle = computed(() => (loading.value ? `正在加载${activeTabConfig.value.label}视频…` : `当前没有${activeTabConfig.value.label}视频`))
 const emptyDescription = computed(() =>
-  loading.value ? '请稍候，管理员列表正在从后端拉取数据。' : '新提交的视频会先进入待审核队列。',
+  loading.value ? '请稍候，管理员列表正在从后端拉取数据。' : `${activeTabConfig.value.summary}。`,
 )
 
 function formatDuration(seconds: number) {
@@ -47,12 +55,12 @@ function formatDuration(seconds: number) {
   return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
 }
 
-async function loadPendingVideos() {
+async function loadVideos() {
   loading.value = true
   errorMessage.value = ''
 
   try {
-    const result = await api.get<CursorPageVO<AdminPendingVideoVO>>('/admin/videos/pending')
+    const result = await api.get<CursorPageVO<AdminVideoVO>>(activeTabConfig.value.endpoint)
     videos.value = result.records ?? []
     nextCursor.value = result.nextCursor ?? null
     hasMore.value = Boolean(result.hasMore)
@@ -76,8 +84,18 @@ function openVideoReview(videoId: string) {
   selectedVideoId.value = videoId
 }
 
+async function switchTab(tab: VideoTabKey) {
+  if (tab === activeTab.value) {
+    return
+  }
+
+  activeTab.value = tab
+  selectedVideoId.value = null
+  await loadVideos()
+}
+
 async function reviewVideo(status: 0 | 1) {
-  if (!selectedVideo.value) {
+  if (!selectedVideo.value || activeTab.value !== 'pending') {
     return
   }
 
@@ -86,7 +104,7 @@ async function reviewVideo(status: 0 | 1) {
 
   try {
     await api.put(`/admin/videos/${selectedVideo.value.id}/status`, { status })
-    await loadPendingVideos()
+    await loadVideos()
   } catch (error) {
     errorMessage.value = (error as Error).message
   } finally {
@@ -95,7 +113,7 @@ async function reviewVideo(status: 0 | 1) {
 }
 
 onMounted(() => {
-  void loadPendingVideos()
+  void loadVideos()
 })
 </script>
 
@@ -104,14 +122,22 @@ onMounted(() => {
     <header class="page-header">
       <div>
         <h1>视频管理</h1>
-        <p>管理员后台默认首页，当前展示待审核视频列表。</p>
+        <p>管理员后台默认首页，支持查看待审核、已上架和已拒绝视频。</p>
       </div>
     </header>
 
     <div class="tabs-row">
-      <button class="tab-button is-active" type="button">待审核</button>
-      <button class="tab-button" type="button" disabled>已通过</button>
-      <button class="tab-button" type="button" disabled>已拒绝</button>
+      <button
+        v-for="(tab, key) in TAB_CONFIG"
+        :key="key"
+        class="tab-button"
+        :class="{ 'is-active': activeTab === key }"
+        :data-tab="key"
+        type="button"
+        @click="switchTab(key as VideoTabKey)"
+      >
+        {{ tab.label }}
+      </button>
     </div>
 
     <div class="video-layout">
@@ -120,8 +146,9 @@ onMounted(() => {
           <div>
             <h2>视频列表</h2>
             <p>封面 / 标题 / 投稿人 / 投稿时间 / 时长 / 当前状态 / 操作按钮</p>
+            <p class="hint-text">{{ activeTabConfig.summary }}</p>
           </div>
-          <button class="refresh-button" type="button" @click="loadPendingVideos">刷新</button>
+          <button class="refresh-button" type="button" @click="loadVideos">刷新</button>
         </div>
 
         <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
@@ -137,7 +164,7 @@ onMounted(() => {
             <div class="video-meta">
               <div class="video-title-row">
                 <h3>{{ video.title }}</h3>
-                <span class="status-badge">待审核</span>
+                <span class="status-badge">{{ activeTabConfig.statusLabel }}</span>
               </div>
               <p class="video-subtitle">投稿人：{{ video.nickname }} · 投稿时间：{{ video.createTime }}</p>
               <p class="video-subtitle">时长：{{ formatDuration(video.duration) }} · 作者ID：{{ video.authorUid }}</p>
@@ -147,7 +174,7 @@ onMounted(() => {
           </li>
         </ul>
 
-        <p v-if="hasMore" class="hint-text">还有更多待审核视频，后续可接入下一页。</p>
+        <p v-if="hasMore" class="hint-text">还有更多{{ activeTabConfig.label }}视频，后续可接入下一页。</p>
         <p v-if="nextCursor" class="hint-text">下一页游标：{{ nextCursor }}</p>
       </section>
 
@@ -160,10 +187,11 @@ onMounted(() => {
           <p class="video-subtitle">投稿时间：{{ selectedVideo.createTime }}</p>
           <p class="video-subtitle">时长：{{ formatDuration(selectedVideo.duration) }}</p>
           <p class="video-description">{{ selectedVideo.description || '暂无简介' }}</p>
-          <div class="drawer-actions">
+          <div v-if="activeTab === 'pending'" class="drawer-actions">
             <button class="approve-button" type="button" @click="reviewVideo(0)">通过</button>
             <button class="reject-button" type="button" @click="reviewVideo(1)">拒绝</button>
           </div>
+          <p v-else class="hint-text">当前视频状态：{{ activeTabConfig.statusLabel }}</p>
         </template>
         <template v-else>
           <h2>审核抽屉占位</h2>
