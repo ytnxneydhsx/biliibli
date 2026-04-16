@@ -14,6 +14,7 @@ import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.message.model.enums.MessageStatus;
 import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.SendMessageVO;
+import com.bilibili.im.metrics.ImSendMetrics;
 import com.bilibili.im.moderation.service.SensitiveWordTrieService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
@@ -38,6 +39,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     private final IpLocationService ipLocationService;
     private final MessageIdGenerator messageIdGenerator;
     private final SensitiveWordTrieService sensitiveWordTrieService;
+    private final ImSendMetrics imSendMetrics;
 
     public ImApplicationServiceImpl(UserAccessService userAccessService,
                                     MessagePermissionDomainService messagePermissionDomainService,
@@ -48,7 +50,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
                                     ImMessageProducer imMessageProducer,
                                     IpLocationService ipLocationService,
                                     MessageIdGenerator messageIdGenerator,
-                                    SensitiveWordTrieService sensitiveWordTrieService) {
+                                    SensitiveWordTrieService sensitiveWordTrieService,
+                                    ImSendMetrics imSendMetrics) {
         this.userAccessService = userAccessService;
         this.messagePermissionDomainService = messagePermissionDomainService;
         this.chatConversationService = chatConversationService;
@@ -59,46 +62,97 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         this.ipLocationService = ipLocationService;
         this.messageIdGenerator = messageIdGenerator;
         this.sensitiveWordTrieService = sensitiveWordTrieService;
+        this.imSendMetrics = imSendMetrics;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SendMessageVO acceptMessage(Long senderId, String clientIp, SendMessageCommand command) {
-        if (senderId == null || senderId <= 0) {
-            throw new IllegalArgumentException("senderId is invalid");
-        }
-        if (command == null) {
-            throw new IllegalArgumentException("command is invalid");
-        }
-        Integer conversationType = normalizeConversationType(command.getConversationType());
-        command.setConversationType(conversationType);
-        userAccessService.validateCanSendImMessage(senderId);
-        validateMessageContent(command.getMessageType(), command.getContent());
-        validateSensitiveWord(command.getContent());
+        long totalStartNanos = System.nanoTime();
+        long validationNanos = 0;
+        long conversationNanos = 0;
+        long locationNanos = 0;
+        long publishNanos = 0;
+        Long clientMessageId = command == null ? null : command.getClientMessageId();
+        try {
+            if (senderId == null || senderId <= 0) {
+                throw new IllegalArgumentException("senderId is invalid");
+            }
+            if (command == null) {
+                throw new IllegalArgumentException("command is invalid");
+            }
+            Integer conversationType = normalizeConversationType(command.getConversationType());
+            command.setConversationType(conversationType);
 
-        String conversationId = resolveConversationId(senderId, command.getReceiverId(), conversationType);
-        LocalDateTime sendTime = imTimeService.now();
-        String senderLocation = ipLocationService.resolveLocation(clientIp);
-        long serverMessageId = messageIdGenerator.nextId();
-        ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(
-                conversationId,
-                senderId,
-                command,
-                sendTime,
-                senderLocation,
-                serverMessageId
-        );
-        imMessageProducer.publish(dispatchEvent);
+            long validationStartNanos = System.nanoTime();
+            try {
+                userAccessService.validateCanSendImMessage(senderId);
+                validateMessageContent(command.getMessageType(), command.getContent());
+                validateSensitiveWord(command.getContent());
+            } finally {
+                validationNanos = System.nanoTime() - validationStartNanos;
+                imSendMetrics.recordAcceptValidation(validationNanos);
+            }
 
-        SendMessageVO sendMessageVO = new SendMessageVO();
-        sendMessageVO.setConversationId(conversationId);
-        sendMessageVO.setClientMessageId(command.getClientMessageId());
-        sendMessageVO.setMessageType(command.getMessageType());
-        sendMessageVO.setContent(command.getContent());
-        sendMessageVO.setSenderLocation(senderLocation);
-        sendMessageVO.setSendTime(sendTime);
-        sendMessageVO.setStatus(MessageStatus.ACCEPTED.getCode());
-        return sendMessageVO;
+            long conversationStartNanos = System.nanoTime();
+            String conversationId;
+            try {
+                conversationId = resolveConversationId(senderId, command.getReceiverId(), conversationType);
+            } finally {
+                conversationNanos = System.nanoTime() - conversationStartNanos;
+                imSendMetrics.recordAcceptConversation(conversationNanos);
+            }
+
+            LocalDateTime sendTime = imTimeService.now();
+            long locationStartNanos = System.nanoTime();
+            String senderLocation;
+            try {
+                senderLocation = ipLocationService.resolveLocation(clientIp);
+            } finally {
+                locationNanos = System.nanoTime() - locationStartNanos;
+                imSendMetrics.recordAcceptLocation(locationNanos);
+            }
+
+            long serverMessageId = messageIdGenerator.nextId();
+            ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(
+                    conversationId,
+                    senderId,
+                    command,
+                    sendTime,
+                    senderLocation,
+                    serverMessageId
+            );
+
+            long publishStartNanos = System.nanoTime();
+            try {
+                imMessageProducer.publish(dispatchEvent);
+            } finally {
+                publishNanos = System.nanoTime() - publishStartNanos;
+                imSendMetrics.recordAcceptPublish(publishNanos);
+            }
+
+            SendMessageVO sendMessageVO = new SendMessageVO();
+            sendMessageVO.setConversationId(conversationId);
+            sendMessageVO.setClientMessageId(command.getClientMessageId());
+            sendMessageVO.setMessageType(command.getMessageType());
+            sendMessageVO.setContent(command.getContent());
+            sendMessageVO.setSenderLocation(senderLocation);
+            sendMessageVO.setSendTime(sendTime);
+            sendMessageVO.setStatus(MessageStatus.ACCEPTED.getCode());
+            return sendMessageVO;
+        } finally {
+            long totalNanos = System.nanoTime() - totalStartNanos;
+            imSendMetrics.recordAcceptTotal(totalNanos);
+            imSendMetrics.recordSlowAccept(
+                    senderId,
+                    clientMessageId,
+                    totalNanos,
+                    validationNanos,
+                    conversationNanos,
+                    locationNanos,
+                    publishNanos
+            );
+        }
     }
 
     private String resolveConversationId(Long senderId, Long receiverId, Integer conversationType) {

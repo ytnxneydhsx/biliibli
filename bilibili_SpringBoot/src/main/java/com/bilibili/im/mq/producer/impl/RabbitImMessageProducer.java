@@ -2,6 +2,7 @@ package com.bilibili.im.mq.producer.impl;
 
 import com.bilibili.config.properties.ImMqProperties;
 import com.bilibili.im.conversation.model.enums.ConversationType;
+import com.bilibili.im.metrics.ImSendMetrics;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
 import org.slf4j.Logger;
@@ -23,10 +24,14 @@ public class RabbitImMessageProducer implements ImMessageProducer {
 
     private final RabbitTemplate rabbitTemplate;
     private final ImMqProperties imMqProperties;
+    private final ImSendMetrics imSendMetrics;
 
-    public RabbitImMessageProducer(RabbitTemplate rabbitTemplate, ImMqProperties imMqProperties) {
+    public RabbitImMessageProducer(RabbitTemplate rabbitTemplate,
+                                   ImMqProperties imMqProperties,
+                                   ImSendMetrics imSendMetrics) {
         this.rabbitTemplate = rabbitTemplate;
         this.imMqProperties = imMqProperties;
+        this.imSendMetrics = imSendMetrics;
         this.rabbitTemplate.setMandatory(true);
         this.rabbitTemplate.setReturnsCallback(returned ->
                 log.error("message returned: exchange={}, routingKey={}, replyText={}",
@@ -41,26 +46,44 @@ public class RabbitImMessageProducer implements ImMessageProducer {
         }
         String routingKey = resolveRoutingKey(event);
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
-
-        rabbitTemplate.convertAndSend(
-                imMqProperties.getExchange(),
-                routingKey,
-                event,
-                correlationData
-        );
+        long publishStartNanos = System.nanoTime();
 
         try {
-            CorrelationData.Confirm confirm = correlationData.getFuture().get(CONFIRM_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            if (confirm == null || !confirm.isAck()) {
-                String reason = confirm != null ? confirm.getReason() : "no confirm received";
-                log.error("publisher confirm nack: correlationId={}, reason={}", correlationData.getId(), reason);
-                throw new RuntimeException("message publish was not confirmed by broker: " + reason);
+            long sendStartNanos = System.nanoTime();
+            try {
+                rabbitTemplate.convertAndSend(
+                        imMqProperties.getExchange(),
+                        routingKey,
+                        event,
+                        correlationData
+                );
+            } finally {
+                imSendMetrics.recordMqPublishSend(System.nanoTime() - sendStartNanos);
             }
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            log.error("publisher confirm timeout: correlationId={}", correlationData.getId(), ex);
-            throw new RuntimeException("message publish confirm timed out", ex);
+
+            try {
+                long confirmStartNanos = System.nanoTime();
+                CorrelationData.Confirm confirm;
+                try {
+                    confirm = correlationData.getFuture().get(CONFIRM_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                } finally {
+                    imSendMetrics.recordMqPublishConfirm(System.nanoTime() - confirmStartNanos);
+                }
+                if (confirm == null || !confirm.isAck()) {
+                    String reason = confirm != null ? confirm.getReason() : "no confirm received";
+                    imSendMetrics.recordMqPublishConfirmNack();
+                    log.error("publisher confirm nack: correlationId={}, reason={}", correlationData.getId(), reason);
+                    throw new RuntimeException("message publish was not confirmed by broker: " + reason);
+                }
+            } catch (RuntimeException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                imSendMetrics.recordMqPublishConfirmTimeout();
+                log.error("publisher confirm timeout: correlationId={}", correlationData.getId(), ex);
+                throw new RuntimeException("message publish confirm timed out", ex);
+            }
+        } finally {
+            imSendMetrics.recordMqPublishTotal(System.nanoTime() - publishStartNanos);
         }
     }
 
