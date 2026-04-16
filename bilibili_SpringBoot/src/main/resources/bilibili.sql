@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS `t_user` (
     `id` BIGINT NOT NULL COMMENT 'snowflake id',
     `username` VARCHAR(32) NOT NULL COMMENT 'login username',
     `password` VARCHAR(100) NOT NULL COMMENT 'hashed password',
-    `role_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0 user, 1 reviewer, 2 admin',
     `status` TINYINT(1) DEFAULT 0 COMMENT '0 normal, 1 deleted',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
