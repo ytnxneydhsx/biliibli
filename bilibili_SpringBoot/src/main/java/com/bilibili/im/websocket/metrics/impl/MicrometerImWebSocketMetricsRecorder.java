@@ -29,6 +29,15 @@ public class MicrometerImWebSocketMetricsRecorder implements ImWebSocketMetricsR
     private final Counter inboundTypeInvalidCounter;
     private final Counter inboundTypeUnsupportedCounter;
     private final Counter expiredSessionCleanupCounter;
+    private final Map<String, Timer> inboundHandleTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> inboundDecodeTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> protocolDispatchTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> protocolIdempotencyTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> protocolAcceptCallTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> outboundEncodeTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> outboundSendTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> pushSerializeTimers = new ConcurrentHashMap<>();
+    private final Map<String, Timer> pushSendTimers = new ConcurrentHashMap<>();
     private final MeterRegistry meterRegistry;
 
     public MicrometerImWebSocketMetricsRecorder(MeterRegistry meterRegistry,
@@ -146,6 +155,105 @@ public class MicrometerImWebSocketMetricsRecorder implements ImWebSocketMetricsR
         }
     }
 
+    @Override
+    public void recordInboundHandle(String type, String outcome, long durationNanos) {
+        taggedTimer(
+                inboundHandleTimers,
+                "im.ws.inbound.handle",
+                "WebSocket inbound frame handling duration",
+                normalizeTagValue(type, "unknown"),
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordInboundDecode(String outcome, long durationNanos) {
+        taggedTimer(
+                inboundDecodeTimers,
+                "im.ws.inbound.decode",
+                "WebSocket inbound JSON decode duration",
+                "all",
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordProtocolDispatch(String type, String outcome, long durationNanos) {
+        taggedTimer(
+                protocolDispatchTimers,
+                "im.ws.protocol.dispatch",
+                "WebSocket protocol dispatch duration",
+                normalizeTagValue(type, "unknown"),
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordProtocolIdempotency(String outcome, long durationNanos) {
+        taggedTimer(
+                protocolIdempotencyTimers,
+                "im.ws.protocol.idempotency",
+                "WebSocket send_message idempotency check duration",
+                "send_message",
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordProtocolAcceptCall(String outcome, long durationNanos) {
+        taggedTimer(
+                protocolAcceptCallTimers,
+                "im.ws.protocol.accept_call",
+                "WebSocket send_message application accept call duration",
+                "send_message",
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordOutboundEncode(String type, String outcome, long durationNanos) {
+        taggedTimer(
+                outboundEncodeTimers,
+                "im.ws.outbound.encode",
+                "WebSocket outbound JSON encode duration",
+                normalizeTagValue(type, "unknown"),
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordOutboundSend(String type, String outcome, long durationNanos) {
+        taggedTimer(
+                outboundSendTimers,
+                "im.ws.outbound.send",
+                "WebSocket outbound send duration",
+                normalizeTagValue(type, "unknown"),
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordPushSerialize(String type, String outcome, long durationNanos) {
+        taggedTimer(
+                pushSerializeTimers,
+                "im.ws.push.serialize",
+                "WebSocket push payload serialize duration",
+                normalizeTagValue(type, "unknown"),
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void recordPushSend(String type, String outcome, long durationNanos) {
+        taggedTimer(
+                pushSendTimers,
+                "im.ws.push.send",
+                "WebSocket push send duration",
+                normalizeTagValue(type, "unknown"),
+                normalizeTagValue(outcome, "unknown")
+        ).record(durationNanos, TimeUnit.NANOSECONDS);
+    }
+
     private Counter handshakeFailureCounter(String reason) {
         String normalizedReason = normalizeTagValue(reason, "unknown");
         return handshakeFailureCounters.computeIfAbsent(normalizedReason, key ->
@@ -173,5 +281,22 @@ public class MicrometerImWebSocketMetricsRecorder implements ImWebSocketMetricsR
         return raw.trim().toLowerCase()
                 .replaceAll("[^a-z0-9._-]+", "_")
                 .replaceAll("_+", "_");
+    }
+
+    private Timer taggedTimer(Map<String, Timer> cache,
+                              String name,
+                              String description,
+                              String type,
+                              String outcome) {
+        String key = type + "|" + outcome;
+        return cache.computeIfAbsent(key, ignored ->
+                Timer.builder(name)
+                        .description(description)
+                        .tag("type", type)
+                        .tag("outcome", outcome)
+                        .publishPercentiles(0.5, 0.95, 0.99)
+                        .publishPercentileHistogram()
+                        .register(meterRegistry)
+        );
     }
 }

@@ -25,4 +25,22 @@ public interface ImWebSocketMetricsRecorder {
     void recordInboundTypeUnsupported();
 
     void recordExpiredSessionCleanup(int expiredSessionCount);
+
+    void recordInboundHandle(String type, String outcome, long durationNanos);
+
+    void recordInboundDecode(String outcome, long durationNanos);
+
+    void recordProtocolDispatch(String type, String outcome, long durationNanos);
+
+    void recordProtocolIdempotency(String outcome, long durationNanos);
+
+    void recordProtocolAcceptCall(String outcome, long durationNanos);
+
+    void recordOutboundEncode(String type, String outcome, long durationNanos);
+
+    void recordOutboundSend(String type, String outcome, long durationNanos);
+
+    void recordPushSerialize(String type, String outcome, long durationNanos);
+
+    void recordPushSend(String type, String outcome, long durationNanos);
 }

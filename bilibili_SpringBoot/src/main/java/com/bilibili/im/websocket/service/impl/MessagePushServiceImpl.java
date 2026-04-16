@@ -2,6 +2,7 @@ package com.bilibili.im.websocket.service.impl;
 
 import com.bilibili.im.websocket.connection.ImConnectionRegistry;
 import com.bilibili.im.websocket.connection.ImSessionConnection;
+import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
 import com.bilibili.im.websocket.model.dto.ImWebSocketOutboundMessageDTO;
 import com.bilibili.im.websocket.model.dto.MessagePushDTO;
 import com.bilibili.im.websocket.model.enums.ImWebSocketMessageType;
@@ -16,11 +17,14 @@ public class MessagePushServiceImpl implements MessagePushService {
 
     private final ImConnectionRegistry connectionRegistry;
     private final ObjectMapper objectMapper;
+    private final ImWebSocketMetricsRecorder metricsRecorder;
 
     public MessagePushServiceImpl(ImConnectionRegistry connectionRegistry,
-                                  ObjectMapper objectMapper) {
+                                  ObjectMapper objectMapper,
+                                  ImWebSocketMetricsRecorder metricsRecorder) {
         this.connectionRegistry = connectionRegistry;
         this.objectMapper = objectMapper;
+        this.metricsRecorder = metricsRecorder;
     }
 
     @Override
@@ -43,9 +47,16 @@ public class MessagePushServiceImpl implements MessagePushService {
         outboundMessage.setMessage("OK");
         outboundMessage.setData(message);
         String payload;
+        long serializeStartNanos = System.nanoTime();
         try {
             payload = objectMapper.writeValueAsString(outboundMessage);
+            metricsRecorder.recordPushSerialize(ImWebSocketMessageType.MESSAGE_RECEIVED.getCode(),
+                    "success",
+                    System.nanoTime() - serializeStartNanos);
         } catch (Exception ex) {
+            metricsRecorder.recordPushSerialize(ImWebSocketMessageType.MESSAGE_RECEIVED.getCode(),
+                    "failure",
+                    System.nanoTime() - serializeStartNanos);
             throw new IllegalStateException("serialize websocket outbound message failed", ex);
         }
 
@@ -53,9 +64,16 @@ public class MessagePushServiceImpl implements MessagePushService {
             if (connection == null || !connection.isOpen()) {
                 continue;
             }
+            long sendStartNanos = System.nanoTime();
             try {
                 connection.sendText(payload);
+                metricsRecorder.recordPushSend(ImWebSocketMessageType.MESSAGE_RECEIVED.getCode(),
+                        "success",
+                        System.nanoTime() - sendStartNanos);
             } catch (Exception ex) {
+                metricsRecorder.recordPushSend(ImWebSocketMessageType.MESSAGE_RECEIVED.getCode(),
+                        "failure",
+                        System.nanoTime() - sendStartNanos);
                 connectionRegistry.unregister(userId, connection.getId());
             }
         }

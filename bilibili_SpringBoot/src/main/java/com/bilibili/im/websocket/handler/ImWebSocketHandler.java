@@ -60,39 +60,58 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        Long userId = resolveUserId(session);
-        if (userId == null || userId <= 0) {
-            return;
-        }
-        String clientIp = resolveClientIp(session);
-
-        connectionRegistry.touch(userId, session.getId());
-        if (message == null || message.getPayload() == null) {
-            return;
-        }
-
-        String payload = message.getPayload().trim();
-        if (payload.isEmpty()) {
-            return;
-        }
-
-        ImWebSocketInboundMessageDTO inboundMessage;
+        long handleStartNanos = System.nanoTime();
+        String inboundType = "unknown";
+        String outcome = "success";
         try {
-            inboundMessage = protocolCodec.decodeInbound(payload);
-        } catch (Exception ex) {
-            metricsRecorder.recordInboundPayloadInvalid();
-            sendOutboundMessage(session, userId, responseFactory.error("websocket message payload is invalid"));
-            return;
-        }
+            Long userId = resolveUserId(session);
+            if (userId == null || userId <= 0) {
+                outcome = "invalid_user";
+                return;
+            }
+            String clientIp = resolveClientIp(session);
 
-        if (inboundMessage == null || inboundMessage.getType() == null || inboundMessage.getType().isBlank()) {
-            metricsRecorder.recordInboundTypeInvalid();
-            sendOutboundMessage(session, userId, responseFactory.error("websocket message type is invalid"));
-            return;
-        }
+            connectionRegistry.touch(userId, session.getId());
+            if (message == null || message.getPayload() == null) {
+                outcome = "empty_payload";
+                return;
+            }
 
-        ImWebSocketOutboundMessageDTO outboundMessage = protocolDispatcher.dispatch(userId, clientIp, inboundMessage);
-        sendOutboundMessage(session, userId, outboundMessage);
+            String payload = message.getPayload().trim();
+            if (payload.isEmpty()) {
+                outcome = "empty_payload";
+                return;
+            }
+
+            ImWebSocketInboundMessageDTO inboundMessage;
+            long decodeStartNanos = System.nanoTime();
+            try {
+                inboundMessage = protocolCodec.decodeInbound(payload);
+                metricsRecorder.recordInboundDecode("success", System.nanoTime() - decodeStartNanos);
+            } catch (Exception ex) {
+                metricsRecorder.recordInboundDecode("failure", System.nanoTime() - decodeStartNanos);
+                metricsRecorder.recordInboundPayloadInvalid();
+                outcome = "invalid_payload";
+                sendOutboundMessage(session, userId, responseFactory.error("websocket message payload is invalid"));
+                return;
+            }
+
+            if (inboundMessage == null || inboundMessage.getType() == null || inboundMessage.getType().isBlank()) {
+                metricsRecorder.recordInboundTypeInvalid();
+                outcome = "invalid_type";
+                sendOutboundMessage(session, userId, responseFactory.error("websocket message type is invalid"));
+                return;
+            }
+
+            inboundType = inboundMessage.getType();
+            ImWebSocketOutboundMessageDTO outboundMessage = protocolDispatcher.dispatch(userId, clientIp, inboundMessage);
+            sendOutboundMessage(session, userId, outboundMessage);
+        } catch (RuntimeException ex) {
+            outcome = "failure";
+            throw ex;
+        } finally {
+            metricsRecorder.recordInboundHandle(inboundType, outcome, System.nanoTime() - handleStartNanos);
+        }
     }
 
     @Override
@@ -130,6 +149,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendOutboundMessage(WebSocketSession session, Long userId, ImWebSocketOutboundMessageDTO payload) {
+        String outboundType = payload == null ? "unknown" : payload.getType();
         ImSessionConnection connection = session == null
                 ? null
                 : connectionRegistry.getConnection(userId, session.getId());
@@ -137,10 +157,23 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             connectionRegistry.unregister(userId, session == null ? null : session.getId());
             return;
         }
+        String text;
+        long encodeStartNanos = System.nanoTime();
         try {
-            connection.sendText(protocolCodec.encodeOutbound(payload));
+            text = protocolCodec.encodeOutbound(payload);
+            metricsRecorder.recordOutboundEncode(outboundType, "success", System.nanoTime() - encodeStartNanos);
         } catch (Exception ex) {
-            if ("heartbeat_ack".equals(payload.getType())) {
+            metricsRecorder.recordOutboundEncode(outboundType, "failure", System.nanoTime() - encodeStartNanos);
+            throw new IllegalStateException("encode websocket json message failed", ex);
+        }
+
+        long sendStartNanos = System.nanoTime();
+        try {
+            connection.sendText(text);
+            metricsRecorder.recordOutboundSend(outboundType, "success", System.nanoTime() - sendStartNanos);
+        } catch (Exception ex) {
+            metricsRecorder.recordOutboundSend(outboundType, "failure", System.nanoTime() - sendStartNanos);
+            if ("heartbeat_ack".equals(outboundType)) {
                 metricsRecorder.recordHeartbeatAckFailed();
             }
             connectionRegistry.unregister(userId, connection.getId());

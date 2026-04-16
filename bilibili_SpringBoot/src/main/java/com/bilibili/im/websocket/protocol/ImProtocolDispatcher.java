@@ -31,36 +31,60 @@ public class ImProtocolDispatcher {
     public ImWebSocketOutboundMessageDTO dispatch(Long userId,
                                                   String clientIp,
                                                   ImWebSocketInboundMessageDTO inboundMessage) {
-        if (ImWebSocketMessageType.matches(inboundMessage.getType(), ImWebSocketMessageType.HEARTBEAT)) {
-            metricsRecorder.recordHeartbeatReceived();
-            metricsRecorder.recordHeartbeatAckSent();
-            return responseFactory.heartbeatAck();
-        }
-
-        if (ImWebSocketMessageType.matches(inboundMessage.getType(), ImWebSocketMessageType.SEND_MESSAGE)) {
-            Long clientMessageId = inboundMessage.getClientMessageId();
-            try {
-                boolean acquired = realtimePushIdempotencyService.tryAcquire(
-                        userId,
-                        clientMessageId
-                );
-                if (!acquired) {
-                    return responseFactory.error("websocket message is duplicated", clientMessageId);
-                }
-
-                SendMessageVO sendMessageVO = imApplicationService.acceptMessage(
-                        userId,
-                        clientIp,
-                        toSendMessageCommand(inboundMessage)
-                );
-                return responseFactory.sendMessageAccepted(sendMessageVO);
-            } catch (Exception ex) {
-                return responseFactory.error(ex.getMessage(), clientMessageId);
+        long dispatchStartNanos = System.nanoTime();
+        String type = inboundMessage == null ? "unknown" : inboundMessage.getType();
+        String outcome = "success";
+        try {
+            if (ImWebSocketMessageType.matches(type, ImWebSocketMessageType.HEARTBEAT)) {
+                metricsRecorder.recordHeartbeatReceived();
+                metricsRecorder.recordHeartbeatAckSent();
+                return responseFactory.heartbeatAck();
             }
-        }
 
-        metricsRecorder.recordInboundTypeUnsupported();
-        return responseFactory.error("websocket message type is unsupported");
+            if (ImWebSocketMessageType.matches(type, ImWebSocketMessageType.SEND_MESSAGE)) {
+                Long clientMessageId = inboundMessage.getClientMessageId();
+                try {
+                    long idempotencyStartNanos = System.nanoTime();
+                    boolean acquired;
+                    try {
+                        acquired = realtimePushIdempotencyService.tryAcquire(
+                                userId,
+                                clientMessageId
+                        );
+                    } finally {
+                        metricsRecorder.recordProtocolIdempotency("success", System.nanoTime() - idempotencyStartNanos);
+                    }
+                    if (!acquired) {
+                        outcome = "duplicate";
+                        return responseFactory.error("websocket message is duplicated", clientMessageId);
+                    }
+
+                    SendMessageVO sendMessageVO;
+                    long acceptStartNanos = System.nanoTime();
+                    try {
+                        sendMessageVO = imApplicationService.acceptMessage(
+                                userId,
+                                clientIp,
+                                toSendMessageCommand(inboundMessage)
+                        );
+                        metricsRecorder.recordProtocolAcceptCall("success", System.nanoTime() - acceptStartNanos);
+                    } catch (Exception ex) {
+                        metricsRecorder.recordProtocolAcceptCall("failure", System.nanoTime() - acceptStartNanos);
+                        throw ex;
+                    }
+                    return responseFactory.sendMessageAccepted(sendMessageVO);
+                } catch (Exception ex) {
+                    outcome = "error";
+                    return responseFactory.error(ex.getMessage(), clientMessageId);
+                }
+            }
+
+            metricsRecorder.recordInboundTypeUnsupported();
+            outcome = "unsupported";
+            return responseFactory.error("websocket message type is unsupported");
+        } finally {
+            metricsRecorder.recordProtocolDispatch(type, outcome, System.nanoTime() - dispatchStartNanos);
+        }
     }
 
     private SendMessageCommand toSendMessageCommand(ImWebSocketInboundMessageDTO inboundMessage) {
