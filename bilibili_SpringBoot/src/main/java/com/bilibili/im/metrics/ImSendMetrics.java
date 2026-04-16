@@ -1,6 +1,7 @@
 package com.bilibili.im.metrics;
 
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
@@ -25,8 +26,12 @@ public class ImSendMetrics {
     private final Timer mqPublishTotalTimer;
     private final Timer mqPublishSendTimer;
     private final Timer mqPublishConfirmTimer;
+    private final Counter mqPublishConfirmAckCounter;
     private final Counter mqPublishConfirmNackCounter;
     private final Counter mqPublishConfirmTimeoutCounter;
+    private final Counter mqPublishConfirmRetryCounter;
+    private final Counter mqPublishConfirmGiveUpCounter;
+    private final AtomicLong mqPublishConfirmPendingGauge = new AtomicLong();
     private final AtomicLong lastSlowAcceptLogNanos = new AtomicLong();
 
     public ImSendMetrics(MeterRegistry meterRegistry) {
@@ -45,12 +50,24 @@ public class ImSendMetrics {
         this.mqPublishSendTimer = timer(meterRegistry, "im.mq.publish.send",
                 "RabbitMQ convertAndSend duration");
         this.mqPublishConfirmTimer = timer(meterRegistry, "im.mq.publish.confirm",
-                "RabbitMQ publisher confirm wait duration");
+                "RabbitMQ publisher confirm latency");
+        this.mqPublishConfirmAckCounter = Counter.builder("im.mq.publish.confirm.ack")
+                .description("RabbitMQ publisher confirm ack count")
+                .register(meterRegistry);
         this.mqPublishConfirmNackCounter = Counter.builder("im.mq.publish.confirm.nack")
                 .description("RabbitMQ publisher confirm nack count")
                 .register(meterRegistry);
         this.mqPublishConfirmTimeoutCounter = Counter.builder("im.mq.publish.confirm.timeout")
                 .description("RabbitMQ publisher confirm timeout or wait failure count")
+                .register(meterRegistry);
+        this.mqPublishConfirmRetryCounter = Counter.builder("im.mq.publish.confirm.retry")
+                .description("RabbitMQ publisher confirm retry count")
+                .register(meterRegistry);
+        this.mqPublishConfirmGiveUpCounter = Counter.builder("im.mq.publish.confirm.giveup")
+                .description("RabbitMQ publisher confirm give up count after retries")
+                .register(meterRegistry);
+        Gauge.builder("im.mq.publish.confirm.pending", mqPublishConfirmPendingGauge, AtomicLong::get)
+                .description("RabbitMQ publisher confirm pending in-memory count")
                 .register(meterRegistry);
     }
 
@@ -86,12 +103,28 @@ public class ImSendMetrics {
         mqPublishConfirmTimer.record(durationNanos, TimeUnit.NANOSECONDS);
     }
 
+    public void recordMqPublishConfirmAck() {
+        mqPublishConfirmAckCounter.increment();
+    }
+
     public void recordMqPublishConfirmNack() {
         mqPublishConfirmNackCounter.increment();
     }
 
     public void recordMqPublishConfirmTimeout() {
         mqPublishConfirmTimeoutCounter.increment();
+    }
+
+    public void recordMqPublishConfirmRetry() {
+        mqPublishConfirmRetryCounter.increment();
+    }
+
+    public void recordMqPublishConfirmGiveUp() {
+        mqPublishConfirmGiveUpCounter.increment();
+    }
+
+    public void recordMqPublishConfirmPending(long pendingCount) {
+        mqPublishConfirmPendingGauge.set(Math.max(pendingCount, 0));
     }
 
     public void recordSlowAccept(Long senderId,
