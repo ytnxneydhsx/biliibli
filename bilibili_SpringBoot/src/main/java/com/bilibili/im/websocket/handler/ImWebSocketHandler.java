@@ -2,6 +2,7 @@ package com.bilibili.im.websocket.handler;
 
 import com.bilibili.im.websocket.ImWebSocketAttributes;
 import com.bilibili.im.websocket.connection.ImConnectionRegistry;
+import com.bilibili.im.websocket.connection.ImSessionConnection;
 import com.bilibili.im.websocket.connection.impl.SpringSessionConnection;
 import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
 import com.bilibili.im.websocket.model.dto.ImWebSocketInboundMessageDTO;
@@ -14,10 +15,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Component
 public class ImWebSocketHandler extends TextWebSocketHandler {
+
+    private static final int SEND_TIME_LIMIT_MILLIS = 10_000;
+    private static final int SEND_BUFFER_SIZE_LIMIT_BYTES = 512 * 1024;
 
     private final ImConnectionRegistry connectionRegistry;
     private final ImProtocolCodec protocolCodec;
@@ -43,7 +48,13 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("websocket userId is invalid");
         }
-        connectionRegistry.register(new SpringSessionConnection(userId, session));
+        WebSocketSession concurrentSession = new ConcurrentWebSocketSessionDecorator(
+                session,
+                SEND_TIME_LIMIT_MILLIS,
+                SEND_BUFFER_SIZE_LIMIT_BYTES
+        );
+        ImSessionConnection connection = new SpringSessionConnection(userId, concurrentSession);
+        connectionRegistry.register(connection);
         metricsRecorder.recordConnectionOpened();
     }
 
@@ -119,17 +130,20 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendOutboundMessage(WebSocketSession session, Long userId, ImWebSocketOutboundMessageDTO payload) {
-        if (session == null || !session.isOpen()) {
+        ImSessionConnection connection = session == null
+                ? null
+                : connectionRegistry.getConnection(userId, session.getId());
+        if (connection == null || !connection.isOpen()) {
             connectionRegistry.unregister(userId, session == null ? null : session.getId());
             return;
         }
         try {
-            session.sendMessage(new TextMessage(protocolCodec.encodeOutbound(payload)));
+            connection.sendText(protocolCodec.encodeOutbound(payload));
         } catch (Exception ex) {
             if ("heartbeat_ack".equals(payload.getType())) {
                 metricsRecorder.recordHeartbeatAckFailed();
             }
-            connectionRegistry.unregister(userId, session.getId());
+            connectionRegistry.unregister(userId, connection.getId());
             throw new IllegalStateException("send websocket json message failed", ex);
         }
     }

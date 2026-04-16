@@ -69,6 +69,25 @@ public class InMemoryImConnectionRegistry implements ImConnectionRegistry {
     }
 
     @Override
+    public ImSessionConnection getConnection(Long userId, String connectionId) {
+        if (userId == null || userId <= 0 || connectionId == null || connectionId.isBlank()) {
+            return null;
+        }
+
+        Map<String, ConnectionRecord> connections = connectionsByUser.get(userId);
+        if (connections == null) {
+            return null;
+        }
+
+        ConnectionRecord connectionRecord = connections.get(connectionId);
+        if (connectionRecord == null || !connectionRecord.isOpen()) {
+            unregister(userId, connectionId);
+            return null;
+        }
+        return connectionRecord.toConnection();
+    }
+
+    @Override
     public List<ImSessionConnection> getConnections(Long userId) {
         if (userId == null || userId <= 0) {
             return Collections.emptyList();

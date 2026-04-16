@@ -10,6 +10,8 @@ public interface ImConnectionRegistry {
 
     void touch(Long userId, String connectionId);
 
+    ImSessionConnection getConnection(Long userId, String connectionId);
+
     List<ImSessionConnection> getConnections(Long userId);
 
     boolean isOnline(Long userId);
