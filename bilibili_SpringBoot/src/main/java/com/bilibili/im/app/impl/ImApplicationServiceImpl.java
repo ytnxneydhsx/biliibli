@@ -92,6 +92,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
 
         SendMessageVO sendMessageVO = new SendMessageVO();
         sendMessageVO.setConversationId(conversationId);
+        sendMessageVO.setClientMessageId(command.getClientMessageId());
         sendMessageVO.setMessageType(command.getMessageType());
         sendMessageVO.setContent(command.getContent());
         sendMessageVO.setSenderLocation(senderLocation);
