@@ -14,6 +14,7 @@ import com.bilibili.im.message.model.enums.MessageStatus;
 import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.SendMessageVO;
 import com.bilibili.im.metrics.ImSendMetrics;
+import com.bilibili.im.metrics.ImSendObservation;
 import com.bilibili.im.moderation.service.SensitiveWordTrieService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
@@ -48,6 +49,7 @@ class ImApplicationServiceImplTest {
         MessageIdGenerator messageIdGenerator = mock(MessageIdGenerator.class);
         SensitiveWordTrieService sensitiveWordTrieService = mock(SensitiveWordTrieService.class);
         ImSendMetrics imSendMetrics = mock(ImSendMetrics.class);
+        ImSendObservation imSendObservation = new ImSendObservation(imSendMetrics);
 
         ImApplicationServiceImpl service = new ImApplicationServiceImpl(
                 userAccessService,
@@ -60,7 +62,7 @@ class ImApplicationServiceImplTest {
                 ipLocationService,
                 messageIdGenerator,
                 sensitiveWordTrieService,
-                imSendMetrics
+                imSendObservation
         );
 
         LocalDateTime now = LocalDateTime.of(2026, 4, 7, 12, 30, 0);
