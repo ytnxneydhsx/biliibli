@@ -1,6 +1,7 @@
 package com.bilibili.im.websocket.interceptor;
 
 import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.common.logging.LogContext;
 import com.bilibili.im.websocket.ImWebSocketAttributes;
 import com.bilibili.im.websocket.metrics.ImWebSocketMetricsRecorder;
 import com.bilibili.security.resolver.ClientIpResolver;
@@ -52,6 +53,7 @@ public class ImWebSocketHandshakeInterceptor implements HandshakeInterceptor {
             AuthenticatedUser authenticatedUser = authenticatedUserResolver.resolve(token);
             attributes.put(ImWebSocketAttributes.USER_ID, authenticatedUser.getUid());
             attributes.put(ImWebSocketAttributes.CLIENT_IP, clientIpResolver.resolve(request));
+            attributes.put(ImWebSocketAttributes.TRACE_ID, resolveTraceId());
             metricsRecorder.recordHandshakeSuccess(System.nanoTime() - startNanos);
             return true;
         } catch (Exception ex) {
@@ -71,5 +73,13 @@ public class ImWebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
     private void recordHandshakeFailure(long startNanos, String reason) {
         metricsRecorder.recordHandshakeFailure(reason, System.nanoTime() - startNanos);
+    }
+
+    private String resolveTraceId() {
+        String traceId = LogContext.currentTraceId();
+        if (traceId == null || traceId.isBlank()) {
+            return LogContext.newTraceId();
+        }
+        return traceId;
     }
 }

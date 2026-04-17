@@ -1,11 +1,14 @@
 package com.bilibili.im.mq.consumer.single;
 
+import com.bilibili.common.logging.LogContext;
 import com.bilibili.im.contact.service.ContactRelationCommandService;
 import com.bilibili.im.message.model.command.PersistMessageCommand;
 import com.bilibili.im.message.service.ChatMessageService;
+import com.bilibili.im.mq.ImMqLogContext;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +25,21 @@ public class ChatMessagePersistConsumer {
         this.contactRelationCommandService = contactRelationCommandService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.messagePersistQueue}")
+    @RabbitListener(
+            queues = "#{@imMqProperties.messagePersistQueue}",
+            containerFactory = "imPersistListenerContainerFactory"
+    )
     @Transactional(rollbackFor = Exception.class)
-    public void consume(ImMessageDispatchEvent event) {
-        if (event == null) {
-            throw new IllegalArgumentException("event is invalid");
+    public void consume(ImMessageDispatchEvent event,
+                        @Header(name = LogContext.TRACE_ID_HEADER, required = false) String traceId,
+                        @Header(name = LogContext.UID_HEADER, required = false) String uid) {
+        try (LogContext.Scope ignored = ImMqLogContext.open(event, traceId, uid)) {
+            if (event == null) {
+                throw new IllegalArgumentException("event is invalid");
+            }
+            chatMessageService.persistMessage(buildPersistMessageCommand(event));
+            contactRelationCommandService.markDmContact(event.getSenderId(), event.getReceiverId());
         }
-        chatMessageService.persistMessage(buildPersistMessageCommand(event));
-        contactRelationCommandService.markDmContact(event.getSenderId(), event.getReceiverId());
     }
 
     private static PersistMessageCommand buildPersistMessageCommand(ImMessageDispatchEvent event) {

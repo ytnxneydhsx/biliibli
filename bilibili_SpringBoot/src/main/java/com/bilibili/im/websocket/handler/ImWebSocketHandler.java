@@ -1,5 +1,6 @@
 package com.bilibili.im.websocket.handler;
 
+import com.bilibili.common.logging.LogContext;
 import com.bilibili.im.websocket.ImWebSocketAttributes;
 import com.bilibili.im.websocket.connection.ImConnectionRegistry;
 import com.bilibili.im.websocket.connection.ImSessionConnection;
@@ -45,82 +46,88 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         Long userId = resolveUserId(session);
-        if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException("websocket userId is invalid");
+        try (LogContext.Scope ignored = LogContext.open(resolveTraceId(session), userId)) {
+            if (userId == null || userId <= 0) {
+                throw new IllegalArgumentException("websocket userId is invalid");
+            }
+            WebSocketSession concurrentSession = new ConcurrentWebSocketSessionDecorator(
+                    session,
+                    SEND_TIME_LIMIT_MILLIS,
+                    SEND_BUFFER_SIZE_LIMIT_BYTES
+            );
+            ImSessionConnection connection = new SpringSessionConnection(userId, concurrentSession);
+            connectionRegistry.register(connection);
+            metricsRecorder.recordConnectionOpened();
         }
-        WebSocketSession concurrentSession = new ConcurrentWebSocketSessionDecorator(
-                session,
-                SEND_TIME_LIMIT_MILLIS,
-                SEND_BUFFER_SIZE_LIMIT_BYTES
-        );
-        ImSessionConnection connection = new SpringSessionConnection(userId, concurrentSession);
-        connectionRegistry.register(connection);
-        metricsRecorder.recordConnectionOpened();
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        long handleStartNanos = System.nanoTime();
-        String inboundType = "unknown";
-        String outcome = "success";
-        try {
-            Long userId = resolveUserId(session);
-            if (userId == null || userId <= 0) {
-                outcome = "invalid_user";
-                return;
-            }
-            String clientIp = resolveClientIp(session);
-
-            connectionRegistry.touch(userId, session.getId());
-            if (message == null || message.getPayload() == null) {
-                outcome = "empty_payload";
-                return;
-            }
-
-            String payload = message.getPayload().trim();
-            if (payload.isEmpty()) {
-                outcome = "empty_payload";
-                return;
-            }
-
-            ImWebSocketInboundMessageDTO inboundMessage;
-            long decodeStartNanos = System.nanoTime();
+        Long userId = resolveUserId(session);
+        try (LogContext.Scope ignored = LogContext.open(resolveTraceId(session), userId)) {
+            long handleStartNanos = System.nanoTime();
+            String inboundType = "unknown";
+            String outcome = "success";
             try {
-                inboundMessage = protocolCodec.decodeInbound(payload);
-                metricsRecorder.recordInboundDecode("success", System.nanoTime() - decodeStartNanos);
-            } catch (Exception ex) {
-                metricsRecorder.recordInboundDecode("failure", System.nanoTime() - decodeStartNanos);
-                metricsRecorder.recordInboundPayloadInvalid();
-                outcome = "invalid_payload";
-                sendOutboundMessage(session, userId, responseFactory.error("websocket message payload is invalid"));
-                return;
-            }
+                if (userId == null || userId <= 0) {
+                    outcome = "invalid_user";
+                    return;
+                }
+                String clientIp = resolveClientIp(session);
 
-            if (inboundMessage == null || inboundMessage.getType() == null || inboundMessage.getType().isBlank()) {
-                metricsRecorder.recordInboundTypeInvalid();
-                outcome = "invalid_type";
-                sendOutboundMessage(session, userId, responseFactory.error("websocket message type is invalid"));
-                return;
-            }
+                connectionRegistry.touch(userId, session.getId());
+                if (message == null || message.getPayload() == null) {
+                    outcome = "empty_payload";
+                    return;
+                }
 
-            inboundType = inboundMessage.getType();
-            ImWebSocketOutboundMessageDTO outboundMessage = protocolDispatcher.dispatch(userId, clientIp, inboundMessage);
-            sendOutboundMessage(session, userId, outboundMessage);
-        } catch (RuntimeException ex) {
-            outcome = "failure";
-            throw ex;
-        } finally {
-            metricsRecorder.recordInboundHandle(inboundType, outcome, System.nanoTime() - handleStartNanos);
+                String payload = message.getPayload().trim();
+                if (payload.isEmpty()) {
+                    outcome = "empty_payload";
+                    return;
+                }
+
+                ImWebSocketInboundMessageDTO inboundMessage;
+                long decodeStartNanos = System.nanoTime();
+                try {
+                    inboundMessage = protocolCodec.decodeInbound(payload);
+                    metricsRecorder.recordInboundDecode("success", System.nanoTime() - decodeStartNanos);
+                } catch (Exception ex) {
+                    metricsRecorder.recordInboundDecode("failure", System.nanoTime() - decodeStartNanos);
+                    metricsRecorder.recordInboundPayloadInvalid();
+                    outcome = "invalid_payload";
+                    sendOutboundMessage(session, userId, responseFactory.error("websocket message payload is invalid"));
+                    return;
+                }
+
+                if (inboundMessage == null || inboundMessage.getType() == null || inboundMessage.getType().isBlank()) {
+                    metricsRecorder.recordInboundTypeInvalid();
+                    outcome = "invalid_type";
+                    sendOutboundMessage(session, userId, responseFactory.error("websocket message type is invalid"));
+                    return;
+                }
+
+                inboundType = inboundMessage.getType();
+                ImWebSocketOutboundMessageDTO outboundMessage = protocolDispatcher.dispatch(userId, clientIp, inboundMessage);
+                sendOutboundMessage(session, userId, outboundMessage);
+            } catch (RuntimeException ex) {
+                outcome = "failure";
+                throw ex;
+            } finally {
+                metricsRecorder.recordInboundHandle(inboundType, outcome, System.nanoTime() - handleStartNanos);
+            }
         }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Long userId = resolveUserId(session);
-        if (userId != null && userId > 0) {
-            connectionRegistry.unregister(userId, session.getId());
+        try (LogContext.Scope ignored = LogContext.open(resolveTraceId(session), userId)) {
+            if (userId != null && userId > 0) {
+                connectionRegistry.unregister(userId, session.getId());
+            }
+            metricsRecorder.recordConnectionClosed(status == null ? "unknown" : "code_" + status.getCode());
         }
-        metricsRecorder.recordConnectionClosed(status == null ? "unknown" : "code_" + status.getCode());
     }
 
     private Long resolveUserId(WebSocketSession session) {
@@ -146,6 +153,17 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             return value;
         }
         return null;
+    }
+
+    private String resolveTraceId(WebSocketSession session) {
+        if (session == null) {
+            return LogContext.newTraceId();
+        }
+        Object traceId = session.getAttributes().get(ImWebSocketAttributes.TRACE_ID);
+        if (traceId instanceof String value && !value.isBlank()) {
+            return value;
+        }
+        return LogContext.newTraceId();
     }
 
     private void sendOutboundMessage(WebSocketSession session, Long userId, ImWebSocketOutboundMessageDTO payload) {
