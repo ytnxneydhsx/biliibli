@@ -6,19 +6,25 @@ import com.bilibili.im.message.cache.group.GroupRecentMessageCacheService;
 import com.bilibili.im.message.model.vo.MessageVO;
 import com.bilibili.im.mq.ImMqLogContext;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
+import com.bilibili.im.mq.metrics.ImMqConsumerMetrics;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+
+import static com.bilibili.im.mq.metrics.ImMqConsumerMetrics.Consumer.GROUP_RECENT_MESSAGE_CACHE_PROJECTION;
 
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
 public class GroupRecentMessageCacheProjectionConsumer {
 
     private final GroupRecentMessageCacheService groupRecentMessageCacheService;
+    private final ImMqConsumerMetrics imMqConsumerMetrics;
 
-    public GroupRecentMessageCacheProjectionConsumer(GroupRecentMessageCacheService groupRecentMessageCacheService) {
+    public GroupRecentMessageCacheProjectionConsumer(GroupRecentMessageCacheService groupRecentMessageCacheService,
+                                                     ImMqConsumerMetrics imMqConsumerMetrics) {
         this.groupRecentMessageCacheService = groupRecentMessageCacheService;
+        this.imMqConsumerMetrics = imMqConsumerMetrics;
     }
 
     @RabbitListener(
@@ -29,16 +35,18 @@ public class GroupRecentMessageCacheProjectionConsumer {
                         @Header(name = LogContext.TRACE_ID_HEADER, required = false) String traceId,
                         @Header(name = LogContext.UID_HEADER, required = false) String uid) {
         try (LogContext.Scope ignored = ImMqLogContext.open(event, traceId, uid)) {
-            if (event == null) {
-                throw new IllegalArgumentException("event is invalid");
-            }
-            if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
-                return;
-            }
-            groupRecentMessageCacheService.appendMessageIfInitialized(
-                    event.getConversationId(),
-                    toMessageVO(event)
-            );
+            imMqConsumerMetrics.record(GROUP_RECENT_MESSAGE_CACHE_PROJECTION, event, () -> {
+                if (event == null) {
+                    throw new IllegalArgumentException("event is invalid");
+                }
+                if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
+                    return;
+                }
+                groupRecentMessageCacheService.appendMessageIfInitialized(
+                        event.getConversationId(),
+                        toMessageVO(event)
+                );
+            });
         }
     }
 

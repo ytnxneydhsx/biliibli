@@ -5,6 +5,7 @@ import com.bilibili.im.app.SingleConversationWindowApplicationService;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.mq.ImMqLogContext;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
+import com.bilibili.im.mq.metrics.ImMqConsumerMetrics;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.handler.annotation.Header;
@@ -14,14 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
+import static com.bilibili.im.mq.metrics.ImMqConsumerMetrics.Consumer.SINGLE_CONVERSATION_PERSIST;
+
 @Component
 @ConditionalOnProperty(prefix = "app.im.mq", name = "enabled", havingValue = "true")
 public class ConversationWindowPersistConsumer {
 
     private final SingleConversationWindowApplicationService singleConversationWindowApplicationService;
+    private final ImMqConsumerMetrics imMqConsumerMetrics;
 
-    public ConversationWindowPersistConsumer(SingleConversationWindowApplicationService singleConversationWindowApplicationService) {
+    public ConversationWindowPersistConsumer(SingleConversationWindowApplicationService singleConversationWindowApplicationService,
+                                             ImMqConsumerMetrics imMqConsumerMetrics) {
         this.singleConversationWindowApplicationService = singleConversationWindowApplicationService;
+        this.imMqConsumerMetrics = imMqConsumerMetrics;
     }
 
     @RabbitListener(
@@ -33,17 +39,19 @@ public class ConversationWindowPersistConsumer {
                         @Header(name = LogContext.TRACE_ID_HEADER, required = false) String traceId,
                         @Header(name = LogContext.UID_HEADER, required = false) String uid) {
         try (LogContext.Scope ignored = ImMqLogContext.open(event, traceId, uid)) {
-            if (event == null) {
-                throw new IllegalArgumentException("event is invalid");
-            }
-            singleConversationWindowApplicationService.projectSingleMessageToConversationWindows(
-                    event.getConversationId(),
-                    event.getSenderId(),
-                    event.getReceiverId(),
-                    buildConversationSummary(event.getContent()),
-                    event.getSendTime(),
-                    event.getServerMessageId()
-            );
+            imMqConsumerMetrics.record(SINGLE_CONVERSATION_PERSIST, event, () -> {
+                if (event == null) {
+                    throw new IllegalArgumentException("event is invalid");
+                }
+                singleConversationWindowApplicationService.projectSingleMessageToConversationWindows(
+                        event.getConversationId(),
+                        event.getSenderId(),
+                        event.getReceiverId(),
+                        buildConversationSummary(event.getContent()),
+                        event.getSendTime(),
+                        event.getServerMessageId()
+                );
+            });
         }
     }
 
