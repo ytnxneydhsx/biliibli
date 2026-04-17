@@ -1,11 +1,14 @@
 package com.bilibili.im.mq.consumer.group;
 
+import com.bilibili.common.logging.LogContext;
 import com.bilibili.im.conversation.model.enums.ConversationType;
 import com.bilibili.im.message.cache.group.GroupRecentMessageCacheService;
 import com.bilibili.im.message.model.vo.MessageVO;
+import com.bilibili.im.mq.ImMqLogContext;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,18 +21,25 @@ public class GroupRecentMessageCacheProjectionConsumer {
         this.groupRecentMessageCacheService = groupRecentMessageCacheService;
     }
 
-    @RabbitListener(queues = "#{@imMqProperties.groupRecentMessageCacheProjectionQueue}")
-    public void consume(ImMessageDispatchEvent event) {
-        if (event == null) {
-            throw new IllegalArgumentException("event is invalid");
+    @RabbitListener(
+            queues = "#{@imMqProperties.groupRecentMessageCacheProjectionQueue}",
+            containerFactory = "imRedisProjectionListenerContainerFactory"
+    )
+    public void consume(ImMessageDispatchEvent event,
+                        @Header(name = LogContext.TRACE_ID_HEADER, required = false) String traceId,
+                        @Header(name = LogContext.UID_HEADER, required = false) String uid) {
+        try (LogContext.Scope ignored = ImMqLogContext.open(event, traceId, uid)) {
+            if (event == null) {
+                throw new IllegalArgumentException("event is invalid");
+            }
+            if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
+                return;
+            }
+            groupRecentMessageCacheService.appendMessageIfInitialized(
+                    event.getConversationId(),
+                    toMessageVO(event)
+            );
         }
-        if (!Integer.valueOf(ConversationType.GROUP.getCode()).equals(event.getConversationType())) {
-            return;
-        }
-        groupRecentMessageCacheService.appendMessageIfInitialized(
-                event.getConversationId(),
-                toMessageVO(event)
-        );
     }
 
     private static MessageVO toMessageVO(ImMessageDispatchEvent event) {

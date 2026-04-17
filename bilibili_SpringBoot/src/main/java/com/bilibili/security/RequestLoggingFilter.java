@@ -1,9 +1,9 @@
 package com.bilibili.security;
 
 import com.bilibili.common.auth.AuthenticatedUser;
+import com.bilibili.common.logging.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,50 +14,48 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 @Component
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestLoggingFilter.class);
-    private static final String TRACE_ID = "traceId";
-    private static final String UID = "uid";
+    private static final Pattern SENSITIVE_QUERY_PARAM = Pattern.compile("(?i)(^|&)([^=&]*token[^=&]*=)[^&]*");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         long startNanos = System.nanoTime();
-        String traceId = resolveTraceId();
-
-        MDC.put(TRACE_ID, traceId);
+        String traceId = LogContext.newTraceId();
         response.setHeader("X-Trace-Id", traceId);
-
+        LogContext.Scope logScope = LogContext.open(traceId, null);
         try {
             filterChain.doFilter(request, response);
         } finally {
-            Long uid = resolveUid();
-            if (uid != null) {
-                MDC.put(UID, String.valueOf(uid));
+            try {
+                Long uid = resolveUid();
+                LogContext.putUid(uid);
+
+                long costMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+                String path = buildSafeRequestPath(request);
+
+                log.info("request method={} path={} status={} costMs={} uid={}",
+                        request.getMethod(), path, response.getStatus(), costMs, uid == null ? "-" : uid);
+            } finally {
+                logScope.close();
             }
-
-            long costMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-            String path = request.getRequestURI();
-            if (request.getQueryString() != null && !request.getQueryString().isEmpty()) {
-                path = path + "?" + request.getQueryString();
-            }
-
-            log.info("request method={} path={} status={} costMs={} uid={}",
-                    request.getMethod(), path, response.getStatus(), costMs, uid == null ? "-" : uid);
-
-            MDC.remove(UID);
-            MDC.remove(TRACE_ID);
         }
     }
 
-    private static String resolveTraceId() {
-        return UUID.randomUUID().toString().replace("-", "");
+    private static String buildSafeRequestPath(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String queryString = request.getQueryString();
+        if (queryString == null || queryString.isEmpty()) {
+            return path;
+        }
+        return path + "?" + SENSITIVE_QUERY_PARAM.matcher(queryString).replaceAll("$1$2***");
     }
 
     private static Long resolveUid() {

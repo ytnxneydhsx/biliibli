@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class SendMessageVO {
 
     private String conversationId;
+    private Long clientMessageId;
     private Integer messageType;
     private MessageContentDTO content;
     private String senderLocation;

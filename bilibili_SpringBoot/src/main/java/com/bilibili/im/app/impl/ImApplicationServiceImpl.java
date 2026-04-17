@@ -14,6 +14,7 @@ import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.message.model.enums.MessageStatus;
 import com.bilibili.im.message.model.enums.MessageType;
 import com.bilibili.im.message.model.vo.SendMessageVO;
+import com.bilibili.im.metrics.ImSendObservation;
 import com.bilibili.im.moderation.service.SensitiveWordTrieService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.producer.ImMessageProducer;
@@ -38,6 +39,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     private final IpLocationService ipLocationService;
     private final MessageIdGenerator messageIdGenerator;
     private final SensitiveWordTrieService sensitiveWordTrieService;
+    private final ImSendObservation imSendObservation;
 
     public ImApplicationServiceImpl(UserAccessService userAccessService,
                                     MessagePermissionDomainService messagePermissionDomainService,
@@ -48,7 +50,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
                                     ImMessageProducer imMessageProducer,
                                     IpLocationService ipLocationService,
                                     MessageIdGenerator messageIdGenerator,
-                                    SensitiveWordTrieService sensitiveWordTrieService) {
+                                    SensitiveWordTrieService sensitiveWordTrieService,
+                                    ImSendObservation imSendObservation) {
         this.userAccessService = userAccessService;
         this.messagePermissionDomainService = messagePermissionDomainService;
         this.chatConversationService = chatConversationService;
@@ -59,45 +62,60 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         this.ipLocationService = ipLocationService;
         this.messageIdGenerator = messageIdGenerator;
         this.sensitiveWordTrieService = sensitiveWordTrieService;
+        this.imSendObservation = imSendObservation;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SendMessageVO acceptMessage(Long senderId, String clientIp, SendMessageCommand command) {
-        if (senderId == null || senderId <= 0) {
-            throw new IllegalArgumentException("senderId is invalid");
-        }
-        if (command == null) {
-            throw new IllegalArgumentException("command is invalid");
-        }
-        Integer conversationType = normalizeConversationType(command.getConversationType());
-        command.setConversationType(conversationType);
-        userAccessService.validateCanSendImMessage(senderId);
-        validateMessageContent(command.getMessageType(), command.getContent());
-        validateSensitiveWord(command.getContent());
+        Long clientMessageId = command == null ? null : command.getClientMessageId();
+        try (ImSendObservation.Context observation = imSendObservation.startAccept(senderId, clientMessageId)) {
+            if (senderId == null || senderId <= 0) {
+                throw new IllegalArgumentException("senderId is invalid");
+            }
+            if (command == null) {
+                throw new IllegalArgumentException("command is invalid");
+            }
+            Integer conversationType = normalizeConversationType(command.getConversationType());
+            command.setConversationType(conversationType);
 
-        String conversationId = resolveConversationId(senderId, command.getReceiverId(), conversationType);
-        LocalDateTime sendTime = imTimeService.now();
-        String senderLocation = ipLocationService.resolveLocation(clientIp);
-        long serverMessageId = messageIdGenerator.nextId();
-        ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(
-                conversationId,
-                senderId,
-                command,
-                sendTime,
-                senderLocation,
-                serverMessageId
-        );
-        imMessageProducer.publish(dispatchEvent);
+            observation.observeValidation(() -> {
+                userAccessService.validateCanSendImMessage(senderId);
+                validateMessageContent(command.getMessageType(), command.getContent());
+                validateSensitiveWord(command.getContent());
+            });
 
-        SendMessageVO sendMessageVO = new SendMessageVO();
-        sendMessageVO.setConversationId(conversationId);
-        sendMessageVO.setMessageType(command.getMessageType());
-        sendMessageVO.setContent(command.getContent());
-        sendMessageVO.setSenderLocation(senderLocation);
-        sendMessageVO.setSendTime(sendTime);
-        sendMessageVO.setStatus(MessageStatus.ACCEPTED.getCode());
-        return sendMessageVO;
+            String conversationId = observation.observeConversation(() ->
+                    resolveConversationId(senderId, command.getReceiverId(), conversationType)
+            );
+
+            LocalDateTime sendTime = imTimeService.now();
+            String senderLocation = observation.observeLocation(() ->
+                    ipLocationService.resolveLocation(clientIp)
+            );
+
+            long serverMessageId = messageIdGenerator.nextId();
+            ImMessageDispatchEvent dispatchEvent = buildDispatchEvent(
+                    conversationId,
+                    senderId,
+                    command,
+                    sendTime,
+                    senderLocation,
+                    serverMessageId
+            );
+
+            observation.observePublish(() -> imMessageProducer.publish(dispatchEvent));
+
+            SendMessageVO sendMessageVO = new SendMessageVO();
+            sendMessageVO.setConversationId(conversationId);
+            sendMessageVO.setClientMessageId(command.getClientMessageId());
+            sendMessageVO.setMessageType(command.getMessageType());
+            sendMessageVO.setContent(command.getContent());
+            sendMessageVO.setSenderLocation(senderLocation);
+            sendMessageVO.setSendTime(sendTime);
+            sendMessageVO.setStatus(MessageStatus.ACCEPTED.getCode());
+            return sendMessageVO;
+        }
     }
 
     private String resolveConversationId(Long senderId, Long receiverId, Integer conversationType) {
