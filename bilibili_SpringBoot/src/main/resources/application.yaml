@@ -116,6 +116,31 @@ app:
       conversationPersistQueue: im.message.conversation.queue
       conversationRedisProjectionQueue: im.message.conversation.redis.queue
       recentMessageCacheProjectionQueue: im.message.recent.cache.queue
+      listener:
+        persist:
+          concurrency: ${IM_MQ_PERSIST_CONCURRENCY:2}
+          max-concurrency: ${IM_MQ_PERSIST_MAX_CONCURRENCY:4}
+          prefetch: ${IM_MQ_PERSIST_PREFETCH:20}
+        conversation:
+          concurrency: ${IM_MQ_CONVERSATION_CONCURRENCY:2}
+          max-concurrency: ${IM_MQ_CONVERSATION_MAX_CONCURRENCY:6}
+          prefetch: ${IM_MQ_CONVERSATION_PREFETCH:20}
+        redis-projection:
+          concurrency: ${IM_MQ_REDIS_PROJECTION_CONCURRENCY:4}
+          max-concurrency: ${IM_MQ_REDIS_PROJECTION_MAX_CONCURRENCY:8}
+          prefetch: ${IM_MQ_REDIS_PROJECTION_PREFETCH:100}
+        realtime-push:
+          concurrency: ${IM_MQ_REALTIME_PUSH_CONCURRENCY:2}
+          max-concurrency: ${IM_MQ_REALTIME_PUSH_MAX_CONCURRENCY:4}
+          prefetch: ${IM_MQ_REALTIME_PUSH_PREFETCH:50}
+        group-persist:
+          concurrency: ${IM_MQ_GROUP_PERSIST_CONCURRENCY:1}
+          max-concurrency: ${IM_MQ_GROUP_PERSIST_MAX_CONCURRENCY:2}
+          prefetch: ${IM_MQ_GROUP_PERSIST_PREFETCH:10}
+        group-realtime-push:
+          concurrency: ${IM_MQ_GROUP_REALTIME_PUSH_CONCURRENCY:2}
+          max-concurrency: ${IM_MQ_GROUP_REALTIME_PUSH_MAX_CONCURRENCY:6}
+          prefetch: ${IM_MQ_GROUP_REALTIME_PUSH_PREFETCH:50}
     websocket:
       enabled: true
       path: /ws/im
