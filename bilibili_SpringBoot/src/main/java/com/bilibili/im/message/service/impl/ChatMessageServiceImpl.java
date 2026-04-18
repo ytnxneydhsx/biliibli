@@ -1,6 +1,7 @@
 package com.bilibili.im.message.service.impl;
 
 import com.bilibili.im.message.mapper.ChatMessageMapper;
+import com.bilibili.im.metrics.ImDbOperationMetrics;
 import com.bilibili.im.message.model.command.PersistMessageCommand;
 import com.bilibili.im.message.model.entity.ChatMessageDO;
 import com.bilibili.im.message.model.enums.MessageStatus;
@@ -17,11 +18,14 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     private final ChatMessageMapper chatMessageMapper;
     private final ObjectMapper objectMapper;
+    private final ImDbOperationMetrics imDbOperationMetrics;
 
     public ChatMessageServiceImpl(ChatMessageMapper chatMessageMapper,
-                                  ObjectMapper objectMapper) {
+                                  ObjectMapper objectMapper,
+                                  ImDbOperationMetrics imDbOperationMetrics) {
         this.chatMessageMapper = chatMessageMapper;
         this.objectMapper = objectMapper;
+        this.imDbOperationMetrics = imDbOperationMetrics;
     }
 
     @Override
@@ -72,15 +76,18 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         message.setStatus(MessageStatus.SUCCESS.getCode());
 
         try {
-            int rows = chatMessageMapper.insert(message);
+            int rows = imDbOperationMetrics.record("chat_message_insert", () -> chatMessageMapper.insert(message));
             if (rows != 1 || message.getId() == null) {
                 throw new RuntimeException("insert chat message failed");
             }
             return message;
         } catch (DuplicateKeyException ex) {
-            ChatMessageDO existingMessage = chatMessageMapper.selectBySenderAndClientMessageId(
-                    command.getSenderId(),
-                    command.getClientMessageId()
+            ChatMessageDO existingMessage = imDbOperationMetrics.record(
+                    "chat_message_duplicate_lookup",
+                    () -> chatMessageMapper.selectBySenderAndClientMessageId(
+                            command.getSenderId(),
+                            command.getClientMessageId()
+                    )
             );
             if (existingMessage == null || existingMessage.getId() == null) {
                 throw new RuntimeException("duplicate chat message detected but existing message not found", ex);
