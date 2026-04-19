@@ -12,11 +12,16 @@
 ## 目录说明
 
 - `docker-compose.yml`：用 Docker 跑 `k6`
+- `scripts/runners/`：封装完整压测流程的 runner 脚本
+- `scripts/reports/`：从原始结果生成 Markdown 报告的脚本
 - `scripts/lib/common.js`：通用请求、阈值、休眠、环境变量解析
 - `scripts/scenarios/`：当前仓库可直接使用的场景脚本
+- `scripts/sql/`：数据库统计和重置辅助 SQL
 - `scripts/templates/http_smoke_template.js`：迁移到其他项目时的最小模板
 - `data/`：放测试账号文件，不进 Git
-- `results/`：放 `k6` 结果，不进 Git
+- `results/runs/`：放原始压测运行产物，不进 Git
+- `results/reports/`：放由结果产物生成的 Markdown 分析报告
+- `results/latest/`：放最近一次 run 的指针文件
 
 ## 设计原则
 
@@ -166,7 +171,7 @@ WS_LOGIN_MODE=per_vu
 
 `ws_handshake.js` 现在会自动把每次运行保存成独立快照，不会再只保留最新一份。
 
-每次运行结束后，`loadtest/results/` 里会新增一份文件：
+每次运行结束后，`loadtest/results/runs/` 里会新增一份原始结果；如果脚本会写最近一次指针，指针放在 `loadtest/results/latest/`。
 
 - `ws-handshake-时间戳.summary.json`
 
