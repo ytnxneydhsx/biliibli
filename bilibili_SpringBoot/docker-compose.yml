@@ -4,6 +4,9 @@ services:
     image: mysql:8.0
     container_name: bilibili-mysql
     restart: always
+    command:
+      - --innodb-flush-log-at-trx-commit=2
+      - --sync-binlog=0
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: bilibili
