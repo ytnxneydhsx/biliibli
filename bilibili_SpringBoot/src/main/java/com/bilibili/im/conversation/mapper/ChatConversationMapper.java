@@ -33,6 +33,7 @@ public interface ChatConversationMapper {
             WHERE owner_user_id = #{ownerUserId}
               AND target_id = #{targetId}
               AND type = #{type}
+              AND (last_server_message_id IS NULL OR last_server_message_id < #{lastServerMessageId})
             """)
     int updateSenderConversationSummary(@Param("conversationId") String conversationId,
                                         @Param("ownerUserId") Long ownerUserId,
@@ -52,6 +53,7 @@ public interface ChatConversationMapper {
             WHERE owner_user_id = #{ownerUserId}
               AND target_id = #{targetId}
               AND type = #{type}
+              AND (last_server_message_id IS NULL OR last_server_message_id < #{lastServerMessageId})
             """)
     int updateReceiverConversationSummary(@Param("conversationId") String conversationId,
                                           @Param("ownerUserId") Long ownerUserId,

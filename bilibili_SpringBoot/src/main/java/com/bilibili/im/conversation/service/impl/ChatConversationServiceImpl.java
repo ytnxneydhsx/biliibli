@@ -83,10 +83,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                 LocalDateTime lastMessageTime,
                                                 Long lastServerMessageId) {
         Integer type = ConversationType.SINGLE.getCode();
-        ChatConversationDO current = chatConversationMapper.selectByOwnerTargetAndType(senderId, receiverId, type);
-        if (!shouldUpdateSummary(current, lastServerMessageId)) {
-            return;
-        }
         chatConversationMapper.updateSenderConversationSummary(
                 conversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
@@ -105,23 +101,8 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
         Integer type = ConversationType.SINGLE.getCode();
         chatConversationMapper.incrementUnreadCount(receiverId, senderId, type);
-
-        ChatConversationDO current = chatConversationMapper.selectByOwnerTargetAndType(receiverId, senderId, type);
-        if (!shouldUpdateSummary(current, lastServerMessageId)) {
-            return;
-        }
         chatConversationMapper.updateReceiverConversationSummary(
                 resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
-    }
-
-    private boolean shouldUpdateSummary(ChatConversationDO current, Long lastServerMessageId) {
-        if (lastServerMessageId == null) {
-            return true;
-        }
-        if (current == null || current.getLastServerMessageId() == null) {
-            return true;
-        }
-        return current.getLastServerMessageId() < lastServerMessageId;
     }
 
     @Override
