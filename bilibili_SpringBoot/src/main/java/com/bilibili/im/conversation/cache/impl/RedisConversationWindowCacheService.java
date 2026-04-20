@@ -12,9 +12,13 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scripting.support.ResourceScriptSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,8 +32,26 @@ import java.util.Set;
 @Service
 public class RedisConversationWindowCacheService implements ConversationWindowCacheService {
 
+    private static final DefaultRedisScript<String> PROJECT_WINDOW_EVENT_SCRIPT = projectWindowEventScript();
+    private static final DefaultRedisScript<String> CACHE_BASELINE_IF_ABSENT_SCRIPT = cacheBaselineIfAbsentScript();
+
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
+
+    private static DefaultRedisScript<String> projectWindowEventScript() {
+        return loadStringScript("scripts/redis/project_conversation_window_event.lua");
+    }
+
+    private static DefaultRedisScript<String> cacheBaselineIfAbsentScript() {
+        return loadStringScript("scripts/redis/cache_conversation_window_baseline_if_absent.lua");
+    }
+
+    private static DefaultRedisScript<String> loadStringScript(String path) {
+        DefaultRedisScript<String> script = new DefaultRedisScript<>();
+        script.setScriptSource(new ResourceScriptSource(new ClassPathResource(path)));
+        script.setResultType(String.class);
+        return script;
+    }
 
     public RedisConversationWindowCacheService(StringRedisTemplate stringRedisTemplate,
                                                ObjectMapper objectMapper) {
@@ -108,7 +130,7 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
                     continue;
                 }
                 tuples.add(new DefaultTypedTuple<>(record.getConversationId(), toScore(record)));
-                payloads.put(record.getConversationId(), writeWindow(toCacheValue(record)));
+                payloads.put(record.getConversationId(), writeWindow(prepareSnapshot(toCacheValue(record))));
             }
         }
 
@@ -145,7 +167,7 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         String initKey = ConversationWindowCacheKeys.initKey(ownerUserId);
 
         stringRedisTemplate.opsForZSet().add(listKey, window.getConversationId(), toScore(window));
-        stringRedisTemplate.opsForHash().put(metaKey, window.getConversationId(), writeWindow(toCacheValue(window)));
+        stringRedisTemplate.opsForHash().put(metaKey, window.getConversationId(), writeWindow(prepareSnapshot(toCacheValue(window))));
         trimOverflow(listKey, metaKey);
         refreshTtl(listKey, metaKey, initKey);
     }
@@ -186,9 +208,85 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         String initKey = ConversationWindowCacheKeys.initKey(ownerUserId);
 
         stringRedisTemplate.opsForZSet().add(listKey, window.getConversationId(), toScore(window));
-        stringRedisTemplate.opsForHash().put(metaKey, window.getConversationId(), writeWindow(window));
+        stringRedisTemplate.opsForHash().put(metaKey, window.getConversationId(), writeWindow(prepareSnapshot(window)));
         trimOverflow(listKey, metaKey);
         refreshTtl(listKey, metaKey, initKey);
+    }
+
+    @Override
+    public ConversationWindowCacheValue cacheConversationWindowBaselineIfAbsent(Long ownerUserId,
+                                                                               ConversationWindowCacheValue window) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (!isValidWindow(window)) {
+            return null;
+        }
+
+        ConversationWindowCacheValue baseline = prepareSnapshot(window);
+        String listKey = ConversationWindowCacheKeys.listKey(ownerUserId);
+        String metaKey = ConversationWindowCacheKeys.metaKey(ownerUserId);
+        String initKey = ConversationWindowCacheKeys.initKey(ownerUserId);
+        String result = stringRedisTemplate.execute(
+                CACHE_BASELINE_IF_ABSENT_SCRIPT,
+                List.of(listKey, metaKey, initKey),
+                baseline.getConversationId(),
+                writeWindow(baseline),
+                String.valueOf(toScore(baseline)),
+                String.valueOf(ConversationWindowCacheTuning.CACHE_TTL.toSeconds())
+        );
+        if (result == null || result.isBlank()) {
+            return null;
+        }
+        trimOverflow(listKey, metaKey);
+        return readWindowValue(result);
+    }
+
+    @Override
+    public ConversationWindowCacheValue projectConversationWindowEvent(Long ownerUserId,
+                                                                       String conversationId,
+                                                                       Long targetId,
+                                                                       String lastMessage,
+                                                                       LocalDateTime lastMessageTime,
+                                                                       Long lastServerMessageId,
+                                                                       boolean incrementUnread) {
+        if (ownerUserId == null || ownerUserId <= 0) {
+            throw new IllegalArgumentException("ownerUserId is invalid");
+        }
+        if (conversationId == null || conversationId.isBlank()) {
+            throw new IllegalArgumentException("conversationId is invalid");
+        }
+        if (targetId == null || targetId <= 0) {
+            throw new IllegalArgumentException("targetId is invalid");
+        }
+        if (lastMessageTime == null) {
+            throw new IllegalArgumentException("lastMessageTime is invalid");
+        }
+        if (lastServerMessageId == null || lastServerMessageId <= 0) {
+            throw new IllegalArgumentException("lastServerMessageId is invalid");
+        }
+
+        String listKey = ConversationWindowCacheKeys.listKey(ownerUserId);
+        String metaKey = ConversationWindowCacheKeys.metaKey(ownerUserId);
+        String initKey = ConversationWindowCacheKeys.initKey(ownerUserId);
+        String processedKey = ConversationWindowCacheKeys.processedKey(ownerUserId, conversationId);
+        String result = stringRedisTemplate.execute(
+                PROJECT_WINDOW_EVENT_SCRIPT,
+                List.of(listKey, metaKey, initKey, processedKey),
+                conversationId,
+                String.valueOf(targetId),
+                lastMessage == null ? "" : lastMessage,
+                lastMessageTime.toString(),
+                String.valueOf(lastServerMessageId),
+                incrementUnread ? "1" : "0",
+                String.valueOf(ConversationWindowCacheTuning.CACHE_TTL.toSeconds()),
+                String.valueOf(toScoreMillis(lastMessageTime))
+        );
+        if (result == null || result.isBlank()) {
+            return null;
+        }
+        trimOverflow(listKey, metaKey);
+        return readWindowValue(result);
     }
 
     private void trimOverflow(String listKey, String metaKey) {
@@ -223,6 +321,13 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
             return 0D;
         }
         return window.getLastMessageTime().toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
+    }
+
+    private long toScoreMillis(LocalDateTime lastMessageTime) {
+        if (lastMessageTime == null) {
+            return 0L;
+        }
+        return lastMessageTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
     }
 
     private boolean isValidWindow(ConversationWindowVO window) {
@@ -266,6 +371,7 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         value.setTargetId(window.getTargetId());
         value.setLastMessage(window.getLastMessage());
         value.setLastMessageTime(window.getLastMessageTime());
+        value.setLastServerMessageId(window.getLastServerMessageId());
         value.setUnreadCount(window.getUnreadCount());
         value.setIsMuted(window.getIsMuted());
         return value;
@@ -280,8 +386,29 @@ public class RedisConversationWindowCacheService implements ConversationWindowCa
         window.setTargetId(value.getTargetId());
         window.setLastMessage(value.getLastMessage());
         window.setLastMessageTime(value.getLastMessageTime());
+        window.setLastServerMessageId(value.getLastServerMessageId());
         window.setUnreadCount(value.getUnreadCount());
         window.setIsMuted(value.getIsMuted());
         return window;
+    }
+
+    private ConversationWindowCacheValue prepareSnapshot(ConversationWindowCacheValue value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.getLastServerMessageId() != null) {
+            String serverMessageId = String.valueOf(value.getLastServerMessageId());
+            if (value.getUnreadBaselineServerMessageIdText() == null
+                    || value.getUnreadBaselineServerMessageIdText().isBlank()) {
+                value.setUnreadBaselineServerMessageIdText(serverMessageId);
+            }
+        }
+        if (value.getUnreadCount() == null) {
+            value.setUnreadCount(0);
+        }
+        if (value.getIsMuted() == null) {
+            value.setIsMuted(0);
+        }
+        return value;
     }
 }

@@ -11,6 +11,7 @@ public class ConversationWindowVO {
     private Long targetId;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
+    private Long lastServerMessageId;
     private Integer unreadCount;
     private Integer isMuted;
 }

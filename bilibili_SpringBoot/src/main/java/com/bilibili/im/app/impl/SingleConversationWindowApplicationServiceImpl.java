@@ -149,6 +149,7 @@ public class SingleConversationWindowApplicationServiceImpl implements SingleCon
         vo.setTargetId(conversation.getTargetId());
         vo.setLastMessage(conversation.getLastMessage());
         vo.setLastMessageTime(conversation.getLastMessageTime());
+        vo.setLastServerMessageId(conversation.getLastServerMessageId());
         vo.setUnreadCount(conversation.getUnreadCount());
         vo.setIsMuted(conversation.getIsMuted());
         return vo;
@@ -163,34 +164,19 @@ public class SingleConversationWindowApplicationServiceImpl implements SingleCon
         if (!conversationWindowCacheService.isInitialized(senderId)) {
             return;
         }
-        ConversationWindowCacheValue redisWindow = conversationWindowCacheService.getConversationWindow(senderId, conversationId);
-        ConversationWindowCacheValue persistedWindow = null;
-        ConversationWindowCacheValue baselineWindow = redisWindow;
-        if (baselineWindow == null) {
-            persistedWindow = resolvePersistedConversationWindow(senderId, receiverId);
-            baselineWindow = persistedWindow;
+        ensureRedisConversationBaseline(senderId, receiverId, conversationId);
+        ConversationWindowCacheValue updated = conversationWindowCacheService.projectConversationWindowEvent(
+                senderId,
+                conversationId,
+                receiverId,
+                lastMessage,
+                lastMessageTime,
+                lastServerMessageId,
+                false
+        );
+        if (updated != null) {
+            conversationWindowPushService.pushSingleConversationUpdated(senderId, toConversationWindowUpdate(updated));
         }
-
-        if (!shouldApplyEvent(baselineWindow, lastServerMessageId)) {
-            if (redisWindow == null && isSameVersion(persistedWindow, lastServerMessageId)) {
-                conversationWindowCacheService.cacheConversationWindowValue(senderId, persistedWindow);
-            }
-            return;
-        }
-
-        ConversationWindowCacheValue next = baselineWindow == null ? new ConversationWindowCacheValue() : baselineWindow;
-        next.setConversationId(conversationId);
-        next.setTargetId(receiverId);
-        next.setLastMessage(lastMessage);
-        next.setLastMessageTime(lastMessageTime);
-        next.setLastServerMessageId(lastServerMessageId);
-        next.setUnreadCount(resolveUnreadCount(next.getUnreadCount(), false));
-        if (next.getIsMuted() == null) {
-            next.setIsMuted(0);
-        }
-
-        conversationWindowCacheService.cacheConversationWindowValue(senderId, next);
-        conversationWindowPushService.pushSingleConversationUpdated(senderId, toConversationWindowUpdate(next));
     }
 
     private void projectReceiverConversationToRedis(String conversationId,
@@ -202,34 +188,29 @@ public class SingleConversationWindowApplicationServiceImpl implements SingleCon
         if (!conversationWindowCacheService.isInitialized(receiverId)) {
             return;
         }
-        ConversationWindowCacheValue redisWindow = conversationWindowCacheService.getConversationWindow(receiverId, conversationId);
-        ConversationWindowCacheValue persistedWindow = null;
-        ConversationWindowCacheValue baselineWindow = redisWindow;
-        if (baselineWindow == null) {
-            persistedWindow = resolvePersistedConversationWindow(receiverId, senderId);
-            baselineWindow = persistedWindow;
+        ensureRedisConversationBaseline(receiverId, senderId, conversationId);
+        ConversationWindowCacheValue updated = conversationWindowCacheService.projectConversationWindowEvent(
+                receiverId,
+                conversationId,
+                senderId,
+                lastMessage,
+                lastMessageTime,
+                lastServerMessageId,
+                true
+        );
+        if (updated != null) {
+            conversationWindowPushService.pushSingleConversationUpdated(receiverId, toConversationWindowUpdate(updated));
         }
+    }
 
-        if (!shouldApplyEvent(baselineWindow, lastServerMessageId)) {
-            if (redisWindow == null && isSameVersion(persistedWindow, lastServerMessageId)) {
-                conversationWindowCacheService.cacheConversationWindowValue(receiverId, persistedWindow);
-            }
+    private void ensureRedisConversationBaseline(Long ownerUserId, Long targetUserId, String conversationId) {
+        if (conversationWindowCacheService.getConversationWindow(ownerUserId, conversationId) != null) {
             return;
         }
-
-        ConversationWindowCacheValue next = baselineWindow == null ? new ConversationWindowCacheValue() : baselineWindow;
-        next.setConversationId(conversationId);
-        next.setTargetId(senderId);
-        next.setLastMessage(lastMessage);
-        next.setLastMessageTime(lastMessageTime);
-        next.setLastServerMessageId(lastServerMessageId);
-        next.setUnreadCount(resolveUnreadCount(next.getUnreadCount(), true));
-        if (next.getIsMuted() == null) {
-            next.setIsMuted(0);
+        ConversationWindowCacheValue persisted = resolvePersistedConversationWindow(ownerUserId, targetUserId);
+        if (persisted != null) {
+            conversationWindowCacheService.cacheConversationWindowBaselineIfAbsent(ownerUserId, persisted);
         }
-
-        conversationWindowCacheService.cacheConversationWindowValue(receiverId, next);
-        conversationWindowPushService.pushSingleConversationUpdated(receiverId, toConversationWindowUpdate(next));
     }
 
     private ConversationWindowCacheValue resolvePersistedConversationWindow(Long ownerUserId, Long targetUserId) {
@@ -240,27 +221,6 @@ public class SingleConversationWindowApplicationServiceImpl implements SingleCon
         return toConversationWindowCacheValue(persisted);
     }
 
-    private boolean shouldApplyEvent(ConversationWindowCacheValue baselineWindow, Long lastServerMessageId) {
-        if (lastServerMessageId == null) {
-            return true;
-        }
-        if (baselineWindow == null || baselineWindow.getLastServerMessageId() == null) {
-            return true;
-        }
-        return baselineWindow.getLastServerMessageId() < lastServerMessageId;
-    }
-
-    private boolean isSameVersion(ConversationWindowCacheValue baselineWindow, Long lastServerMessageId) {
-        return baselineWindow != null
-                && baselineWindow.getLastServerMessageId() != null
-                && baselineWindow.getLastServerMessageId().equals(lastServerMessageId);
-    }
-
-    private int resolveUnreadCount(Integer currentUnreadCount, boolean increment) {
-        int unreadCount = currentUnreadCount == null ? 0 : Math.max(currentUnreadCount, 0);
-        return increment ? unreadCount + 1 : unreadCount;
-    }
-
     private ConversationWindowCacheValue toConversationWindowCacheValue(ChatConversationDO conversation) {
         ConversationWindowCacheValue value = new ConversationWindowCacheValue();
         value.setConversationId(conversation.getConversationId());
@@ -268,6 +228,10 @@ public class SingleConversationWindowApplicationServiceImpl implements SingleCon
         value.setLastMessage(conversation.getLastMessage());
         value.setLastMessageTime(conversation.getLastMessageTime());
         value.setLastServerMessageId(conversation.getLastServerMessageId());
+        if (conversation.getLastServerMessageId() != null) {
+            String serverMessageId = String.valueOf(conversation.getLastServerMessageId());
+            value.setUnreadBaselineServerMessageIdText(serverMessageId);
+        }
         value.setUnreadCount(conversation.getUnreadCount());
         value.setIsMuted(conversation.getIsMuted());
         return value;

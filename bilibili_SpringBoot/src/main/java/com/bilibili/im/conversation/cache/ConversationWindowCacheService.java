@@ -3,6 +3,7 @@ package com.bilibili.im.conversation.cache;
 import com.bilibili.im.conversation.cache.model.ConversationWindowCacheValue;
 import com.bilibili.im.conversation.model.vo.ConversationWindowVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ConversationWindowCacheService {
@@ -18,4 +19,15 @@ public interface ConversationWindowCacheService {
     ConversationWindowCacheValue getConversationWindow(Long ownerUserId, String conversationId);
 
     void cacheConversationWindowValue(Long ownerUserId, ConversationWindowCacheValue window);
+
+    ConversationWindowCacheValue cacheConversationWindowBaselineIfAbsent(Long ownerUserId,
+                                                                         ConversationWindowCacheValue window);
+
+    ConversationWindowCacheValue projectConversationWindowEvent(Long ownerUserId,
+                                                                String conversationId,
+                                                                Long targetId,
+                                                                String lastMessage,
+                                                                LocalDateTime lastMessageTime,
+                                                                Long lastServerMessageId,
+                                                                boolean incrementUnread);
 }

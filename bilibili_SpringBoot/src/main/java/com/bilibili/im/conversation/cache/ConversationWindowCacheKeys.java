@@ -5,6 +5,7 @@ public final class ConversationWindowCacheKeys {
     private static final String LIST_KEY_PREFIX = "im:conv:list:";
     private static final String META_KEY_PREFIX = "im:conv:meta:";
     private static final String INIT_KEY_PREFIX = "im:conv:init:";
+    private static final String PROCESSED_KEY_PREFIX = "im:conv:processed:";
 
     private ConversationWindowCacheKeys() {
     }
@@ -19,5 +20,9 @@ public final class ConversationWindowCacheKeys {
 
     public static String initKey(Long ownerUserId) {
         return INIT_KEY_PREFIX + ownerUserId;
+    }
+
+    public static String processedKey(Long ownerUserId, String conversationId) {
+        return PROCESSED_KEY_PREFIX + ownerUserId + ":" + conversationId;
     }
 }
