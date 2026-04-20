@@ -1,4 +1,4 @@
-package com.bilibili.im.mq.consumer;
+package com.bilibili.im.message.cache;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 
 @Service
-public class ImConsumerDedupeService {
+public class ImMqConsumerIdempotencyService {
 
     private static final Duration DEFAULT_TTL = Duration.ofDays(1);
     private static final String KEY_PREFIX = "im:consumer:dedupe:";
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    public ImConsumerDedupeService(StringRedisTemplate stringRedisTemplate) {
+    public ImMqConsumerIdempotencyService(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 

@@ -2,9 +2,9 @@ package com.bilibili.im.mq.consumer.single;
 
 import com.bilibili.common.logging.LogContext;
 import com.bilibili.im.app.SingleConversationWindowApplicationService;
+import com.bilibili.im.message.cache.ImMqConsumerIdempotencyService;
 import com.bilibili.im.message.model.dto.MessageContentDTO;
 import com.bilibili.im.mq.ImMqLogContext;
-import com.bilibili.im.mq.consumer.ImConsumerDedupeService;
 import com.bilibili.im.mq.event.ImMessageDispatchEvent;
 import com.bilibili.im.mq.metrics.ImMqConsumerMetrics;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -28,14 +28,14 @@ public class ConversationWindowPersistConsumer {
 
     private final SingleConversationWindowApplicationService singleConversationWindowApplicationService;
     private final ImMqConsumerMetrics imMqConsumerMetrics;
-    private final ImConsumerDedupeService imConsumerDedupeService;
+    private final ImMqConsumerIdempotencyService imMqConsumerIdempotencyService;
 
     public ConversationWindowPersistConsumer(SingleConversationWindowApplicationService singleConversationWindowApplicationService,
                                              ImMqConsumerMetrics imMqConsumerMetrics,
-                                             ImConsumerDedupeService imConsumerDedupeService) {
+                                             ImMqConsumerIdempotencyService imMqConsumerIdempotencyService) {
         this.singleConversationWindowApplicationService = singleConversationWindowApplicationService;
         this.imMqConsumerMetrics = imMqConsumerMetrics;
-        this.imConsumerDedupeService = imConsumerDedupeService;
+        this.imMqConsumerIdempotencyService = imMqConsumerIdempotencyService;
     }
 
     @RabbitListener(
@@ -51,7 +51,7 @@ public class ConversationWindowPersistConsumer {
                 if (event == null) {
                     throw new IllegalArgumentException("event is invalid");
                 }
-                if (!imConsumerDedupeService.tryAcquire(DEDUPE_CONSUMER, event.getServerMessageId())) {
+                if (!imMqConsumerIdempotencyService.tryAcquire(DEDUPE_CONSUMER, event.getServerMessageId())) {
                     return;
                 }
                 releaseDedupeOnRollback(event.getServerMessageId());
@@ -65,7 +65,7 @@ public class ConversationWindowPersistConsumer {
                             event.getServerMessageId()
                     );
                 } catch (RuntimeException | Error ex) {
-                    imConsumerDedupeService.release(DEDUPE_CONSUMER, event.getServerMessageId());
+                    imMqConsumerIdempotencyService.release(DEDUPE_CONSUMER, event.getServerMessageId());
                     throw ex;
                 }
             });
@@ -80,7 +80,7 @@ public class ConversationWindowPersistConsumer {
             @Override
             public void afterCompletion(int status) {
                 if (status != STATUS_COMMITTED) {
-                    imConsumerDedupeService.release(DEDUPE_CONSUMER, serverMessageId);
+                    imMqConsumerIdempotencyService.release(DEDUPE_CONSUMER, serverMessageId);
                 }
             }
         });
