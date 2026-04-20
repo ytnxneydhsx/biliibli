@@ -28,24 +28,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
             throw new IllegalArgumentException("peerUserId is invalid");
         }
 
-        Integer type = ConversationType.SINGLE.getCode();
-        ChatConversationDO ownerConversation = chatConversationMapper.selectByOwnerTargetAndType(ownerUserId, peerUserId, type);
-        if (ownerConversation != null && ownerConversation.getConversationId() != null
-                && !ownerConversation.getConversationId().isBlank()) {
-            return ownerConversation.getConversationId();
-        }
-
-        String conversationId = buildSingleConversationId(ownerUserId, peerUserId);
-
-        chatConversationMapper.insertIgnoreConversation(
-                conversationId,
-                ownerUserId,
-                peerUserId,
-                type,
-                0,
-                0
-        );
-        return conversationId;
+        return buildSingleConversationId(ownerUserId, peerUserId);
     }
 
     @Override
@@ -97,7 +80,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
 
         Integer type = ConversationType.SINGLE.getCode();
-        chatConversationMapper.updateSenderConversationSummary(
+        updateSenderConversationWithFallback(
                 resolvedConversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
 
@@ -124,7 +107,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
 
         Integer type = ConversationType.SINGLE.getCode();
-        chatConversationMapper.upsertReceiverConversationSummary(
+        updateReceiverConversationWithFallback(
                 resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
 
@@ -135,22 +118,22 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                             String lastMessage,
                                                             LocalDateTime lastMessageTime,
                                                             Long lastServerMessageId) {
-        updateSenderConversationSummary(
-                conversationId,
-                senderId,
-                receiverId,
-                lastMessage,
-                lastMessageTime,
-                lastServerMessageId
-        );
-        updateReceiverConversationSummary(
-                conversationId,
-                senderId,
-                receiverId,
-                lastMessage,
-                lastMessageTime,
-                lastServerMessageId
-        );
+        validateSingleProjection(conversationId, senderId, receiverId, lastServerMessageId);
+        String resolvedConversationId = buildSingleConversationId(senderId, receiverId);
+        Integer type = ConversationType.SINGLE.getCode();
+
+        if (senderId <= receiverId) {
+            updateSenderConversationWithFallback(
+                    resolvedConversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
+            updateReceiverConversationWithFallback(
+                    resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
+            return;
+        }
+
+        updateReceiverConversationWithFallback(
+                resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
+        updateSenderConversationWithFallback(
+                resolvedConversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
 
     @Override
@@ -173,5 +156,75 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         long lowUserId = Math.min(firstUserId, secondUserId);
         long highUserId = Math.max(firstUserId, secondUserId);
         return "single_%d_%d".formatted(lowUserId, highUserId);
+    }
+
+    private int insertIgnoreConversation(String conversationId, Long ownerUserId, Long targetId, Integer type) {
+        return chatConversationMapper.insertIgnoreConversation(
+                conversationId,
+                ownerUserId,
+                targetId,
+                type,
+                0,
+                0
+        );
+    }
+
+    private void updateSenderConversationWithFallback(String conversationId,
+                                                      Long ownerUserId,
+                                                      Long targetId,
+                                                      Integer type,
+                                                      String lastMessage,
+                                                      LocalDateTime lastMessageTime,
+                                                      Long lastServerMessageId) {
+        int updated = chatConversationMapper.updateSenderConversationSummary(
+                conversationId, ownerUserId, targetId, type, lastMessage, lastMessageTime, lastServerMessageId);
+        if (updated > 0) {
+            return;
+        }
+
+        int inserted = insertIgnoreConversation(conversationId, ownerUserId, targetId, type);
+        if (inserted > 0) {
+            chatConversationMapper.updateSenderConversationSummary(
+                    conversationId, ownerUserId, targetId, type, lastMessage, lastMessageTime, lastServerMessageId);
+        }
+    }
+
+    private void updateReceiverConversationWithFallback(String conversationId,
+                                                        Long ownerUserId,
+                                                        Long targetId,
+                                                        Integer type,
+                                                        String lastMessage,
+                                                        LocalDateTime lastMessageTime,
+                                                        Long lastServerMessageId) {
+        int updated = chatConversationMapper.updateReceiverConversationSummary(
+                conversationId, ownerUserId, targetId, type, lastMessage, lastMessageTime, lastServerMessageId);
+        if (updated > 0) {
+            return;
+        }
+
+        int inserted = insertIgnoreConversation(conversationId, ownerUserId, targetId, type);
+        if (inserted > 0) {
+            chatConversationMapper.updateReceiverConversationSummary(
+                    conversationId, ownerUserId, targetId, type, lastMessage, lastMessageTime, lastServerMessageId);
+        }
+    }
+
+    private void validateSingleProjection(String conversationId,
+                                          Long senderId,
+                                          Long receiverId,
+                                          Long lastServerMessageId) {
+        if (senderId == null || senderId <= 0) {
+            throw new IllegalArgumentException("senderId is invalid");
+        }
+        if (receiverId == null || receiverId <= 0) {
+            throw new IllegalArgumentException("receiverId is invalid");
+        }
+        if (lastServerMessageId == null || lastServerMessageId <= 0) {
+            throw new IllegalArgumentException("lastServerMessageId is invalid");
+        }
+        String resolvedConversationId = buildSingleConversationId(senderId, receiverId);
+        if (!resolvedConversationId.equals(conversationId)) {
+            throw new IllegalStateException("single conversation id does not match participants");
+        }
     }
 }
