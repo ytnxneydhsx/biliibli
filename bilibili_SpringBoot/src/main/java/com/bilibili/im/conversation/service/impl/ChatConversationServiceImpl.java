@@ -82,9 +82,23 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                 String lastMessage,
                                                 LocalDateTime lastMessageTime,
                                                 Long lastServerMessageId) {
+        if (senderId == null || senderId <= 0) {
+            throw new IllegalArgumentException("senderId is invalid");
+        }
+        if (receiverId == null || receiverId <= 0) {
+            throw new IllegalArgumentException("receiverId is invalid");
+        }
+        if (lastServerMessageId == null || lastServerMessageId <= 0) {
+            throw new IllegalArgumentException("lastServerMessageId is invalid");
+        }
+        String resolvedConversationId = buildSingleConversationId(senderId, receiverId);
+        if (!resolvedConversationId.equals(conversationId)) {
+            throw new IllegalStateException("sender conversation id does not match receiver conversation id");
+        }
+
         Integer type = ConversationType.SINGLE.getCode();
         chatConversationMapper.updateSenderConversationSummary(
-                conversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
+                resolvedConversationId, senderId, receiverId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
 
     @Override
@@ -94,14 +108,23 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                                                   String lastMessage,
                                                   LocalDateTime lastMessageTime,
                                                   Long lastServerMessageId) {
-        String resolvedConversationId = resolveSingleConversationId(receiverId, senderId);
+        if (senderId == null || senderId <= 0) {
+            throw new IllegalArgumentException("senderId is invalid");
+        }
+        if (receiverId == null || receiverId <= 0) {
+            throw new IllegalArgumentException("receiverId is invalid");
+        }
+        if (lastServerMessageId == null || lastServerMessageId <= 0) {
+            throw new IllegalArgumentException("lastServerMessageId is invalid");
+        }
+
+        String resolvedConversationId = buildSingleConversationId(receiverId, senderId);
         if (!resolvedConversationId.equals(conversationId)) {
             throw new IllegalStateException("receiver conversation id does not match sender conversation id");
         }
 
         Integer type = ConversationType.SINGLE.getCode();
-        chatConversationMapper.incrementUnreadCount(receiverId, senderId, type);
-        chatConversationMapper.updateReceiverConversationSummary(
+        chatConversationMapper.upsertReceiverConversationSummary(
                 resolvedConversationId, receiverId, senderId, type, lastMessage, lastMessageTime, lastServerMessageId);
     }
 
