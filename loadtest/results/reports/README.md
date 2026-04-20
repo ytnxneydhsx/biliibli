@@ -4,6 +4,7 @@
 
 | 文件 | 内容 |
 |---|---|
+| `im-mq-metrics-ab-20260417-231753.md` | 2026-04-17 MQ Consumer Micrometer A/B 压测报告 |
 | `peak_load_report.md` | 2026-04-17 IM 峰值压测报告 |
 | `followup_load_analysis_report.md` | 2026-04-17 后续压测分析报告 |
 | `loadtest_runs.md` | 2026-04-18 压测运行记录 |
