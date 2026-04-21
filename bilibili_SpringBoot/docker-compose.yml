@@ -7,7 +7,9 @@ services:
     command:
       - --innodb-flush-log-at-trx-commit=2
       - --sync-binlog=0
+      - --default-time-zone=+08:00
     environment:
+      TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: bilibili
       MYSQL_USER: huangnv
@@ -28,8 +30,9 @@ services:
     container_name: bilibili-app
     restart: always
     environment:
+      TZ: Asia/Shanghai
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
-      DB_URL: jdbc:mysql://mysql:3306/bilibili?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
+      DB_URL: jdbc:mysql://mysql:3306/bilibili?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
       DB_USERNAME: huangnv
       DB_PASSWORD: 11447
       MINIO_ENDPOINT: http://minio:9000
@@ -56,6 +59,8 @@ services:
     image: redis:7-alpine
     container_name: bilibili-redis
     restart: always
+    environment:
+      TZ: Asia/Shanghai
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "127.0.0.1:6379:6379"
@@ -72,6 +77,7 @@ services:
     container_name: bilibili-rabbitmq
     restart: always
     environment:
+      TZ: Asia/Shanghai
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_DEFAULT_VHOST: /
@@ -90,6 +96,7 @@ services:
     restart: always
     command: server /data --console-address ":9001"
     environment:
+      TZ: CST-8
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-huangnv}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-zxcvbnm123.0}
       MINIO_REGION: ${MINIO_REGION:-us-east-1}
@@ -103,6 +110,8 @@ services:
     image: nginx:1.28-alpine
     container_name: bilibili-nginx
     restart: always
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       - app
     ports:
