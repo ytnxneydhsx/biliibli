@@ -1,6 +1,6 @@
 # IM 应用层 / Spring Boot
 
-对应仪表盘文件：`im-spring-boot-application.json`
+对应仪表盘文件：`../dashboards/im-spring-boot-application.json`
 
 ## 监控范围
 

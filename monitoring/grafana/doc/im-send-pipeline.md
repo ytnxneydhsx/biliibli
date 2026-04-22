@@ -1,6 +1,6 @@
 # IM 发送链路
 
-对应仪表盘文件：`im-send-pipeline.json`
+对应仪表盘文件：`../dashboards/im-send-pipeline.json`
 
 ## 监控范围
 

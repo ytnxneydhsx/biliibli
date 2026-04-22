@@ -1,6 +1,6 @@
 # IM MQ / RabbitMQ
 
-对应仪表盘文件：`im-mq-rabbitmq.json`
+对应仪表盘文件：`../dashboards/im-mq-rabbitmq.json`
 
 ## 监控范围
 

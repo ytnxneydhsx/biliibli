@@ -1,6 +1,6 @@
 # IM Minimal Overview
 
-对应仪表盘文件：`im-minimal-overview.json`
+对应仪表盘文件：`../dashboards/im-minimal-overview.json`
 
 ## 监控范围
 
@@ -8,14 +8,14 @@
 
 分类页面：
 
-- `im-health-status.json`：总览 / 健康状态
-- `im-spring-boot-application.json`：应用层 / Spring Boot
-- `im-websocket-realtime.json`：WebSocket 实时链路
-- `im-send-pipeline.json`：发送链路
-- `im-mq-rabbitmq.json`：MQ / RabbitMQ
-- `im-mysql-redis.json`：MySQL / Redis
-- `im-host-container.json`：主机与容器
-- `im-monitoring-system.json`：监控系统自身
+- `../dashboards/im-health-status.json`：总览 / 健康状态
+- `../dashboards/im-spring-boot-application.json`：应用层 / Spring Boot
+- `../dashboards/im-websocket-realtime.json`：WebSocket 实时链路
+- `../dashboards/im-send-pipeline.json`：发送链路
+- `../dashboards/im-mq-rabbitmq.json`：MQ / RabbitMQ
+- `../dashboards/im-mysql-redis.json`：MySQL / Redis
+- `../dashboards/im-host-container.json`：主机与容器
+- `../dashboards/im-monitoring-system.json`：监控系统自身
 
 ## 采集接口总表
 

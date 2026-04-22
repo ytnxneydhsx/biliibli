@@ -1,6 +1,6 @@
 # IM WebSocket 实时链路
 
-对应仪表盘文件：`im-websocket-realtime.json`
+对应仪表盘文件：`../dashboards/im-websocket-realtime.json`
 
 ## 监控范围
 

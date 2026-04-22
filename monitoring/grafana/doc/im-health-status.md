@@ -1,6 +1,6 @@
 # IM 总览 / 健康状态
 
-对应仪表盘文件：`im-health-status.json`
+对应仪表盘文件：`../dashboards/im-health-status.json`
 
 ## 监控范围
 

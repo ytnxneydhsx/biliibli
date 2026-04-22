@@ -1,6 +1,6 @@
 # IM 主机与容器
 
-对应仪表盘文件：`im-host-container.json`
+对应仪表盘文件：`../dashboards/im-host-container.json`
 
 ## 监控范围
 

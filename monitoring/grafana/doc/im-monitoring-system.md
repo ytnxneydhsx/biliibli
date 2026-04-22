@@ -1,6 +1,6 @@
 # IM 监控系统自身
 
-对应仪表盘文件：`im-monitoring-system.json`
+对应仪表盘文件：`../dashboards/im-monitoring-system.json`
 
 ## 监控范围
 

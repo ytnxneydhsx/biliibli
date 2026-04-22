@@ -1,6 +1,6 @@
 # IM MySQL / Redis
 
-对应仪表盘文件：`im-mysql-redis.json`
+对应仪表盘文件：`../dashboards/im-mysql-redis.json`
 
 ## 监控范围
 
