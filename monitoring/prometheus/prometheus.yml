@@ -1,6 +1,6 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: __PROMETHEUS_SCRAPE_INTERVAL__
+  evaluation_interval: __PROMETHEUS_EVALUATION_INTERVAL__
   external_labels:
     project: bilibili
     environment: local
@@ -27,6 +27,18 @@ scrape_configs:
 
   - job_name: rabbitmq
     metrics_path: /metrics
+    static_configs:
+      - targets:
+          - rabbitmq:15692
+        labels:
+          service: bilibili-rabbitmq
+
+  - job_name: rabbitmq-detailed
+    metrics_path: /metrics/detailed
+    params:
+      family:
+        - queue_coarse_metrics
+        - queue_consumer_count
     static_configs:
       - targets:
           - rabbitmq:15692

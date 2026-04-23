@@ -6,5 +6,7 @@ datasources:
     type: prometheus
     access: proxy
     url: http://prometheus:9090
+    jsonData:
+      timeInterval: __GRAFANA_PROMETHEUS_TIME_INTERVAL__
     isDefault: true
     editable: true

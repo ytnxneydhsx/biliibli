@@ -201,7 +201,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rabbitmq_queue_messages_ready{queue=~\"im\\\\.message\\\\..*\"}",
+          "expr": "rabbitmq_detailed_queue_messages_ready{queue=~\"im\\\\.message\\\\..*\"}",
           "legendFormat": "{{queue}} ready",
           "range": true,
           "refId": "A"
@@ -212,7 +212,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rabbitmq_queue_messages_unacked{queue=~\"im\\\\.message\\\\..*\"}",
+          "expr": "rabbitmq_detailed_queue_messages_unacked{queue=~\"im\\\\.message\\\\..*\"}",
           "legendFormat": "{{queue}} unacked",
           "range": true,
           "refId": "B"
@@ -557,7 +557,7 @@
     }
   ],
   "preload": false,
-  "refresh": "10s",
+  "refresh": "1s",
   "schemaVersion": 40,
   "tags": [
     "bilibili",
@@ -576,6 +576,6 @@
   "timezone": "browser",
   "title": "IM MQ / RabbitMQ",
   "uid": "im-mq-rabbitmq",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

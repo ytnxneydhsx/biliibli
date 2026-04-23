@@ -3,15 +3,24 @@ services:
     image: prom/prometheus:v2.55.1
     container_name: bilibili-prometheus
     restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.path=/prometheus
-      - --web.console.libraries=/usr/share/prometheus/console_libraries
-      - --web.console.templates=/usr/share/prometheus/consoles
+      - |
+        sed \
+          -e "s/__PROMETHEUS_SCRAPE_INTERVAL__/${PROMETHEUS_SCRAPE_INTERVAL:-1s}/g" \
+          -e "s/__PROMETHEUS_EVALUATION_INTERVAL__/${PROMETHEUS_EVALUATION_INTERVAL:-1s}/g" \
+          /etc/prometheus/templates/prometheus.yml > /tmp/prometheus.yml && \
+        exec /bin/prometheus \
+          --config.file=/tmp/prometheus.yml \
+          --storage.tsdb.path=/prometheus \
+          --web.console.libraries=/usr/share/prometheus/console_libraries \
+          --web.console.templates=/usr/share/prometheus/consoles
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/templates/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
       - monitoring
@@ -27,12 +36,28 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: ${GRAFANA_MIN_REFRESH_INTERVAL:-1s}
+      GF_PATHS_PROVISIONING: /tmp/grafana-provisioning
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - |
+        rm -rf /tmp/grafana-dashboards /tmp/grafana-provisioning && \
+        mkdir -p /tmp/grafana-dashboards /tmp/grafana-provisioning/datasources /tmp/grafana-provisioning/dashboards && \
+        cp /etc/grafana/provisioning-templates/datasources/prometheus.yml /tmp/grafana-provisioning/datasources/prometheus.yml && \
+        cp /etc/grafana/provisioning-templates/dashboards/dashboards.yml /tmp/grafana-provisioning/dashboards/dashboards.yml && \
+        cp /var/lib/grafana/dashboard-templates/*.json /tmp/grafana-dashboards/ && \
+        sed -i "s/__GRAFANA_PROMETHEUS_TIME_INTERVAL__/${GRAFANA_PROMETHEUS_TIME_INTERVAL:-1s}/g" /tmp/grafana-provisioning/datasources/prometheus.yml && \
+        find /tmp/grafana-dashboards -name '*.json' -exec sed -i "s/\"refresh\": \"1s\"/\"refresh\": \"${GRAFANA_DASHBOARD_REFRESH:-1s}\"/g" {} \; && \
+        sed -i "s|/var/lib/grafana/dashboards|/tmp/grafana-dashboards|g" /tmp/grafana-provisioning/dashboards/dashboards.yml && \
+        exec /run.sh
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning-templates:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboard-templates:ro
     networks:
       - monitoring
 
@@ -62,7 +87,7 @@ services:
     ports:
       - "${NODE_EXPORTER_PORT:-9100}:9100"
     volumes:
-      - /:/host:ro,rslave
+      - /:/host:ro
     networks:
       - monitoring
 

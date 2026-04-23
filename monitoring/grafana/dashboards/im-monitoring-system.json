@@ -235,7 +235,7 @@
     }
   ],
   "preload": false,
-  "refresh": "10s",
+  "refresh": "1s",
   "schemaVersion": 40,
   "tags": [
     "bilibili",
