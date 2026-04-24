@@ -1,5 +1,6 @@
 package com.bilibili.im.group.service.impl;
 
+import com.bilibili.im.group.cache.GroupPermissionCacheEvictor;
 import com.bilibili.im.group.mapper.ChatGroupMapper;
 import com.bilibili.im.group.mapper.ChatGroupMemberMapper;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
@@ -21,13 +22,16 @@ public class ChatGroupServiceImpl implements ChatGroupService {
     private final ChatGroupMapper chatGroupMapper;
     private final ChatGroupMemberMapper chatGroupMemberMapper;
     private final GroupPermissionService groupPermissionService;
+    private final GroupPermissionCacheEvictor groupPermissionCacheEvictor;
 
     public ChatGroupServiceImpl(ChatGroupMapper chatGroupMapper,
                                 ChatGroupMemberMapper chatGroupMemberMapper,
-                                GroupPermissionService groupPermissionService) {
+                                GroupPermissionService groupPermissionService,
+                                GroupPermissionCacheEvictor groupPermissionCacheEvictor) {
         this.chatGroupMapper = chatGroupMapper;
         this.chatGroupMemberMapper = chatGroupMemberMapper;
         this.groupPermissionService = groupPermissionService;
+        this.groupPermissionCacheEvictor = groupPermissionCacheEvictor;
     }
 
     @Override
@@ -89,7 +93,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
             throw new IllegalArgumentException("targetUserId is invalid");
         }
 
-        ChatGroupDO group = groupPermissionService.requireActiveGroup(groupId);
+        groupPermissionService.requireActiveGroup(groupId);
         ChatGroupMemberDO existedMember = chatGroupMemberMapper.selectByGroupIdAndUserId(groupId, targetUserId);
         if (existedMember != null && Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(existedMember.getStatus())) {
             throw new IllegalArgumentException("target user is already in group");
@@ -107,6 +111,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         }
 
         syncMemberCount(groupId);
+        groupPermissionCacheEvictor.evictGroupMember(groupId, targetUserId);
     }
 
     @Override
@@ -135,6 +140,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         }
 
         syncMemberCount(groupId);
+        groupPermissionCacheEvictor.evictGroupMember(groupId, currentUserId);
     }
 
     @Override
@@ -150,6 +156,11 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         ChatGroupDO group = groupPermissionService.requireActiveGroup(groupId);
         ChatGroupMemberDO membership = groupPermissionService.requireActiveMembership(groupId, ownerUserId);
         groupPermissionService.requireCanDismissGroup(group, membership, ownerUserId);
+
+        List<Long> activeMemberUserIds = chatGroupMemberMapper.selectByGroupIdAndStatus(
+                groupId,
+                ChatGroupMemberStatus.ACTIVE.getCode()
+        ).stream().map(ChatGroupMemberDO::getUserId).toList();
 
         int groupRows = chatGroupMapper.updateGroupStatusAndMemberCount(
                 groupId,
@@ -168,6 +179,9 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         if (memberRows <= 0) {
             throw new RuntimeException("dismiss group members failed");
         }
+
+        groupPermissionCacheEvictor.evictGroup(groupId);
+        groupPermissionCacheEvictor.evictGroupMembers(groupId, activeMemberUserIds);
     }
 
     @Override
@@ -197,6 +211,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         }
 
         syncMemberCount(groupId);
+        groupPermissionCacheEvictor.evictGroupMember(groupId, targetUserId);
     }
 
     @Override
@@ -228,6 +243,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         if (rows <= 0) {
             throw new RuntimeException("update group member role failed");
         }
+        groupPermissionCacheEvictor.evictGroupMember(groupId, targetUserId);
     }
 
     @Override
@@ -251,6 +267,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         if (rows <= 0) {
             throw new RuntimeException("update group mute status failed");
         }
+        groupPermissionCacheEvictor.evictGroup(groupId);
     }
 
     @Override
@@ -278,6 +295,7 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         if (rows <= 0) {
             throw new RuntimeException("update group member mute status failed");
         }
+        groupPermissionCacheEvictor.evictGroupMember(groupId, targetUserId);
     }
 
     @Override

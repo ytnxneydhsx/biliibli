@@ -1,7 +1,9 @@
 package com.bilibili.im.group.permission.impl;
 
-import com.bilibili.im.group.mapper.ChatGroupMapper;
-import com.bilibili.im.group.mapper.ChatGroupMemberMapper;
+import com.bilibili.im.group.cache.ChatGroupMemberSnapshotCache;
+import com.bilibili.im.group.cache.ChatGroupSnapshotCache;
+import com.bilibili.im.group.model.cache.ChatGroupMemberSnapshot;
+import com.bilibili.im.group.model.cache.ChatGroupSnapshot;
 import com.bilibili.im.group.model.entity.ChatGroupDO;
 import com.bilibili.im.group.model.entity.ChatGroupMemberDO;
 import com.bilibili.im.group.model.enums.ChatGroupMemberRole;
@@ -14,13 +16,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupPermissionServiceImpl implements GroupPermissionService {
 
-    private final ChatGroupMapper chatGroupMapper;
-    private final ChatGroupMemberMapper chatGroupMemberMapper;
+    private static final int TRUE_VALUE = 1;
 
-    public GroupPermissionServiceImpl(ChatGroupMapper chatGroupMapper,
-                                      ChatGroupMemberMapper chatGroupMemberMapper) {
-        this.chatGroupMapper = chatGroupMapper;
-        this.chatGroupMemberMapper = chatGroupMemberMapper;
+    private final ChatGroupSnapshotCache chatGroupSnapshotCache;
+    private final ChatGroupMemberSnapshotCache chatGroupMemberSnapshotCache;
+
+    public GroupPermissionServiceImpl(ChatGroupSnapshotCache chatGroupSnapshotCache,
+                                      ChatGroupMemberSnapshotCache chatGroupMemberSnapshotCache) {
+        this.chatGroupSnapshotCache = chatGroupSnapshotCache;
+        this.chatGroupMemberSnapshotCache = chatGroupMemberSnapshotCache;
     }
 
     @Override
@@ -28,13 +32,18 @@ public class GroupPermissionServiceImpl implements GroupPermissionService {
         if (groupId == null || groupId <= 0) {
             throw new IllegalArgumentException("groupId is invalid");
         }
-        ChatGroupDO group = chatGroupMapper.selectById(groupId);
-        if (group == null) {
+        ChatGroupSnapshot snapshot = chatGroupSnapshotCache.get(groupId);
+        if (!snapshot.exists()) {
             throw new IllegalArgumentException("group does not exist");
         }
-        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(group.getStatus())) {
+        if (!Integer.valueOf(ChatGroupStatus.ACTIVE.getCode()).equals(snapshot.status())) {
             throw new IllegalArgumentException("group status is invalid");
         }
+        ChatGroupDO group = new ChatGroupDO();
+        group.setId(snapshot.groupId());
+        group.setOwnerUserId(snapshot.ownerUserId());
+        group.setStatus(snapshot.status());
+        group.setIsAllMuted(snapshot.allMuted() ? TRUE_VALUE : 0);
         return group;
     }
 
@@ -46,10 +55,16 @@ public class GroupPermissionServiceImpl implements GroupPermissionService {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("userId is invalid");
         }
-        ChatGroupMemberDO membership = chatGroupMemberMapper.selectByGroupIdAndUserId(groupId, userId);
-        if (membership == null || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(membership.getStatus())) {
+        ChatGroupMemberSnapshot snapshot = chatGroupMemberSnapshotCache.get(groupId, userId);
+        if (!snapshot.exists() || !Integer.valueOf(ChatGroupMemberStatus.ACTIVE.getCode()).equals(snapshot.status())) {
             throw new IllegalArgumentException("group membership is invalid");
         }
+        ChatGroupMemberDO membership = new ChatGroupMemberDO();
+        membership.setGroupId(snapshot.groupId());
+        membership.setUserId(snapshot.userId());
+        membership.setRole(snapshot.role());
+        membership.setStatus(snapshot.status());
+        membership.setIsMuted(snapshot.muted() ? TRUE_VALUE : 0);
         return membership;
     }
 
