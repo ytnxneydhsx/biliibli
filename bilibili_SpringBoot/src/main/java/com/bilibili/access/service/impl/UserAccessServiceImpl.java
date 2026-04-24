@@ -1,45 +1,35 @@
 package com.bilibili.access.service.impl;
 
-import com.bilibili.access.mapper.UserAccessMapper;
-import com.bilibili.access.model.entity.UserAccessDO;
+import com.bilibili.access.cache.UserAccessSnapshotCache;
+import com.bilibili.access.cache.UserExistenceCache;
+import com.bilibili.access.model.cache.UserAccessSnapshot;
 import com.bilibili.access.model.state.UserAccessState;
 import com.bilibili.access.service.UserAccessService;
-import com.bilibili.user.mapper.UserMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserAccessServiceImpl implements UserAccessService {
 
-    private static final int ENABLED = 1;
+    private final UserExistenceCache userExistenceCache;
+    private final UserAccessSnapshotCache userAccessSnapshotCache;
 
-    private final UserAccessMapper userAccessMapper;
-    private final UserMapper userMapper;
-
-    public UserAccessServiceImpl(UserAccessMapper userAccessMapper,
-                                 UserMapper userMapper) {
-        this.userAccessMapper = userAccessMapper;
-        this.userMapper = userMapper;
+    public UserAccessServiceImpl(UserExistenceCache userExistenceCache,
+                                 UserAccessSnapshotCache userAccessSnapshotCache) {
+        this.userExistenceCache = userExistenceCache;
+        this.userAccessSnapshotCache = userAccessSnapshotCache;
     }
 
     @Override
     public UserAccessState getUserAccessState(Long userId) {
-        if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException("userId is invalid");
-        }
-
-        UserAccessDO userAccess = userAccessMapper.selectByUserId(userId);
-        if (userAccess == null) {
-            return buildDefaultState(userId);
-        }
-
+        UserAccessSnapshot snapshot = userAccessSnapshotCache.get(userId);
         return new UserAccessState(
-                userId,
-                isEnabled(userAccess.getLikeEnabled()),
-                isEnabled(userAccess.getCommentEnabled()),
-                isEnabled(userAccess.getImMessageSendEnabled()),
-                isEnabled(userAccess.getVideoUploadEnabled()),
-                isEnabled(userAccess.getProfileEditEnabled())
+                snapshot.userId(),
+                snapshot.likeEnabled(),
+                snapshot.commentEnabled(),
+                snapshot.imMessageSendEnabled(),
+                snapshot.videoUploadEnabled(),
+                snapshot.profileEditEnabled()
         );
     }
 
@@ -55,7 +45,7 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean canSendImMessage(Long userId) {
-        return getUserAccessState(userId).isImMessageSendEnabled();
+        return userAccessSnapshotCache.get(userId).imMessageSendEnabled();
     }
 
     @Override
@@ -84,10 +74,10 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public void validateCanSendImMessage(Long userId) {
-        if (userMapper.selectById(userId) == null) {
+        if (!userExistenceCache.exists(userId)) {
             throw new IllegalArgumentException("sender user not found");
         }
-        if (!canSendImMessage(userId)) {
+        if (!userAccessSnapshotCache.get(userId).imMessageSendEnabled()) {
             throw new AccessDeniedException("current user cannot send im message");
         }
     }
@@ -106,11 +96,4 @@ public class UserAccessServiceImpl implements UserAccessService {
         }
     }
 
-    private UserAccessState buildDefaultState(Long userId) {
-        return new UserAccessState(userId, true, true, true, true, true);
-    }
-
-    private boolean isEnabled(Integer value) {
-        return value != null && value == ENABLED;
-    }
 }

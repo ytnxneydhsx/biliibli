@@ -4,6 +4,8 @@ import com.bilibili.admin.mapper.AdminUserAccessMapper;
 import com.bilibili.admin.mapper.AdminUserMapper;
 import com.bilibili.admin.model.vo.AdminUserVO;
 import com.bilibili.admin.service.AdminUserAccessService;
+import com.bilibili.access.cache.AccessCacheNames;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ public class AdminUserAccessServiceImpl implements AdminUserAccessService {
     }
 
     @Override
+    @CacheEvict(cacheNames = AccessCacheNames.USER_ACCESS_SNAPSHOT, key = "#p0")
     @Transactional(rollbackFor = Exception.class)
     public AdminUserVO banVideoBusiness(Long userId, Long operatorId) {
         if (userId == null || userId <= 0) {
@@ -38,6 +41,7 @@ public class AdminUserAccessServiceImpl implements AdminUserAccessService {
     }
 
     @Override
+    @CacheEvict(cacheNames = AccessCacheNames.USER_ACCESS_SNAPSHOT, key = "#p0")
     @Transactional(rollbackFor = Exception.class)
     public AdminUserVO unbanVideoBusiness(Long userId, Long operatorId) {
         if (userId == null || userId <= 0) {

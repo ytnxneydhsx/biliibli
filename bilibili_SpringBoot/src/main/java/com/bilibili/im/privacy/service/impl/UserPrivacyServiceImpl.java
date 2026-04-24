@@ -1,22 +1,29 @@
 package com.bilibili.im.privacy.service.impl;
 
+import com.bilibili.im.privacy.cache.UserPrivacyCacheNames;
+import com.bilibili.im.privacy.cache.UserPrivacyPolicyCache;
 import com.bilibili.im.privacy.mapper.UserPrivacySettingMapper;
 import com.bilibili.im.privacy.model.dto.UpdatePrivateMessagePolicyDTO;
 import com.bilibili.im.privacy.model.enums.PrivateMessagePolicy;
 import com.bilibili.im.privacy.model.vo.UserPrivacySettingVO;
 import com.bilibili.im.privacy.service.UserPrivacyService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserPrivacyServiceImpl implements UserPrivacyService {
 
     private final UserPrivacySettingMapper userPrivacySettingMapper;
+    private final UserPrivacyPolicyCache userPrivacyPolicyCache;
 
-    public UserPrivacyServiceImpl(UserPrivacySettingMapper userPrivacySettingMapper) {
+    public UserPrivacyServiceImpl(UserPrivacySettingMapper userPrivacySettingMapper,
+                                  UserPrivacyPolicyCache userPrivacyPolicyCache) {
         this.userPrivacySettingMapper = userPrivacySettingMapper;
+        this.userPrivacyPolicyCache = userPrivacyPolicyCache;
     }
 
     @Override
+    @CacheEvict(cacheNames = UserPrivacyCacheNames.USER_PRIVACY_POLICY, key = "#p0")
     public void initializeDefaultPrivacySetting(Long userId) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("userId is invalid");
@@ -26,11 +33,7 @@ public class UserPrivacyServiceImpl implements UserPrivacyService {
 
     @Override
     public PrivateMessagePolicy getPrivateMessagePolicy(Long userId) {
-        if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException("userId is invalid");
-        }
-        Integer policyCode = userPrivacySettingMapper.selectPrivateMessagePolicyByUserId(userId);
-        return PrivateMessagePolicy.fromCode(policyCode);
+        return userPrivacyPolicyCache.get(userId);
     }
 
     @Override
@@ -43,6 +46,7 @@ public class UserPrivacyServiceImpl implements UserPrivacyService {
     }
 
     @Override
+    @CacheEvict(cacheNames = UserPrivacyCacheNames.USER_PRIVACY_POLICY, key = "#p0")
     public void updatePrivateMessagePolicy(Long userId, UpdatePrivateMessagePolicyDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("dto is invalid");

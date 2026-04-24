@@ -1,9 +1,11 @@
 package com.bilibili.access.service.impl;
 
+import com.bilibili.access.cache.AccessCacheNames;
 import com.bilibili.access.mapper.UserAccessMapper;
 import com.bilibili.access.model.command.ApplyImAccessRestrictionCommand;
 import com.bilibili.access.model.enums.UserAccessRestrictionType;
 import com.bilibili.access.service.UserAccessAdminService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ public class UserAccessAdminServiceImpl implements UserAccessAdminService {
     }
 
     @Override
+    @CacheEvict(cacheNames = AccessCacheNames.USER_ACCESS_SNAPSHOT, key = "#p0.userId")
     @Transactional(rollbackFor = Exception.class)
     public void applyImAccessRestriction(ApplyImAccessRestrictionCommand command) {
         if (command == null) {

@@ -1,6 +1,7 @@
 package com.bilibili.im.contact.service.impl;
 
-import com.bilibili.im.contact.mapper.ContactRelationMapper;
+import com.bilibili.im.contact.cache.ContactRelationSnapshotCache;
+import com.bilibili.im.contact.model.cache.ContactRelationSnapshot;
 import com.bilibili.im.contact.model.entity.ContactRelationDO;
 import com.bilibili.im.contact.service.ContactRelationQueryService;
 import org.springframework.stereotype.Service;
@@ -8,31 +9,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContactRelationQueryServiceImpl implements ContactRelationQueryService {
 
-    private final ContactRelationMapper contactRelationMapper;
+    private static final int TRUE_VALUE = 1;
 
-    public ContactRelationQueryServiceImpl(ContactRelationMapper contactRelationMapper) {
-        this.contactRelationMapper = contactRelationMapper;
+    private final ContactRelationSnapshotCache contactRelationSnapshotCache;
+
+    public ContactRelationQueryServiceImpl(ContactRelationSnapshotCache contactRelationSnapshotCache) {
+        this.contactRelationSnapshotCache = contactRelationSnapshotCache;
     }
 
     @Override
     public ContactRelationDO getRelation(Long ownerUserId, Long targetUserId) {
-        if (ownerUserId == null || ownerUserId <= 0) {
-            throw new IllegalArgumentException("ownerUserId is invalid");
+        ContactRelationSnapshot snapshot = contactRelationSnapshotCache.get(ownerUserId, targetUserId);
+        if (!snapshot.exists()) {
+            return null;
         }
-        if (targetUserId == null || targetUserId <= 0) {
-            throw new IllegalArgumentException("targetUserId is invalid");
-        }
-        return contactRelationMapper.selectByUserIdAndTargetUserId(ownerUserId, targetUserId);
+        ContactRelationDO relation = new ContactRelationDO();
+        relation.setUserId(snapshot.ownerUserId());
+        relation.setTargetUserId(snapshot.targetUserId());
+        relation.setIsContact(toInt(snapshot.contact()));
+        relation.setIsDmContact(toInt(snapshot.dmContact()));
+        relation.setIsBlocked(toInt(snapshot.blocked()));
+        relation.setIsMuted(toInt(snapshot.muted()));
+        return relation;
     }
 
-    @Override
-    public ContactRelationDO getReceiverViewRelation(Long senderId, Long receiverId) {
-        if (senderId == null || senderId <= 0) {
-            throw new IllegalArgumentException("senderId is invalid");
-        }
-        if (receiverId == null || receiverId <= 0) {
-            throw new IllegalArgumentException("receiverId is invalid");
-        }
-        return getRelation(receiverId, senderId);
+    private Integer toInt(boolean value) {
+        return value ? TRUE_VALUE : 0;
     }
 }

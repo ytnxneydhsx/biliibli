@@ -1,27 +1,35 @@
 package com.bilibili.im.contact.service.impl;
 
-import com.bilibili.im.contact.cache.ContactRelationDmContactCacheService;
+import com.bilibili.im.contact.cache.ContactRelationCacheKeys;
+import com.bilibili.im.contact.cache.ContactRelationCacheNames;
+import com.bilibili.im.contact.cache.ContactRelationSnapshotCache;
 import com.bilibili.im.contact.mapper.ContactRelationMapper;
+import com.bilibili.im.contact.model.cache.ContactRelationSnapshot;
 import com.bilibili.im.contact.service.ContactRelationCommandService;
 import com.bilibili.im.metrics.ImDbOperationMetrics;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ContactRelationCommandServiceImpl implements ContactRelationCommandService {
 
     private final ContactRelationMapper contactRelationMapper;
-    private final ContactRelationDmContactCacheService dmContactCacheService;
+    private final ContactRelationSnapshotCache contactRelationSnapshotCache;
     private final ImDbOperationMetrics imDbOperationMetrics;
 
     public ContactRelationCommandServiceImpl(ContactRelationMapper contactRelationMapper,
-                                             ContactRelationDmContactCacheService dmContactCacheService,
+                                             ContactRelationSnapshotCache contactRelationSnapshotCache,
                                              ImDbOperationMetrics imDbOperationMetrics) {
         this.contactRelationMapper = contactRelationMapper;
-        this.dmContactCacheService = dmContactCacheService;
+        this.contactRelationSnapshotCache = contactRelationSnapshotCache;
         this.imDbOperationMetrics = imDbOperationMetrics;
     }
 
     @Override
+    @CacheEvict(
+            cacheNames = ContactRelationCacheNames.CONTACT_RELATION_SNAPSHOT,
+            key = "T(com.bilibili.im.contact.cache.ContactRelationCacheKeys).relationKey(#p0, #p1)"
+    )
     public void markDmContact(Long ownerUserId, Long targetUserId) {
         if (ownerUserId == null || ownerUserId <= 0) {
             throw new IllegalArgumentException("ownerUserId is invalid");
@@ -33,7 +41,8 @@ public class ContactRelationCommandServiceImpl implements ContactRelationCommand
             return;
         }
 
-        if (dmContactCacheService.hasDmContact(ownerUserId, targetUserId)) {
+        ContactRelationSnapshot snapshot = contactRelationSnapshotCache.get(ownerUserId, targetUserId);
+        if (snapshot.exists() && snapshot.dmContact()) {
             return;
         }
 
@@ -44,7 +53,5 @@ public class ContactRelationCommandServiceImpl implements ContactRelationCommand
         if (rows <= 0) {
             throw new IllegalStateException("mark dm contact failed");
         }
-
-        dmContactCacheService.markDmContact(ownerUserId, targetUserId);
     }
 }

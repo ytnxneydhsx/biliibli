@@ -1,11 +1,11 @@
 package com.bilibili.im.domain.impl;
 
+import com.bilibili.access.cache.UserExistenceCache;
 import com.bilibili.im.contact.model.entity.ContactRelationDO;
 import com.bilibili.im.contact.service.ContactRelationQueryService;
 import com.bilibili.im.domain.MessagePermissionDomainService;
 import com.bilibili.im.privacy.model.enums.PrivateMessagePolicy;
 import com.bilibili.im.privacy.service.UserPrivacyService;
-import com.bilibili.user.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,14 +13,14 @@ public class MessagePermissionDomainServiceImpl implements MessagePermissionDoma
 
     private final UserPrivacyService userPrivacyService;
     private final ContactRelationQueryService contactRelationQueryService;
-    private final UserMapper userMapper;
+    private final UserExistenceCache userExistenceCache;
 
     public MessagePermissionDomainServiceImpl(UserPrivacyService userPrivacyService,
                                               ContactRelationQueryService contactRelationQueryService,
-                                              UserMapper userMapper) {
+                                              UserExistenceCache userExistenceCache) {
         this.userPrivacyService = userPrivacyService;
         this.contactRelationQueryService = contactRelationQueryService;
-        this.userMapper = userMapper;
+        this.userExistenceCache = userExistenceCache;
     }
 
     @Override
@@ -31,14 +31,14 @@ public class MessagePermissionDomainServiceImpl implements MessagePermissionDoma
         if (receiverId == null || receiverId <= 0) {
             throw new IllegalArgumentException("receiverId is invalid");
         }
-        if (userMapper.selectById(receiverId) == null) {
+        if (!userExistenceCache.exists(receiverId)) {
             throw new IllegalArgumentException("receiver user not found");
         }
         if (senderId.equals(receiverId)) {
             throw new IllegalArgumentException("cannot send message to self");
         }
 
-        ContactRelationDO receiverViewRelation = contactRelationQueryService.getReceiverViewRelation(senderId, receiverId);
+        ContactRelationDO receiverViewRelation = contactRelationQueryService.getRelation(receiverId, senderId);
         if (receiverViewRelation != null && isTrue(receiverViewRelation.getIsBlocked())) {
             throw new IllegalArgumentException("receiver has blocked sender");
         }
