@@ -1,0 +1,266 @@
+{
+  "id": "2026-05-19-162257",
+  "generated_at": "2026-05-19T08:22:57.884049Z",
+  "language": "zh",
+  "pages": [
+    {
+      "slug": "1-xiang-mu-gai-lan",
+      "title": "项目概览",
+      "file": "1-xiang-mu-gai-lan.md",
+      "section": "快速入门",
+      "level": "..."
+    },
+    {
+      "slug": "2-huan-jing-da-jian-yu-qi-dong",
+      "title": "环境搭建与启动",
+      "file": "2-huan-jing-da-jian-yu-qi-dong.md",
+      "section": "快速入门",
+      "level": "..."
+    },
+    {
+      "slug": "3-xiang-mu-mu-lu-jie-gou-zong-lan",
+      "title": "项目目录结构总览",
+      "file": "3-xiang-mu-mu-lu-jie-gou-zong-lan.md",
+      "section": "快速入门",
+      "level": "..."
+    },
+    {
+      "slug": "4-yong-hu-duan-lu-you-yu-ye-mian-ti-xi",
+      "title": "用户端路由与页面体系",
+      "file": "4-yong-hu-duan-lu-you-yu-ye-mian-ti-xi.md",
+      "section": "前端开发指南",
+      "group": "用户端（bilibili_web）",
+      "level": "..."
+    },
+    {
+      "slug": "5-shi-pin-liu-lan-yu-dan-mu-jiao-hu",
+      "title": "视频浏览与弹幕交互",
+      "file": "5-shi-pin-liu-lan-yu-dan-mu-jiao-hu.md",
+      "section": "前端开发指南",
+      "group": "用户端（bilibili_web）",
+      "level": "..."
+    },
+    {
+      "slug": "6-ji-shi-tong-xin-im-qian-duan-ji-cheng",
+      "title": "即时通信（IM）前端集成",
+      "file": "6-ji-shi-tong-xin-im-qian-duan-ji-cheng.md",
+      "section": "前端开发指南",
+      "group": "用户端（bilibili_web）",
+      "level": "..."
+    },
+    {
+      "slug": "7-guan-li-duan-gong-neng-yu-quan-xian-she-ji",
+      "title": "管理端功能与权限设计",
+      "file": "7-guan-li-duan-gong-neng-yu-quan-xian-she-ji.md",
+      "section": "前端开发指南",
+      "group": "管理端（bilibili_admin_web）",
+      "level": "..."
+    },
+    {
+      "slug": "8-spring-boot-hou-duan-jia-gou-fen-ceng-yu-ling-yu-hua-fen",
+      "title": "Spring Boot 后端架构分层与领域划分",
+      "file": "8-spring-boot-hou-duan-jia-gou-fen-ceng-yu-ling-yu-hua-fen.md",
+      "section": "后端核心模块",
+      "group": "基础架构",
+      "level": "..."
+    },
+    {
+      "slug": "9-jwt-ren-zheng-yu-spring-security-quan-xian-ti-xi",
+      "title": "JWT 认证与 Spring Security 权限体系",
+      "file": "9-jwt-ren-zheng-yu-spring-security-quan-xian-ti-xi.md",
+      "section": "后端核心模块",
+      "group": "基础架构",
+      "level": "..."
+    },
+    {
+      "slug": "10-shu-ju-ku-she-ji-yu-flyway-qian-yi-guan-li",
+      "title": "数据库设计与 Flyway 迁移管理",
+      "file": "10-shu-ju-ku-she-ji-yu-flyway-qian-yi-guan-li.md",
+      "section": "后端核心模块",
+      "group": "基础架构",
+      "level": "..."
+    },
+    {
+      "slug": "11-yong-hu-yu-she-jiao-guan-xi-mo-kuai",
+      "title": "用户与社交关系模块",
+      "file": "11-yong-hu-yu-she-jiao-guan-xi-mo-kuai.md",
+      "section": "后端核心模块",
+      "group": "业务模块",
+      "level": "..."
+    },
+    {
+      "slug": "12-shi-pin-guan-li-yu-dan-mu-xi-tong",
+      "title": "视频管理与弹幕系统",
+      "file": "12-shi-pin-guan-li-yu-dan-mu-xi-tong.md",
+      "section": "后端核心模块",
+      "group": "业务模块",
+      "level": "..."
+    },
+    {
+      "slug": "13-ping-lun-yu-sou-suo-fu-wu",
+      "title": "评论与搜索服务",
+      "file": "13-ping-lun-yu-sou-suo-fu-wu.md",
+      "section": "后端核心模块",
+      "group": "业务模块",
+      "level": "..."
+    },
+    {
+      "slug": "14-minio-dui-xiang-cun-chu-fu-wu",
+      "title": "MinIO 对象存储服务",
+      "file": "14-minio-dui-xiang-cun-chu-fu-wu.md",
+      "section": "后端核心模块",
+      "group": "业务模块",
+      "level": "..."
+    },
+    {
+      "slug": "15-guan-li-hou-tai-api",
+      "title": "管理后台 API",
+      "file": "15-guan-li-hou-tai-api.md",
+      "section": "后端核心模块",
+      "group": "业务模块",
+      "level": "..."
+    },
+    {
+      "slug": "16-im-ling-yu-mo-xing-yu-ying-yong-ceng-bian-pai",
+      "title": "IM 领域模型与应用层编排",
+      "file": "16-im-ling-yu-mo-xing-yu-ying-yong-ceng-bian-pai.md",
+      "section": "即时通信系统深度解析",
+      "group": "IM 整体架构",
+      "level": "..."
+    },
+    {
+      "slug": "17-websocket-lian-jie-guan-li-yu-zi-ding-yi-xie-yi",
+      "title": "WebSocket 连接管理与自定义协议",
+      "file": "17-websocket-lian-jie-guan-li-yu-zi-ding-yi-xie-yi.md",
+      "section": "即时通信系统深度解析",
+      "group": "IM 整体架构",
+      "level": "..."
+    },
+    {
+      "slug": "18-rabbitmq-xiao-xi-dui-lie-yu-xiao-fei-zhe-she-ji",
+      "title": "RabbitMQ 消息队列与消费者设计",
+      "file": "18-rabbitmq-xiao-xi-dui-lie-yu-xiao-fei-zhe-she-ji.md",
+      "section": "即时通信系统深度解析",
+      "group": "消息处理管线",
+      "level": "..."
+    },
+    {
+      "slug": "19-hui-hua-chuang-kou-yu-redis-huan-cun-ce-lue",
+      "title": "会话窗口与 Redis 缓存策略",
+      "file": "19-hui-hua-chuang-kou-yu-redis-huan-cun-ce-lue.md",
+      "section": "即时通信系统深度解析",
+      "group": "消息处理管线",
+      "level": "..."
+    },
+    {
+      "slug": "20-xiao-xi-ke-kao-xing-mi-deng-yu-shun-xu-xing-bao-zhang",
+      "title": "消息可靠性、幂等与顺序性保障",
+      "file": "20-xiao-xi-ke-kao-xing-mi-deng-yu-shun-xu-xing-bao-zhang.md",
+      "section": "即时通信系统深度解析",
+      "group": "消息处理管线",
+      "level": "..."
+    },
+    {
+      "slug": "21-qun-liao-gong-neng-she-ji-yu-quan-xian-mo-xing",
+      "title": "群聊功能设计与权限模型",
+      "file": "21-qun-liao-gong-neng-she-ji-yu-quan-xian-mo-xing.md",
+      "section": "即时通信系统深度解析",
+      "group": "群聊与安全",
+      "level": "..."
+    },
+    {
+      "slug": "22-min-gan-ci-guo-lu-yu-nei-rong-shen-he",
+      "title": "敏感词过滤与内容审核",
+      "file": "22-min-gan-ci-guo-lu-yu-nei-rong-shen-he.md",
+      "section": "即时通信系统深度解析",
+      "group": "群聊与安全",
+      "level": "..."
+    },
+    {
+      "slug": "23-yong-hu-yin-si-she-zhi-yu-xiao-xi-ping-bi",
+      "title": "用户隐私设置与消息屏蔽",
+      "file": "23-yong-hu-yin-si-she-zhi-yu-xiao-xi-ping-bi.md",
+      "section": "即时通信系统深度解析",
+      "group": "群聊与安全",
+      "level": "..."
+    },
+    {
+      "slug": "24-redis-lua-jiao-ben-qu-dong-de-shuang-slot-re-du-pai-xing-bang",
+      "title": "Redis Lua 脚本驱动的双 Slot 热度排行榜",
+      "file": "24-redis-lua-jiao-ben-qu-dong-de-shuang-slot-re-du-pai-xing-bang.md",
+      "section": "视频热度系统",
+      "level": "..."
+    },
+    {
+      "slug": "25-docker-compose-duo-fu-wu-bian-pai",
+      "title": "Docker Compose 多服务编排",
+      "file": "25-docker-compose-duo-fu-wu-bian-pai.md",
+      "section": "部署与运维",
+      "group": "容器化部署",
+      "level": "..."
+    },
+    {
+      "slug": "26-nginx-fan-xiang-dai-li-yu-qian-duan-jing-tai-zi-yuan-bu-shu",
+      "title": "Nginx 反向代理与前端静态资源部署",
+      "file": "26-nginx-fan-xiang-dai-li-yu-qian-duan-jing-tai-zi-yuan-bu-shu.md",
+      "section": "部署与运维",
+      "group": "容器化部署",
+      "level": "..."
+    },
+    {
+      "slug": "27-prometheus-grafana-jian-kong-zhan-da-jian",
+      "title": "Prometheus + Grafana 监控栈搭建",
+      "file": "27-prometheus-grafana-jian-kong-zhan-da-jian.md",
+      "section": "部署与运维",
+      "group": "可观测性",
+      "level": "..."
+    },
+    {
+      "slug": "28-grafana-dashboard-yu-guan-jian-zhi-biao-jie-du",
+      "title": "Grafana Dashboard 与关键指标解读",
+      "file": "28-grafana-dashboard-yu-guan-jian-zhi-biao-jie-du.md",
+      "section": "部署与运维",
+      "group": "可观测性",
+      "level": "..."
+    },
+    {
+      "slug": "29-k6-du-li-ya-ce-kuang-jia-shi-yong-zhi-nan",
+      "title": "k6 独立压测框架使用指南",
+      "file": "29-k6-du-li-ya-ce-kuang-jia-shi-yong-zhi-nan.md",
+      "section": "测试与质量保障",
+      "group": "负载测试",
+      "level": "..."
+    },
+    {
+      "slug": "30-websocket-yu-im-chang-jing-ya-ce-jiao-ben",
+      "title": "WebSocket 与 IM 场景压测脚本",
+      "file": "30-websocket-yu-im-chang-jing-ya-ce-jiao-ben.md",
+      "section": "测试与质量保障",
+      "group": "负载测试",
+      "level": "..."
+    },
+    {
+      "slug": "31-ce-shi-shu-ju-sheng-cheng-yu-mo-ni-gong-ju",
+      "title": "测试数据生成与模拟工具",
+      "file": "31-ce-shi-shu-ju-sheng-cheng-yu-mo-ni-gong-ju.md",
+      "section": "测试与质量保障",
+      "group": "负载测试",
+      "level": "..."
+    },
+    {
+      "slug": "32-vitest-dan-yuan-ce-shi-yu-lu-you-shou-wei-yan-zheng",
+      "title": "Vitest 单元测试与路由守卫验证",
+      "file": "32-vitest-dan-yuan-ce-shi-yu-lu-you-shou-wei-yan-zheng.md",
+      "section": "测试与质量保障",
+      "group": "前端测试",
+      "level": "..."
+    },
+    {
+      "slug": "33-gong-neng-she-ji-gui-ge-shuo-ming-yu-shi-shi-ji-hua-suo-yin",
+      "title": "功能设计规格说明与实施计划索引",
+      "file": "33-gong-neng-she-ji-gui-ge-shuo-ming-yu-shi-shi-ji-hua-suo-yin.md",
+      "section": "设计文档与演进记录",
+      "level": "..."
+    }
+  ]
+}
