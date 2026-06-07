@@ -23,7 +23,14 @@ defineProps<{
 
 <style scoped>
 .messages-debug {
-  padding: 22px;
+  margin: 10px 12px 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--bili-line, #e3e5e7);
+  border-radius: 8px;
+  background: rgba(18, 29, 43, 0.82);
+  color: var(--bili-muted, #8ea1b8);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .messages-debug summary {
@@ -34,14 +41,14 @@ defineProps<{
 .debug-list {
   display: grid;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .debug-item {
   padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  border: 1px solid var(--bili-line, #e3e5e7);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .debug-top {

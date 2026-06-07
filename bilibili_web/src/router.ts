@@ -58,7 +58,7 @@ const routes = [
     path: '/messages',
     name: 'messages',
     component: () => import('./views/MessagesView.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, hideSiteHeader: true, fullBleed: true },
   },
 ]
 

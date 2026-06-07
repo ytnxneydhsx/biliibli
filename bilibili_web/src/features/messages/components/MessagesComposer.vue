@@ -80,10 +80,12 @@ function onFileChange(event: Event) {
 <style scoped>
 .composer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 110px;
-  gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--bili-line, #e3e5e7);
+  background: rgba(16, 27, 41, 0.94);
+  align-items: end;
 }
 
 .composer-main {
@@ -92,11 +94,38 @@ function onFileChange(event: Event) {
 }
 
 .composer textarea {
-  min-height: 84px;
+  min-height: 42px;
+  height: 42px;
   resize: vertical;
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid var(--line);
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--bili-line, #e3e5e7);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--bili-text, #f7fbff);
+  outline: none;
+  box-shadow: none;
+}
+
+.composer textarea::placeholder {
+  color: var(--bili-subtle, #9499a0);
+}
+
+.composer textarea:focus {
+  border-color: var(--bili-blue, #00aeec);
+  box-shadow: 0 0 0 2px rgba(50, 197, 255, 0.14);
+}
+
+.composer > .primary-button {
+  width: 72px;
+  min-height: 42px;
+  align-self: end;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--bili-pink, #fb7299) 0%, #ff5f8f 100%);
+  box-shadow: 0 16px 32px rgba(251, 114, 153, 0.24);
+}
+
+.composer > .primary-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff83a7 0%, #ff5f8f 100%);
 }
 
 .composer-toolbar {
@@ -116,9 +145,9 @@ function onFileChange(event: Event) {
   display: grid;
   gap: 8px;
   padding: 10px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: 14px;
+  border: 1px solid var(--bili-line, #e3e5e7);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .draft-image {
@@ -132,19 +161,19 @@ function onFileChange(event: Event) {
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--bili-subtle, #9499a0);
 }
 
 .ghost-button {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--blue);
+  color: var(--bili-blue, #00aeec);
   text-align: left;
 }
 
 .danger-text {
-  color: var(--danger);
+  color: var(--bili-pink, #fb7299);
 }
 
 .hidden-input {
@@ -155,6 +184,13 @@ function onFileChange(event: Event) {
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong, rgba(187, 208, 235, 0.2));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--bili-text, #f7fbff);
+  box-shadow: none;
 }
 
 .upload-button.disabled {
@@ -164,7 +200,7 @@ function onFileChange(event: Event) {
 
 @media (max-width: 720px) {
   .composer {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 64px;
   }
 }
 </style>

@@ -34,22 +34,23 @@ defineProps<{
 
 <style scoped>
 .message-bubble {
-  max-width: min(72%, 560px);
-  padding: 14px 16px;
-  border-radius: 20px;
-  border: 1px solid transparent;
+  max-width: min(72%, 520px);
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--bili-line, #e3e5e7);
+  color: var(--bili-text, #f7fbff);
+  box-shadow: none;
 }
 
 .message-bubble.incoming {
   align-self: flex-start;
-  background: #fff;
-  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .message-bubble.outgoing {
   align-self: flex-end;
-  background: linear-gradient(135deg, rgba(0, 161, 214, 0.12), rgba(251, 114, 153, 0.1));
-  border-color: rgba(0, 161, 214, 0.18);
+  background: linear-gradient(135deg, rgba(50, 197, 255, 0.16), rgba(251, 114, 153, 0.12));
+  border-color: rgba(50, 197, 255, 0.22);
 }
 
 .message-bubble.pending {
@@ -58,13 +59,13 @@ defineProps<{
 
 .message-bubble.failed {
   opacity: 1;
-  border-color: rgba(239, 68, 68, 0.35);
-  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(255, 109, 138, 0.42);
+  background: rgba(255, 109, 138, 0.1);
 }
 
 .message-fail-reason {
   margin-top: 8px;
-  color: #ef4444;
+  color: var(--bili-pink, #fb7299);
   font-size: 12px;
 }
 
@@ -73,7 +74,7 @@ defineProps<{
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 8px;
-  color: var(--muted);
+  color: var(--bili-subtle, #9499a0);
   font-size: 12px;
 }
 
@@ -81,7 +82,8 @@ defineProps<{
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.7;
+  line-height: 1.65;
+  font-size: 14px;
 }
 
 .message-images {
@@ -92,14 +94,14 @@ defineProps<{
 
 .message-location {
   margin-top: 10px;
-  color: var(--muted);
+  color: var(--bili-subtle, #9499a0);
   font-size: 12px;
 }
 
 .message-image {
   width: min(280px, 100%);
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  border: 1px solid var(--bili-line, #e3e5e7);
   object-fit: cover;
 }
 

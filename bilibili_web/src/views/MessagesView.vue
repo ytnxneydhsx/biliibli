@@ -86,6 +86,13 @@ void messageStream
 
 <template>
   <section class="messages-page">
+    <div class="messages-canvas">
+      <header class="messages-topbar">
+        <strong>我的消息</strong>
+        <span>{{ activeTargetType === 'group' ? '群聊天' : '私人聊天' }}</span>
+      </header>
+
+      <div class="messages-layout">
     <MessagesSidebar
       :current-profile="currentProfile"
       :current-uid="currentUid"
@@ -109,7 +116,7 @@ void messageStream
     />
 
     <section class="messages-shell">
-      <section class="messages-main panel">
+      <section class="messages-main">
         <header class="chat-header">
           <div class="chat-peer">
             <img
@@ -226,14 +233,71 @@ void messageStream
     </section>
 
     <MessagesDebugPanel :event-logs="eventLogs" />
+      </div>
+    </div>
   </section>
 </template>
 
 <style scoped>
 .messages-page {
+  --bili-bg: var(--bg);
+  --bili-panel: var(--bg-panel);
+  --bili-panel-strong: var(--bg-panel-strong);
+  --bili-text: var(--text);
+  --bili-muted: var(--muted);
+  --bili-subtle: #6f839b;
+  --bili-line: var(--line);
+  --bili-line-soft: rgba(165, 188, 218, 0.08);
+  --bili-blue: var(--blue);
+  --bili-blue-hover: #6fd8ff;
+  --bili-blue-soft: var(--blue-soft);
+  --bili-pink: var(--pink);
+  min-height: 100vh;
+  padding: 6px 0;
+  background:
+    radial-gradient(circle at 9% -8%, rgba(251, 114, 153, 0.2), transparent 28%),
+    radial-gradient(circle at 86% 0%, rgba(50, 197, 255, 0.16), transparent 30%),
+    linear-gradient(180deg, #07111c 0%, #0a1522 44%, #08111d 100%);
+  color: var(--bili-text);
+}
+
+.messages-canvas {
+  width: min(1020px, calc(100vw - 24px));
+  min-height: calc(100vh - 12px);
+  margin: 0 auto;
+  border-left: 1px solid var(--bili-line);
+  border-right: 1px solid var(--bili-line);
+  background: rgba(8, 17, 29, 0.58);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+}
+
+.messages-topbar {
+  height: 52px;
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid var(--bili-line);
+  border-top: 0;
+  background: rgba(18, 29, 43, 0.86);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(20px);
+}
+
+.messages-topbar strong {
+  font-size: 15px;
+}
+
+.messages-topbar span {
+  color: var(--bili-subtle);
+  font-size: 13px;
+}
+
+.messages-layout {
+  display: grid;
+  grid-template-columns: 400px minmax(0, 1fr);
+  align-items: stretch;
+  min-height: calc(100vh - 64px);
 }
 
 .messages-shell {
@@ -243,12 +307,20 @@ void messageStream
 }
 
 .messages-main {
-  padding: 22px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: calc(100vh - 64px);
+  border-radius: 0;
+  border: 0;
+  background: rgba(10, 21, 34, 0.74);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .chat-header {
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
+  min-height: 56px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--bili-line);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -258,17 +330,19 @@ void messageStream
 .chat-peer {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .chat-peer h2 {
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   font-family: var(--font-heading);
+  color: var(--bili-text);
+  font-size: 14px;
 }
 
 .chat-avatar {
-  width: 56px;
-  height: 56px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -276,19 +350,48 @@ void messageStream
 .chat-avatar.fallback {
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--pink) 0%, #ff9ab6 100%);
+  background: var(--bili-blue);
   color: #fff;
   font-weight: 800;
 }
 
+.chat-header :deep(.muted),
+.chat-peer .muted {
+  color: var(--bili-subtle);
+  font-size: 12px;
+}
+
+.chat-header .secondary-button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--bili-text);
+  box-shadow: none;
+}
+
 .message-stream {
-  min-height: 460px;
-  max-height: 460px;
+  min-height: 0;
+  max-height: none;
   overflow-y: auto;
-  padding: 22px 0;
+  padding: 22px 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  scrollbar-color: #c9ccd0 transparent;
+}
+
+.message-stream::-webkit-scrollbar {
+  width: 8px;
+}
+
+.message-stream::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-stream::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c9ccd0;
 }
 
 .history-actions {
@@ -296,15 +399,27 @@ void messageStream
   justify-content: center;
 }
 
-@media (max-width: 1120px) {
-  .messages-page {
-    grid-template-columns: 1fr;
-  }
+.history-actions .secondary-button {
+  min-height: 30px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--bili-text);
+  box-shadow: none;
 }
 
-@media (min-width: 1121px) {
-  .messages-shell {
-    grid-template-columns: minmax(0, 1fr) auto;
+.messages-page :deep(.empty-state) {
+  border: 1px dashed var(--bili-line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--bili-subtle);
+}
+
+@media (max-width: 1120px) {
+  .messages-canvas {
+    width: min(100vw - 16px, 1020px);
+  }
+
+  .messages-layout {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -313,8 +428,32 @@ void messageStream
 }
 
 @media (max-width: 720px) {
+  .messages-page {
+    padding: 0;
+    background: var(--bili-bg);
+  }
+
+  .messages-canvas {
+    width: 100%;
+    border: 0;
+  }
+
   .messages-main {
-    padding: 16px;
+    min-height: 620px;
+  }
+
+  .chat-header {
+    align-items: flex-start;
+  }
+
+  .chat-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .message-stream {
+    min-height: 360px;
+    padding: 16px 12px;
   }
 }
 </style>
