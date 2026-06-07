@@ -167,19 +167,27 @@ async function submitRegister() {
 <style scoped>
 .auth-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
   gap: 24px;
-  align-items: stretch;
+  align-items: center;
+  min-height: 560px;
 }
 
 .auth-intro,
 .auth-card {
-  padding: 30px;
+  padding: 34px;
 }
 
 .auth-intro {
   position: relative;
   overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background:
+    linear-gradient(145deg, rgba(16, 27, 41, 0.92) 0%, rgba(10, 21, 34, 0.9) 58%, rgba(12, 35, 52, 0.86) 100%);
 }
 
 .auth-intro::before {
@@ -187,8 +195,9 @@ async function submitRegister() {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top left, rgba(251, 114, 153, 0.14), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(0, 161, 214, 0.12), transparent 36%);
+    radial-gradient(circle at 12% 12%, rgba(251, 114, 153, 0.22), transparent 30%),
+    radial-gradient(circle at 88% 88%, rgba(50, 197, 255, 0.16), transparent 34%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.05), transparent 42%);
   pointer-events: none;
 }
 
@@ -199,15 +208,19 @@ async function submitRegister() {
 
 .auth-intro h1 {
   margin: 18px 0 12px;
-  max-width: 11ch;
+  max-width: 12ch;
   font-family: var(--font-heading);
-  font-size: clamp(32px, 4vw, 54px);
+  font-size: clamp(34px, 4vw, 58px);
   line-height: 1.06;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .auth-copy {
   max-width: 46ch;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .auth-highlights {
@@ -223,18 +236,18 @@ async function submitRegister() {
   padding: 0 16px;
   width: fit-content;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--line-strong);
   color: var(--text);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
 }
 
 .session-card {
   margin-top: 28px;
   padding: 22px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-soft);
   display: grid;
   gap: 18px;
@@ -270,7 +283,26 @@ async function submitRegister() {
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.9);
+  position: relative;
+  overflow: hidden;
+  align-self: center;
+  background:
+    linear-gradient(150deg, rgba(18, 29, 43, 0.96) 0%, rgba(12, 22, 35, 0.94) 100%);
+}
+
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(251, 114, 153, 0.18), transparent 28%),
+    radial-gradient(circle at 100% 20%, rgba(50, 197, 255, 0.12), transparent 32%);
+  pointer-events: none;
+}
+
+.auth-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .auth-card-head {
@@ -283,6 +315,7 @@ async function submitRegister() {
   margin: 0 0 6px;
   font-family: var(--font-heading);
   font-size: 28px;
+  color: var(--text);
 }
 
 .auth-card-head p {
@@ -297,16 +330,71 @@ async function submitRegister() {
 
 .auth-submit {
   width: 100%;
+  min-height: 46px;
+}
+
+.auth-card .field-group label {
+  color: #d8e6f6;
+  font-size: 14px;
+}
+
+.auth-card .field-group input {
+  min-height: 48px;
+  border-color: rgba(187, 208, 235, 0.18);
+  background: rgba(5, 13, 23, 0.48);
+  color: var(--text);
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.auth-card .field-group input::placeholder {
+  color: rgba(216, 230, 246, 0.42);
+}
+
+.auth-card .field-group input:focus {
+  border-color: rgba(251, 114, 153, 0.62);
+  box-shadow:
+    0 0 0 3px rgba(251, 114, 153, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 @media (max-width: 960px) {
   .auth-layout {
     grid-template-columns: 1fr;
+    min-height: unset;
+    align-items: stretch;
   }
 
   .auth-intro,
   .auth-card {
     padding: 24px;
+  }
+
+  .auth-intro {
+    min-height: 340px;
+  }
+}
+
+@media (max-width: 560px) {
+  .auth-intro,
+  .auth-card {
+    padding: 20px;
+  }
+
+  .auth-intro h1 {
+    max-width: 9em;
+    font-size: 32px;
+  }
+
+  .auth-tabs,
+  .session-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .session-actions .text-button {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 }
 </style>

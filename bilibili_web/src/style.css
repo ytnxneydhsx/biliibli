@@ -1,29 +1,29 @@
 :root {
-  --bg: #f4f7ff;
-  --bg-panel: rgba(255, 255, 255, 0.84);
-  --bg-panel-strong: rgba(255, 255, 255, 0.94);
-  --bg-soft: #fff8fb;
-  --text: #1f2433;
-  --muted: #677083;
-  --line: rgba(123, 139, 169, 0.16);
-  --line-strong: rgba(73, 93, 131, 0.18);
+  --bg: #07111c;
+  --bg-panel: rgba(18, 29, 43, 0.82);
+  --bg-panel-strong: rgba(16, 27, 41, 0.94);
+  --bg-soft: #101b2a;
+  --text: #f7fbff;
+  --muted: #8ea1b8;
+  --line: rgba(165, 188, 218, 0.12);
+  --line-strong: rgba(187, 208, 235, 0.2);
   --pink: #fb7299;
-  --pink-deep: #e85a86;
-  --blue: #00a1d6;
-  --blue-soft: #dff6ff;
-  --pink-soft: #ffe3ef;
-  --warning: #ffb74d;
-  --success: #27c08a;
-  --danger: #ff5c7c;
-  --shadow: 0 22px 60px rgba(42, 56, 92, 0.12);
-  --shadow-soft: 0 16px 34px rgba(53, 77, 122, 0.12);
-  --radius-xl: 28px;
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-  --content-width: 1280px;
+  --pink-deep: #ff5d8d;
+  --blue: #32c5ff;
+  --blue-soft: rgba(50, 197, 255, 0.16);
+  --pink-soft: rgba(251, 114, 153, 0.16);
+  --warning: #ffbd5a;
+  --success: #41d59a;
+  --danger: #ff6d8a;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  --shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.26);
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --content-width: 1360px;
   --font-sans: "Noto Sans SC", "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-heading: "Trebuchet MS", "Noto Sans SC", "HarmonyOS Sans SC", sans-serif;
+  --font-heading: "Inter", "Noto Sans SC", "HarmonyOS Sans SC", "PingFang SC", sans-serif;
   color: var(--text);
   font-family: var(--font-sans);
   line-height: 1.5;
@@ -47,9 +47,10 @@ body,
 
 body {
   background:
-    radial-gradient(circle at 0% 0%, rgba(255, 153, 188, 0.2), transparent 28%),
-    radial-gradient(circle at 100% 0%, rgba(74, 192, 255, 0.18), transparent 24%),
-    linear-gradient(180deg, #fcfdff 0%, #f4f7ff 42%, #eef4ff 100%);
+    radial-gradient(circle at 9% -8%, rgba(251, 114, 153, 0.2), transparent 28%),
+    radial-gradient(circle at 86% 0%, rgba(50, 197, 255, 0.16), transparent 30%),
+    linear-gradient(180deg, #07111c 0%, #0a1522 44%, #08111d 100%);
+  overflow-x: hidden;
 }
 
 a {
@@ -80,7 +81,7 @@ img {
 .page-shell {
   width: min(var(--content-width), calc(100vw - 32px));
   margin: 0 auto;
-  padding: 28px 0 48px;
+  padding: 24px 0 52px;
 }
 
 .panel {
@@ -88,7 +89,7 @@ img {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
 }
 
 .section-title {
@@ -103,7 +104,7 @@ img {
 .section-title h3 {
   margin: 0;
   font-family: var(--font-heading);
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .pill {
@@ -112,7 +113,7 @@ img {
   gap: 8px;
   border-radius: 999px;
   padding: 8px 14px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--line);
   color: var(--muted);
 }
@@ -131,13 +132,13 @@ img {
 }
 
 .primary-button {
-  background: linear-gradient(135deg, var(--pink) 0%, #ff8db0 100%);
+  background: linear-gradient(135deg, var(--pink) 0%, #ff5f8f 100%);
   color: #fff;
-  box-shadow: 0 14px 30px rgba(251, 114, 153, 0.3);
+  box-shadow: 0 16px 32px rgba(251, 114, 153, 0.28);
 }
 
 .secondary-button {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.07);
   color: var(--text);
   border: 1px solid var(--line-strong);
 }
@@ -155,7 +156,7 @@ img {
 
 .text-button {
   background: transparent;
-  color: var(--blue);
+  color: #b9dcff;
   padding: 0;
 }
 
@@ -169,10 +170,12 @@ img {
   justify-content: center;
   min-height: 28px;
   padding: 0 12px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(0, 161, 214, 0.12), rgba(251, 114, 153, 0.12));
-  color: var(--blue);
+  border-radius: var(--radius-sm);
+  background: rgba(251, 114, 153, 0.14);
+  border: 1px solid rgba(251, 114, 153, 0.35);
+  color: #ff8bae;
   font-size: 13px;
+  font-weight: 800;
 }
 
 .empty-state,
@@ -180,8 +183,8 @@ img {
 .loading-state {
   padding: 24px;
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px dashed rgba(103, 112, 131, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(165, 188, 218, 0.2);
   text-align: center;
   color: var(--muted);
 }
@@ -213,7 +216,7 @@ img {
   border: 1px solid rgba(103, 112, 131, 0.2);
   border-radius: 16px;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text);
 }
 
